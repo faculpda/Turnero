@@ -22,6 +22,7 @@ build/
 .next/
 coverage/
 prisma/dev.db
+public/uploads/
 
 # Python
 __pycache__/

@@ -490,6 +490,11 @@ th:last-child {
   resize: vertical;
 }
 
+.field input[type="file"],
+.field input[type="color"] {
+  padding: 10px 12px;
+}
+
 .field input:focus {
   outline: 2px solid #cfe2ff;
   outline-offset: 2px;
@@ -558,6 +563,12 @@ th:last-child {
   gap: 18px;
 }
 
+.site-builder-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 20px;
+}
+
 .service-form {
   margin-top: 4px;
 }
@@ -584,6 +595,12 @@ th:last-child {
 
 .tenant-hero {
   border-color: color-mix(in srgb, var(--tenant-primary) 16%, var(--line));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--tenant-secondary) 78%, white 22%),
+      white 52%
+    );
 }
 
 .tenant-hero-grid {
@@ -621,6 +638,26 @@ th:last-child {
 
 .tenant-primary-button {
   background: var(--tenant-primary);
+  border-color: var(--tenant-primary);
+}
+
+.tenant-public .eyebrow,
+.preview-eyebrow {
+  color: var(--tenant-primary);
+}
+
+.tenant-public .service-chip,
+.tenant-public .slot {
+  border-color: color-mix(in srgb, var(--tenant-primary) 12%, var(--line));
+}
+
+.tenant-public .panel {
+  border-color: color-mix(in srgb, var(--tenant-primary) 10%, var(--line));
+}
+
+.tenant-public .button.secondary {
+  border-color: color-mix(in srgb, var(--tenant-primary) 18%, var(--line));
+  background: color-mix(in srgb, var(--tenant-secondary) 38%, white 62%);
 }
 
 .tenant-hero-media {
@@ -644,6 +681,41 @@ th:last-child {
   padding: 24px;
 }
 
+.site-preview-panel {
+  --tenant-primary: #205fc0;
+  --tenant-secondary: #dff1ff;
+  align-content: start;
+}
+
+.site-preview-hero {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 16%, var(--line));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--tenant-secondary) 78%, white 22%),
+      white 52%
+    );
+}
+
+.site-preview-title {
+  margin: 0;
+  font-size: 1.9rem;
+  line-height: 1.08;
+}
+
+.site-preview-image {
+  width: 100%;
+  min-height: 220px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 16%, var(--line));
+  background: color-mix(in srgb, var(--tenant-secondary) 76%, white 24%);
+}
+
 @media (max-width: 920px) {
   .hero-grid,
   .info-grid,
@@ -651,7 +723,8 @@ th:last-child {
   .plans-grid,
   .showcase-mini-grid,
   .service-form-grid,
-  .tenant-hero-grid {
+  .tenant-hero-grid,
+  .site-builder-shell {
     grid-template-columns: 1fr;
   }
 
