@@ -1,42 +1,88 @@
-import type { TenantPublicProfile } from "@/lib/types";
+import Link from "next/link";
+import { AccessDenied } from "@/components/auth/access-denied";
+import { SessionBanner } from "@/components/auth/session-banner";
+import { TenantBookingForm } from "@/components/tenant/booking-form";
+import type { AuthSession } from "@/lib/auth/session";
+import type { ServiceAvailability, TenantPublicProfile } from "@/lib/types";
 
 type TenantBookingPageProps = {
   tenant: TenantPublicProfile;
+  availabilityByService: ServiceAvailability[];
+  customerSession: AuthSession | null;
+  useSlugRoutes?: boolean;
 };
 
-export function TenantBookingPage({ tenant }: TenantBookingPageProps) {
+function loginHref(tenant: TenantPublicProfile, useSlugRoutes: boolean): string {
+  return useSlugRoutes ? `/${tenant.slug}/ingresar` : "/ingresar";
+}
+
+function profileHref(tenant: TenantPublicProfile, useSlugRoutes: boolean): string {
+  return useSlugRoutes ? `/${tenant.slug}/mi-perfil` : "/mi-perfil";
+}
+
+export function TenantBookingPage({
+  tenant,
+  availabilityByService,
+  customerSession,
+  useSlugRoutes = true,
+}: TenantBookingPageProps) {
+  if (!customerSession || customerSession.globalRole !== "CUSTOMER") {
+    return (
+      <AccessDenied
+        description="Para confirmar un turno primero necesitamos que ingreses con tu cuenta de cliente."
+        loginHref={loginHref(tenant, useSlugRoutes)}
+        title="Reserva disponible para clientes autenticados"
+      />
+    );
+  }
+
   return (
     <main className="shell grid">
+      <SessionBanner
+        session={customerSession}
+        subtitle={`Reserva online para ${tenant.name}`}
+      />
+
       <section className="hero">
         <span className="eyebrow">Flujo de reserva</span>
         <h1>Reservar en {tenant.name}</h1>
         <p className="muted">
-          Esta pantalla representa el siguiente paso del MVP: seleccionar servicio,
-          fecha, horario y confirmar el turno.
+          Elige el servicio, selecciona un horario disponible y confirma tu turno.
         </p>
+        <div className="actions">
+          <Link className="button secondary" href={profileHref(tenant, useSlugRoutes)}>
+            Ver mis turnos
+          </Link>
+        </div>
       </section>
 
       <section className="grid cols-2">
-        <article className="panel">
-          <h2>1. Elegir servicio</h2>
-          <div className="service-list">
-            {tenant.services.map((service) => (
-              <div className="service-chip" key={service.id}>
-                <strong>{service.name}</strong>
-                <div className="muted">
-                  {service.durationMin} min - {service.priceLabel}
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
+        <TenantBookingForm
+          availabilityByService={availabilityByService}
+          redirectTo={profileHref(tenant, useSlugRoutes)}
+          tenantSlug={tenant.slug}
+        />
 
         <article className="panel">
-          <h2>2. Elegir horario</h2>
-          <div className="slot-list">
-            {tenant.nextSlots.map((slot) => (
-              <div className="slot" key={slot}>
-                {slot}
+          <h2>Disponibilidad</h2>
+          <p className="muted">Resumen de slots abiertos para las proximas reservas.</p>
+          <div className="availability-list">
+            {availabilityByService.map((entry) => (
+              <div className="availability-card" key={entry.service.id}>
+                <strong>{entry.service.name}</strong>
+                <div className="muted">
+                  {entry.service.durationMin} min - {entry.service.priceLabel}
+                </div>
+                <div className="slot-list">
+                  {entry.slots.slice(0, 4).map((slot) => (
+                    <div className="slot" key={slot.startsAt}>
+                      {slot.label}
+                    </div>
+                  ))}
+                  {entry.slots.length === 0 ? (
+                    <div className="slot muted">Sin horarios disponibles</div>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>

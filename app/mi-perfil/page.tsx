@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { AccessDenied } from "@/components/auth/access-denied";
 import { TenantCustomerProfilePage } from "@/components/tenant/customer-profile-page";
 import { getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
-import { getPublicTenantProfileByHost } from "@/lib/data/tenants";
+import { getPublicTenantProfileByHost, listCustomerAppointments } from "@/lib/data/tenants";
 import { getRequestHost, isPlatformHost } from "@/lib/tenant-context";
 
 export default async function RootCustomerProfilePage() {
@@ -30,5 +30,13 @@ export default async function RootCustomerProfilePage() {
     );
   }
 
-  return <TenantCustomerProfilePage session={session} tenant={tenant} />;
+  const appointments = await listCustomerAppointments(session.userId, tenant.slug);
+
+  return (
+    <TenantCustomerProfilePage
+      appointments={appointments}
+      session={session}
+      tenant={tenant}
+    />
+  );
 }

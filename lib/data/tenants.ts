@@ -4,10 +4,13 @@ import {
   tenantPublicProfile as fallbackPublicProfile,
   tenants as fallbackTenants,
 } from "@/lib/mock-data";
+import { generateAvailableSlotsForService } from "@/lib/availability";
 import { formatAppointmentDate, formatPrice } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import type {
   AppointmentSummary,
+  CustomerAppointmentSummary,
+  TenantBookingData,
   TenantDashboardData,
   TenantPublicProfile,
   TenantSummary,
@@ -65,6 +68,22 @@ const dashboardTenantInclude = {
           user: true,
         },
       },
+    },
+  },
+} satisfies Prisma.TenantInclude;
+
+const bookingTenantInclude = {
+  ...publicTenantInclude,
+  appointments: {
+    where: {
+      status: {
+        in: ["PENDING", "CONFIRMED"],
+      },
+    },
+    select: {
+      startsAt: true,
+      endsAt: true,
+      status: true,
     },
   },
 } satisfies Prisma.TenantInclude;
@@ -225,5 +244,124 @@ export async function getTenantDashboardData(
       profile: fallbackPublicProfile,
       appointments: fallbackAppointments,
     };
+  }
+}
+
+export async function getTenantBookingData(
+  slug: string,
+): Promise<TenantBookingData | undefined> {
+  try {
+    const tenant = await prisma.tenant.findUnique({
+      where: {
+        slug,
+      },
+      include: bookingTenantInclude,
+    });
+
+    if (!tenant) {
+      if (fallbackPublicProfile.slug !== slug) {
+        return undefined;
+      }
+
+      return {
+        profile: fallbackPublicProfile,
+        availabilityByService: fallbackPublicProfile.services.map((service) => ({
+          service,
+          slots: fallbackPublicProfile.nextSlots.map((slot, index) => ({
+            startsAt: `mock-${service.id}-${index}`,
+            endsAt: `mock-${service.id}-${index + 1}`,
+            label: slot,
+          })),
+        })),
+      };
+    }
+
+    const profile = mapPublicTenant(tenant);
+    const availabilityByService = tenant.services.map((service) => ({
+      service: {
+        id: service.id,
+        name: service.name,
+        durationMin: service.durationMin,
+        priceLabel: formatPrice(service.priceCents),
+      },
+      slots: generateAvailableSlotsForService(
+        { durationMin: service.durationMin },
+        tenant.availability,
+        tenant.appointments,
+      ),
+    }));
+
+    return {
+      profile,
+      availabilityByService,
+    };
+  } catch {
+    if (fallbackPublicProfile.slug !== slug) {
+      return undefined;
+    }
+
+    return {
+      profile: fallbackPublicProfile,
+      availabilityByService: fallbackPublicProfile.services.map((service) => ({
+        service,
+        slots: fallbackPublicProfile.nextSlots.map((slot, index) => ({
+          startsAt: `mock-${service.id}-${index}`,
+          endsAt: `mock-${service.id}-${index + 1}`,
+          label: slot,
+        })),
+      })),
+    };
+  }
+}
+
+export async function getTenantBookingDataByHost(
+  host: string,
+): Promise<TenantBookingData | undefined> {
+  const profile = await getPublicTenantProfileByHost(host);
+
+  if (!profile) {
+    return undefined;
+  }
+
+  return getTenantBookingData(profile.slug);
+}
+
+export async function listCustomerAppointments(
+  userId: string,
+  tenantSlug: string,
+): Promise<CustomerAppointmentSummary[]> {
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        customerProfile: {
+          userId,
+          tenant: {
+            slug: tenantSlug,
+          },
+        },
+      },
+      include: {
+        service: true,
+      },
+      orderBy: {
+        startsAt: "asc",
+      },
+    });
+
+    return appointments.map((appointment) => ({
+      id: appointment.id,
+      serviceName: appointment.service.name,
+      startsAt: formatAppointmentDate(appointment.startsAt),
+      status: appointment.status,
+    }));
+  } catch {
+    return [
+      {
+        id: "fallback-customer-1",
+        serviceName: "Limpieza dental",
+        startsAt: "Mar 7 abr, 09:00",
+        status: "CONFIRMED",
+      },
+    ];
   }
 }

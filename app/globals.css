@@ -226,6 +226,38 @@ th:last-child {
   background: color-mix(in srgb, var(--panel) 88%, white 12%);
 }
 
+.booking-form,
+.availability-card {
+  display: grid;
+  gap: 14px;
+}
+
+.booking-form select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: white;
+  color: var(--text);
+  font: inherit;
+}
+
+.booking-form {
+  align-content: start;
+}
+
+.availability-list {
+  display: grid;
+  gap: 14px;
+}
+
+.availability-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  padding: 16px;
+}
+
 .slot,
 .service-chip {
   border-radius: 16px;

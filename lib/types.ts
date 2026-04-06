@@ -31,6 +31,13 @@ export type AppointmentSummary = {
   status: AppointmentStatus;
 };
 
+export type CustomerAppointmentSummary = {
+  id: string;
+  serviceName: string;
+  startsAt: string;
+  status: AppointmentStatus;
+};
+
 export type TenantPublicProfile = {
   id: string;
   name: string;
@@ -41,7 +48,23 @@ export type TenantPublicProfile = {
   nextSlots: string[];
 };
 
+export type BookingSlot = {
+  startsAt: string;
+  endsAt: string;
+  label: string;
+};
+
+export type ServiceAvailability = {
+  service: ServiceSummary;
+  slots: BookingSlot[];
+};
+
 export type TenantDashboardData = {
   profile: TenantPublicProfile;
   appointments: AppointmentSummary[];
+};
+
+export type TenantBookingData = {
+  profile: TenantPublicProfile;
+  availabilityByService: ServiceAvailability[];
 };

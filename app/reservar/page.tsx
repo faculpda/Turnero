@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { TenantBookingPage } from "@/components/tenant/booking-page";
-import { getPublicTenantProfileByHost } from "@/lib/data/tenants";
+import { getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
+import { getTenantBookingDataByHost } from "@/lib/data/tenants";
 import { getRequestHost, isPlatformHost } from "@/lib/tenant-context";
 
 export default async function RootBookingPage() {
@@ -10,11 +11,22 @@ export default async function RootBookingPage() {
     notFound();
   }
 
-  const tenant = await getPublicTenantProfileByHost(host);
+  const bookingData = await getTenantBookingDataByHost(host);
 
-  if (!tenant) {
+  if (!bookingData) {
     notFound();
   }
 
-  return <TenantBookingPage tenant={tenant} />;
+  const session = await getCurrentSession();
+  const customerSession =
+    session && (await hasCustomerAccess(bookingData.profile.slug)) ? session : null;
+
+  return (
+    <TenantBookingPage
+      availabilityByService={bookingData.availabilityByService}
+      customerSession={customerSession}
+      tenant={bookingData.profile}
+      useSlugRoutes={false}
+    />
+  );
 }

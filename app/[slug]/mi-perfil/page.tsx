@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { AccessDenied } from "@/components/auth/access-denied";
 import { TenantCustomerProfilePage } from "@/components/tenant/customer-profile-page";
 import { getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
-import { getPublicTenantProfile } from "@/lib/data/tenants";
+import { getPublicTenantProfile, listCustomerAppointments } from "@/lib/data/tenants";
 
 type CustomerProfilePageProps = {
   params: Promise<{
@@ -31,5 +31,13 @@ export default async function CustomerProfilePage({
     );
   }
 
-  return <TenantCustomerProfilePage session={session} tenant={tenant} />;
+  const appointments = await listCustomerAppointments(session.userId, slug);
+
+  return (
+    <TenantCustomerProfilePage
+      appointments={appointments}
+      session={session}
+      tenant={tenant}
+    />
+  );
 }
