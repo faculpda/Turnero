@@ -39,17 +39,17 @@ export default async function TenantDashboardPage({
   ).length;
 
   return (
-    <main className="shell grid">
+    <main className="shell grid dashboard-shell">
       <SessionBanner session={session} subtitle={`Gestion interna de ${profile.name}`} />
 
-      <section className="hero spotlight">
-        <div className="header-row">
+      <section className="hero spotlight dashboard-hero">
+        <div className="dashboard-hero-copy">
           <div>
             <span className="eyebrow">Panel del tenant</span>
             <h1>{profile.name}</h1>
             <p className="muted">
-              Desde aqui el profesional revisa su agenda, sus servicios y los turnos
-              reservados por sus clientes.
+              Un espacio simple para revisar reservas, mantener tus servicios al dia y ajustar
+              la experiencia publica del negocio.
             </p>
           </div>
           <div className="actions">
@@ -61,6 +61,20 @@ export default async function TenantDashboardPage({
             </Link>
           </div>
         </div>
+        <div className="dashboard-hero-notes">
+          <div className="dashboard-note-card">
+            <strong>Que puedes hacer aqui</strong>
+            <p className="muted">
+              Revisar turnos, editar servicios, configurar cobros y personalizar tu pagina.
+            </p>
+          </div>
+          <div className="dashboard-note-card">
+            <strong>Foco principal</strong>
+            <p className="muted">
+              La reserva de turnos sigue siendo el eje central de todo el producto.
+            </p>
+          </div>
+        </div>
       </section>
 
       <PanelPestanas
@@ -68,65 +82,46 @@ export default async function TenantDashboardPage({
         personalizar={<SiteBuilderForm tenant={profile} />}
         resumen={
           <>
-            <section className="grid cols-3">
-              <article className="metric">
-                <h2>{profile.services.length}</h2>
-                <p className="muted">Servicios activos</p>
-              </article>
-              <article className="metric">
-                <h2>{appointments.length}</h2>
-                <p className="muted">Turnos de hoy</p>
-              </article>
-              <article className="metric">
-                <h2>87%</h2>
-                <p className="muted">Ocupacion estimada semanal</p>
-              </article>
+            <section className="dashboard-section">
+              <div className="dashboard-section-header">
+                <div>
+                  <h2>Resumen general</h2>
+                  <p className="muted">
+                    Lo mas importante del dia en un solo vistazo.
+                  </p>
+                </div>
+              </div>
+              <div className="dashboard-kpi-grid">
+                <article className="metric dashboard-kpi-card">
+                  <span className="dashboard-kpi-label">Servicios activos</span>
+                  <h2>{profile.services.length}</h2>
+                  <p className="muted">Oferta publicada para que el cliente reserve.</p>
+                </article>
+                <article className="metric dashboard-kpi-card">
+                  <span className="dashboard-kpi-label">Turnos de hoy</span>
+                  <h2>{appointments.length}</h2>
+                  <p className="muted">Reservas recientes visibles para seguimiento.</p>
+                </article>
+                <article className="metric dashboard-kpi-card">
+                  <span className="dashboard-kpi-label">Ocupacion semanal</span>
+                  <h2>87%</h2>
+                  <p className="muted">Indicador visual para medir la carga estimada.</p>
+                </article>
+              </div>
             </section>
 
-            <section className="grid cols-2">
-              <article className="panel payment-status-panel">
-                <div className="header-row">
+            <section className="dashboard-split-grid">
+              <article className="panel dashboard-main-card">
+                <div className="dashboard-section-header">
                   <div>
-                    <h2>Cobro online</h2>
+                    <h2>Agenda visible</h2>
                     <p className="muted">
-                      Estado general de Mercado Pago para este tenant.
+                      Horarios que hoy aparecen disponibles en tu web publica.
                     </p>
-                  </div>
-                  <span
-                    className={`badge ${onlinePaymentEnabled ? "approved" : "cancelled"}`}
-                  >
-                    {onlinePaymentEnabled ? "Activo" : "Inactivo"}
-                  </span>
-                </div>
-                <div className="hero-meta">
-                  <span>{onlinePaymentServices} servicios con pago online</span>
-                  <span>
-                    {profile.paymentSettings?.hasMercadoPagoAccessToken
-                      ? "Cuenta de Mercado Pago conectada"
-                      : "Cuenta pendiente de configurar"}
-                  </span>
-                </div>
-              </article>
-
-              <article className="panel">
-                <h2>Como se mostrara al cliente</h2>
-                <p className="muted">
-                  Los servicios pagos muestran una etiqueta clara para indicar que el cobro se
-                  realiza online durante la reserva.
-                </p>
-              </article>
-            </section>
-
-            <section className="grid cols-2">
-              <article className="panel">
-                <div className="header-row">
-                  <div>
-                    <h2>Proximos slots</h2>
-                    <p className="muted">Horarios visibles en la web publica</p>
                   </div>
                   <button className="button secondary">Editar agenda</button>
                 </div>
-                <div className="slot-list">
+                <div className="slot-list dashboard-slot-list">
                   {profile.nextSlots.map((slot) => (
                     <div className="slot" key={slot}>
                       {slot}
@@ -135,16 +130,56 @@ export default async function TenantDashboardPage({
                 </div>
               </article>
 
-              <article className="panel">
-                <div className="header-row">
+              <article className="panel dashboard-side-card">
+                <div className="dashboard-section-header">
                   <div>
-                    <h2>Servicios visibles</h2>
-                    <p className="muted">Resumen rapido de la oferta publicada</p>
+                    <h2>Cobro online</h2>
+                    <p className="muted">
+                      Estado actual de Mercado Pago para este tenant.
+                    </p>
+                  </div>
+                  <span
+                    className={`badge ${onlinePaymentEnabled ? "approved" : "cancelled"}`}
+                  >
+                    {onlinePaymentEnabled ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+                <div className="dashboard-summary-list">
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Servicios con pago online</span>
+                    <strong>{onlinePaymentServices}</strong>
+                  </div>
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Estado de la cuenta</span>
+                    <strong>
+                      {profile.paymentSettings?.hasMercadoPagoAccessToken
+                        ? "Conectada"
+                        : "Pendiente"}
+                    </strong>
+                  </div>
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Experiencia del cliente</span>
+                    <strong>
+                      {onlinePaymentEnabled ? "Checkout online activo" : "Reserva sin cobro"}
+                    </strong>
                   </div>
                 </div>
-                <div className="service-list">
+              </article>
+            </section>
+
+            <section className="dashboard-split-grid">
+              <article className="panel dashboard-main-card">
+                <div className="dashboard-section-header">
+                  <div>
+                    <h2>Servicios visibles</h2>
+                    <p className="muted">
+                      Asi se ve hoy la oferta principal del negocio.
+                    </p>
+                  </div>
+                </div>
+                <div className="service-list dashboard-service-preview-list">
                   {profile.services.map((service) => (
-                    <div className="service-chip" key={service.id}>
+                    <div className="service-chip dashboard-service-preview-card" key={service.id}>
                       {service.images?.[0] ? (
                         <img
                           alt={service.images[0].altText ?? service.name}
@@ -176,62 +211,98 @@ export default async function TenantDashboardPage({
                   ))}
                 </div>
               </article>
+
+              <article className="panel dashboard-side-card">
+                <div className="dashboard-section-header">
+                  <div>
+                    <h2>Lo que ve el cliente</h2>
+                    <p className="muted">
+                      Los servicios pagos y los horarios visibles se reflejan automaticamente
+                      en la web publica.
+                    </p>
+                  </div>
+                </div>
+                <div className="dashboard-summary-list">
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Web publica</span>
+                    <strong>Actualizada</strong>
+                  </div>
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Cobro online</span>
+                    <strong>{onlinePaymentEnabled ? "Visible" : "No visible"}</strong>
+                  </div>
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Perfil del cliente final</span>
+                    <strong>Disponible</strong>
+                  </div>
+                </div>
+              </article>
             </section>
 
-            <section className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Paciente</th>
-                    <th>Servicio</th>
-                    <th>Horario</th>
-                    <th>Estado</th>
-                    <th>Pago</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((appointment) => (
-                    <tr key={appointment.id}>
-                      <td>{appointment.customerName}</td>
-                      <td>{appointment.serviceName}</td>
-                      <td>{appointment.startsAt}</td>
-                      <td>
-                        <span className={`badge ${appointment.status.toLowerCase()}`}>
-                          {appointment.status}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
-                          {appointment.paymentStatus}
-                        </span>
-                      </td>
+            <section className="dashboard-section">
+              <div className="dashboard-section-header">
+                <div>
+                  <h2>Turnos recientes</h2>
+                  <p className="muted">
+                    Ultimos movimientos de agenda para revisar rapidamente.
+                  </p>
+                </div>
+              </div>
+              <div className="table-wrap dashboard-table-card">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Paciente</th>
+                      <th>Servicio</th>
+                      <th>Horario</th>
+                      <th>Estado</th>
+                      <th>Pago</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {appointments.map((appointment) => (
+                      <tr key={appointment.id}>
+                        <td>{appointment.customerName}</td>
+                        <td>{appointment.serviceName}</td>
+                        <td>{appointment.startsAt}</td>
+                        <td>
+                          <span className={`badge ${appointment.status.toLowerCase()}`}>
+                            {appointment.status}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
+                            {appointment.paymentStatus}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           </>
         }
         servicios={
-          <section className="grid">
-            <article className="panel">
-              <div className="header-row">
-                <div>
-                  <h2>Servicios</h2>
-                  <p className="muted">Configura los servicios que el cliente podra reservar.</p>
-                </div>
-                <AddServiceForm tenantSlug={tenantSlug} />
+          <section className="dashboard-section">
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Servicios</h2>
+                <p className="muted">
+                  Edita cada servicio con claridad: datos, estado, precio e imagenes.
+                </p>
               </div>
-              <div className="service-list">
-                {profile.services.map((service) => (
-                  <ServiceEditorCard
-                    key={service.id}
-                    service={service}
-                    tenantSlug={tenantSlug}
-                  />
-                ))}
-              </div>
-            </article>
+              <AddServiceForm tenantSlug={tenantSlug} />
+            </div>
+            <div className="service-list service-list-stack">
+              {profile.services.map((service) => (
+                <ServiceEditorCard
+                  key={service.id}
+                  service={service}
+                  tenantSlug={tenantSlug}
+                />
+              ))}
+            </div>
           </section>
         }
       />
