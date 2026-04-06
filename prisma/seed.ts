@@ -157,6 +157,37 @@ async function main() {
     }),
   ]);
 
+  await prisma.serviceImage.deleteMany({
+    where: {
+      service: {
+        tenantId: tenant.id,
+      },
+    },
+  });
+
+  await prisma.serviceImage.createMany({
+    data: [
+      {
+        serviceId: cleaning.id,
+        url: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=900&q=80",
+        altText: "Limpieza dental profesional",
+        sortOrder: 1,
+      },
+      {
+        serviceId: checkup.id,
+        url: "https://images.unsplash.com/photo-1588776814546-daab30f310ce?auto=format&fit=crop&w=900&q=80",
+        altText: "Control odontologico general",
+        sortOrder: 1,
+      },
+      {
+        serviceId: whitening.id,
+        url: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&w=900&q=80",
+        altText: "Blanqueamiento dental",
+        sortOrder: 1,
+      },
+    ],
+  });
+
   await prisma.availabilityRule.deleteMany({
     where: {
       tenantId: tenant.id,

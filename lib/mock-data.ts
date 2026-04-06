@@ -69,6 +69,8 @@ export const tenantPublicProfile: TenantPublicProfile = {
       durationMin: 30,
       priceLabel: "$25.000",
       priceCents: 2500000,
+      isActive: true,
+      images: [],
     },
     {
       id: "srv_2",
@@ -76,6 +78,8 @@ export const tenantPublicProfile: TenantPublicProfile = {
       durationMin: 45,
       priceLabel: "$32.000",
       priceCents: 3200000,
+      isActive: true,
+      images: [],
     },
     {
       id: "srv_3",
@@ -83,6 +87,8 @@ export const tenantPublicProfile: TenantPublicProfile = {
       durationMin: 60,
       priceLabel: "$48.000",
       priceCents: 4800000,
+      isActive: true,
+      images: [],
     },
   ],
   nextSlots: [

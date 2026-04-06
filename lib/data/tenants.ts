@@ -39,6 +39,13 @@ const publicTenantInclude = {
     orderBy: {
       sortOrder: "asc",
     },
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+    },
   },
   availability: {
     where: {
@@ -56,7 +63,19 @@ const publicTenantInclude = {
 } satisfies Prisma.TenantInclude;
 
 const dashboardTenantInclude = {
-  ...publicTenantInclude,
+  services: {
+    orderBy: {
+      sortOrder: "asc",
+    },
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+    },
+  },
+  availability: publicTenantInclude.availability,
   appointments: {
     orderBy: {
       startsAt: "asc",
@@ -120,9 +139,44 @@ function mapAdminTenant(
   };
 }
 
-function mapPublicTenant(
-  tenant: Prisma.TenantGetPayload<{ include: typeof publicTenantInclude }>,
-): TenantPublicProfile {
+type TenantProfileRecord = {
+  id: string;
+  name: string;
+  slug: string;
+  heroTitle: string | null;
+  heroDescription: string | null;
+  publicDescription: string | null;
+  siteTitle: string | null;
+  logoUrl: string | null;
+  heroImageUrl: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  ctaLabel: string | null;
+  mercadoPagoEnabled?: boolean | null;
+  mercadoPagoPublicKey?: string | null;
+  mercadoPagoAccessToken?: string | null;
+  mercadoPagoWebhookSecret?: string | null;
+  availability: Array<{
+    dayOfWeek: number;
+    startTime: string;
+    slotStepMin: number;
+  }>;
+  services: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    durationMin: number;
+    priceCents: number | null;
+    isActive: boolean;
+    images: Array<{
+      id: string;
+      url: string;
+      altText: string | null;
+    }>;
+  }>;
+};
+
+function mapPublicTenant(tenant: TenantProfileRecord): TenantPublicProfile {
   return {
     id: tenant.id,
     name: tenant.name,
@@ -153,6 +207,12 @@ function mapPublicTenant(
       durationMin: service.durationMin,
       priceLabel: formatPrice(service.priceCents),
       priceCents: service.priceCents,
+      isActive: service.isActive,
+      images: service.images.map((image) => ({
+        id: image.id,
+        url: image.url,
+        altText: image.altText ?? undefined,
+      })),
     })),
     nextSlots: buildPreviewSlots(tenant.availability),
   };
@@ -301,6 +361,12 @@ export async function getTenantBookingData(
         durationMin: service.durationMin,
         priceLabel: formatPrice(service.priceCents),
         priceCents: service.priceCents,
+        isActive: service.isActive,
+        images: service.images.map((image) => ({
+          id: image.id,
+          url: image.url,
+          altText: image.altText ?? undefined,
+        })),
       },
       slots: generateAvailableSlotsForService(
         { durationMin: service.durationMin },

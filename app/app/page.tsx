@@ -4,6 +4,7 @@ import { SessionBanner } from "@/components/auth/session-banner";
 import { AddServiceForm } from "@/components/tenant/add-service-form";
 import { PanelPestanas } from "@/components/tenant/panel-pestanas";
 import { PaymentSettingsForm } from "@/components/tenant/payment-settings-form";
+import { ServiceEditorCard } from "@/components/tenant/service-editor-card";
 import { SiteBuilderForm } from "@/components/tenant/site-builder-form";
 import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
 import { getTenantDashboardData } from "@/lib/data/tenants";
@@ -144,6 +145,13 @@ export default async function TenantDashboardPage({
                 <div className="service-list">
                   {profile.services.map((service) => (
                     <div className="service-chip" key={service.id}>
+                      {service.images?.[0] ? (
+                        <img
+                          alt={service.images[0].altText ?? service.name}
+                          className="service-inline-image"
+                          src={service.images[0].url}
+                        />
+                      ) : null}
                       <div className="service-chip-header">
                         <strong>{service.name}</strong>
                         <span
@@ -216,28 +224,11 @@ export default async function TenantDashboardPage({
               </div>
               <div className="service-list">
                 {profile.services.map((service) => (
-                  <div className="service-chip" key={service.id}>
-                    <div className="service-chip-header">
-                      <strong>{service.name}</strong>
-                      <span
-                        className={`badge ${
-                          onlinePaymentEnabled && (service.priceCents ?? 0) > 0
-                            ? "approved"
-                            : "pending"
-                        }`}
-                      >
-                        {onlinePaymentEnabled && (service.priceCents ?? 0) > 0
-                          ? "Pago online"
-                          : "Reserva sin cobro"}
-                      </span>
-                    </div>
-                    {service.description ? (
-                      <div className="muted service-description">{service.description}</div>
-                    ) : null}
-                    <div className="muted">
-                      {service.durationMin} min - {service.priceLabel}
-                    </div>
-                  </div>
+                  <ServiceEditorCard
+                    key={service.id}
+                    service={service}
+                    tenantSlug={tenantSlug}
+                  />
                 ))}
               </div>
             </article>

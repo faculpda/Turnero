@@ -96,6 +96,18 @@ export function TenantPublicHome({
                 {service.description ? (
                   <div className="muted service-description">{service.description}</div>
                 ) : null}
+                {service.images && service.images.length > 0 ? (
+                  <div className="service-image-grid">
+                    {service.images.map((image) => (
+                      <img
+                        alt={image.altText ?? service.name}
+                        className="service-image-thumb"
+                        key={image.id}
+                        src={image.url}
+                      />
+                    ))}
+                  </div>
+                ) : null}
                 <div className="muted">
                   {service.durationMin} min - {service.priceLabel}
                 </div>

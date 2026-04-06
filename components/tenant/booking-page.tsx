@@ -94,6 +94,18 @@ export function TenantBookingPage({
                 <div className="muted">
                   {entry.service.durationMin} min - {entry.service.priceLabel}
                 </div>
+                {entry.service.images && entry.service.images.length > 0 ? (
+                  <div className="service-image-grid">
+                    {entry.service.images.map((image) => (
+                      <img
+                        alt={image.altText ?? entry.service.name}
+                        className="service-image-thumb"
+                        key={image.id}
+                        src={image.url}
+                      />
+                    ))}
+                  </div>
+                ) : null}
                 <div className="slot-list">
                   {entry.slots.slice(0, 4).map((slot) => (
                     <div className="slot" key={slot.startsAt}>

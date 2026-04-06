@@ -626,6 +626,63 @@ th:last-child {
   gap: 16px;
 }
 
+.service-editor-card {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+}
+
+.service-editor-form {
+  margin-top: 8px;
+}
+
+.service-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.service-image-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.service-image-slot {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.service-image-thumb,
+.service-inline-image {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: var(--panel-soft);
+}
+
+.service-image-thumb {
+  height: 148px;
+}
+
+.service-inline-image {
+  height: 120px;
+  margin-bottom: 12px;
+}
+
+.service-image-placeholder {
+  display: grid;
+  place-items: center;
+  height: 148px;
+  border-radius: 14px;
+  border: 1px dashed var(--line);
+  background: var(--panel-soft);
+}
+
 .service-admin {
   display: grid;
   gap: 14px;
@@ -832,6 +889,8 @@ th:last-child {
   .plans-grid,
   .showcase-mini-grid,
   .service-form-grid,
+  .service-image-grid,
+  .service-image-editor-grid,
   .tenant-hero-grid,
   .site-builder-shell {
     grid-template-columns: 1fr;

@@ -30,6 +30,12 @@ export type ServiceSummary = {
   durationMin: number;
   priceLabel: string;
   priceCents?: number | null;
+  isActive?: boolean;
+  images?: Array<{
+    id: string;
+    url: string;
+    altText?: string;
+  }>;
 };
 
 export type AppointmentSummary = {
