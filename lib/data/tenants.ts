@@ -172,6 +172,32 @@ export async function getPublicTenantProfile(
   }
 }
 
+export async function getPublicTenantProfileByHost(
+  host: string,
+): Promise<TenantPublicProfile | undefined> {
+  try {
+    const tenantDomain = await prisma.tenantDomain.findUnique({
+      where: {
+        host,
+      },
+      include: {
+        tenant: {
+          include: publicTenantInclude,
+        },
+      },
+    });
+
+    if (!tenantDomain) {
+      return fallbackPublicProfile.slug === host ? fallbackPublicProfile : undefined;
+    }
+
+    return mapPublicTenant(tenantDomain.tenant);
+  } catch {
+    const fallbackTenant = fallbackTenants.find((tenant) => tenant.domain === host);
+    return fallbackTenant?.slug === fallbackPublicProfile.slug ? fallbackPublicProfile : undefined;
+  }
+}
+
 export async function getTenantDashboardData(
   slug = "dentista",
 ): Promise<TenantDashboardData> {

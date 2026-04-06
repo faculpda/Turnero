@@ -1,6 +1,22 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { TenantPublicHome } from "@/components/tenant/public-home";
+import { getPublicTenantProfileByHost } from "@/lib/data/tenants";
+import { getRequestHost, isPlatformHost } from "@/lib/tenant-context";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const host = await getRequestHost();
+
+  if (host && !isPlatformHost(host)) {
+    const tenant = await getPublicTenantProfileByHost(host);
+
+    if (!tenant) {
+      notFound();
+    }
+
+    return <TenantPublicHome tenant={tenant} useSlugRoutes={false} />;
+  }
+
   return (
     <main className="shell grid">
       <section className="hero spotlight">
