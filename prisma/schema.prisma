@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model Tenant {
+  id               String             @id @default(cuid())
+  name             String
+  slug             String             @unique
+  status           TenantStatus       @default(TRIAL)
+  primaryColor     String?
+  publicDescription String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  domains          TenantDomain[]
+  memberships      Membership[]
+  services         Service[]
+  customers        CustomerProfile[]
+  appointments     Appointment[]
+  availability     AvailabilityRule[]
+}
+
+model TenantDomain {
+  id        String   @id @default(cuid())
+  host      String   @unique
+  verified  Boolean  @default(false)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id          String            @id @default(cuid())
+  name        String
+  email       String            @unique
+  passwordHash String?
+  globalRole  UserRole          @default(CUSTOMER)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships Membership[]
+  customerProfiles CustomerProfile[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  role      UserRole
+  createdAt DateTime @default(now())
+  userId    String
+  tenantId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId])
+}
+
+model CustomerProfile {
+  id         String         @id @default(cuid())
+  phone      String?
+  notes      String?
+  createdAt  DateTime       @default(now())
+  userId     String
+  tenantId   String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant     Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@unique([userId, tenantId])
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  durationMin Int
+  priceCents  Int?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+}
+
+model AvailabilityRule {
+  id        String   @id @default(cuid())
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean  @default(true)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id                String             @id @default(cuid())
+  startsAt          DateTime
+  endsAt            DateTime
+  status            AppointmentStatus  @default(CONFIRMED)
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  tenantId          String
+  serviceId         String
+  customerProfileId String
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  service           Service            @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  customerProfile   CustomerProfile    @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+}
