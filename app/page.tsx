@@ -19,7 +19,7 @@ export default async function HomePage() {
 
   return (
     <main className="shell grid">
-      <section className="hero spotlight">
+      <section className="hero">
         <div className="hero-grid">
           <div>
             <span className="eyebrow">Turnero SaaS</span>
@@ -52,9 +52,9 @@ export default async function HomePage() {
                 Agenda centralizada, disponibilidad clara y seguimiento del estado de cada turno.
               </p>
             </div>
-            <div className="showcase-card accent">
+            <div className="showcase-card">
               <span className="showcase-label">Dominios</span>
-              <strong>`turnero.com.ar/dentista` o `dentista.com`</strong>
+              <strong>turnero.com.ar/dentista o dentista.com</strong>
               <p className="muted">
                 El mismo tenant puede vivir tanto dentro de la plataforma como en su dominio propio.
               </p>
@@ -86,8 +86,8 @@ export default async function HomePage() {
 
       <section className="panel narrative-band">
         <div>
-          <span className="eyebrow">Experiencia Premium</span>
-          <h2>Un sistema pensado para verse profesional desde el primer contacto.</h2>
+          <span className="eyebrow">Experiencia</span>
+          <h2>Un sistema claro, sobrio y preparado para crecer.</h2>
         </div>
         <p className="muted">
           La interfaz esta orientada a transmitir confianza, orden y claridad tanto para el
