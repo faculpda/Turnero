@@ -56,11 +56,22 @@ export function TenantBookingForm({
       }),
     });
 
-    const payload = (await response.json()) as { ok?: boolean; error?: string; redirectTo?: string };
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      error?: string;
+      redirectTo?: string;
+      checkoutUrl?: string;
+      paymentRequired?: boolean;
+    };
 
     if (!response.ok || !payload.ok) {
       setError(payload.error ?? "No se pudo reservar el turno.");
       setIsSubmitting(false);
+      return;
+    }
+
+    if (payload.paymentRequired && payload.checkoutUrl) {
+      window.location.assign(payload.checkoutUrl);
       return;
     }
 
@@ -103,7 +114,7 @@ export function TenantBookingForm({
         disabled={isSubmitting || !serviceId || !startsAt || (selectedAvailability?.slots.length ?? 0) === 0}
         type="submit"
       >
-        {isSubmitting ? "Reservando..." : "Confirmar turno"}
+        {isSubmitting ? "Procesando..." : "Confirmar turno"}
       </button>
     </form>
   );

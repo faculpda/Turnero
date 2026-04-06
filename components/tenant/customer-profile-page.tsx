@@ -6,12 +6,14 @@ type TenantCustomerProfilePageProps = {
   tenant: TenantPublicProfile;
   session: AuthSession;
   appointments: CustomerAppointmentSummary[];
+  paymentMessage?: string | null;
 };
 
 export function TenantCustomerProfilePage({
   tenant,
   session,
   appointments,
+  paymentMessage,
 }: TenantCustomerProfilePageProps) {
   return (
     <main className="shell grid">
@@ -23,6 +25,7 @@ export function TenantCustomerProfilePage({
         <p className="muted">
           Aqui el cliente final puede consultar sus proximas reservas y su historial.
         </p>
+        {paymentMessage ? <p className="form-error">{paymentMessage}</p> : null}
       </section>
 
       <section className="table-wrap">
@@ -32,6 +35,7 @@ export function TenantCustomerProfilePage({
               <th>Servicio</th>
               <th>Fecha</th>
               <th>Estado</th>
+              <th>Pago</th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +46,11 @@ export function TenantCustomerProfilePage({
                 <td>
                   <span className={`badge ${appointment.status.toLowerCase()}`}>
                     {appointment.status}
+                  </span>
+                </td>
+                <td>
+                  <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
+                    {appointment.paymentStatus}
                   </span>
                 </td>
               </tr>

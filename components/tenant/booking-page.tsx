@@ -49,6 +49,12 @@ export function TenantBookingPage({
         <p className="muted">
           Elige el servicio, selecciona un horario disponible y confirma tu turno.
         </p>
+        {tenant.paymentSettings?.mercadoPagoEnabled ? (
+          <p className="muted">
+            Este negocio tiene cobro online con Mercado Pago. Si el servicio tiene precio,
+            despues de reservar te vamos a redirigir al checkout para completar el pago.
+          </p>
+        ) : null}
         <div className="actions">
           <Link className="button secondary" href={profileHref(tenant, useSlugRoutes)}>
             Ver mis turnos

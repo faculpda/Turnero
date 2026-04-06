@@ -29,6 +29,18 @@ enum AppointmentStatus {
   NO_SHOW
 }
 
+enum PaymentProvider {
+  MERCADO_PAGO
+}
+
+enum PaymentStatus {
+  NOT_REQUIRED
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
 model Tenant {
   id               String             @id @default(cuid())
   name             String
@@ -43,6 +55,10 @@ model Tenant {
   heroDescription  String?
   ctaLabel         String?
   publicDescription String?
+  mercadoPagoEnabled Boolean          @default(false)
+  mercadoPagoPublicKey String?
+  mercadoPagoAccessToken String?
+  mercadoPagoWebhookSecret String?
   timezone         String             @default("America/Argentina/Buenos_Aires")
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
@@ -146,6 +162,14 @@ model Appointment {
   startsAt          DateTime
   endsAt            DateTime
   status            AppointmentStatus  @default(CONFIRMED)
+  paymentProvider   PaymentProvider?
+  paymentStatus     PaymentStatus      @default(NOT_REQUIRED)
+  paymentAmountCents Int?
+  paymentPreferenceId String?
+  paymentExternalReference String?     @unique
+  paymentProviderPaymentId String?
+  paymentApprovedAt DateTime?
+  paymentExpiresAt  DateTime?
   notes             String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt

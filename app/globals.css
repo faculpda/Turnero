@@ -358,7 +358,8 @@ p {
 }
 
 .badge.active,
-.badge.confirmed {
+.badge.confirmed,
+.badge.approved {
   background: #e4f4ef;
   color: var(--success);
 }
@@ -370,7 +371,8 @@ p {
 }
 
 .badge.suspended,
-.badge.cancelled {
+.badge.cancelled,
+.badge.rejected {
   background: #f3e2e2;
   color: var(--danger);
 }
@@ -466,6 +468,17 @@ th:last-child {
   display: grid;
   gap: 8px;
   font-weight: 700;
+}
+
+.field-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.field-checkbox input {
+  width: 18px;
+  height: 18px;
 }
 
 .field input,
@@ -586,6 +599,10 @@ th:last-child {
   border-radius: 16px;
   background: var(--panel-soft);
   padding: 18px;
+}
+
+.subtle-panel {
+  background: var(--panel-soft);
 }
 
 .slot,

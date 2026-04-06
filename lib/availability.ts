@@ -9,6 +9,7 @@ type ExistingAppointmentShape = {
   startsAt: Date;
   endsAt: Date;
   status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
+  paymentExpiresAt?: Date | null;
 };
 
 type ServiceShape = {
@@ -49,8 +50,18 @@ function overlaps(
   slotEnd: Date,
   appointments: ExistingAppointmentShape[],
 ): boolean {
+  const now = new Date();
+
   return appointments.some((appointment) => {
     if (!ACTIVE_APPOINTMENT_STATUSES.has(appointment.status)) {
+      return false;
+    }
+
+    if (
+      appointment.status === "PENDING" &&
+      appointment.paymentExpiresAt &&
+      appointment.paymentExpiresAt <= now
+    ) {
       return false;
     }
 

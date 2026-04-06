@@ -3,6 +3,15 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
 import { generateAvailableSlotsForService } from "@/lib/availability";
+import {
+  buildAppointmentActiveFilter,
+  buildMercadoPagoReturnUrls,
+  createMercadoPagoPreference,
+  decryptTenantSecret,
+  getBaseUrlFromRequest,
+  getPaymentHoldExpiration,
+  isMercadoPagoReady,
+} from "@/lib/payments/mercadopago";
 import { prisma } from "@/lib/prisma";
 
 const createAppointmentSchema = z.object({
@@ -12,10 +21,6 @@ const createAppointmentSchema = z.object({
   redirectTo: z.string().min(1).optional(),
 });
 
-const ACTIVE_APPOINTMENT_STATUSES: Array<"PENDING" | "CONFIRMED"> = [
-  "PENDING",
-  "CONFIRMED",
-];
 const MAX_TRANSACTION_RETRIES = 3;
 
 function sanitizeRedirectTo(redirectTo: string | undefined, tenantSlug: string): string {
@@ -64,6 +69,7 @@ export async function POST(request: Request) {
       try {
         const appointment = await prisma.$transaction(
           async (tx) => {
+            const now = new Date();
             const service = await tx.service.findUnique({
               where: {
                 id: payload.serviceId,
@@ -85,15 +91,12 @@ export async function POST(request: Request) {
                       ],
                     },
                     appointments: {
-                      where: {
-                        status: {
-                          in: ACTIVE_APPOINTMENT_STATUSES,
-                        },
-                      },
+                      where: buildAppointmentActiveFilter(now),
                       select: {
                         startsAt: true,
                         endsAt: true,
                         status: true,
+                        paymentExpiresAt: true,
                       },
                     },
                   },
@@ -160,15 +163,13 @@ export async function POST(request: Request) {
             const conflictingAppointment = await tx.appointment.findFirst({
               where: {
                 tenantId: service.tenantId,
-                status: {
-                  in: ACTIVE_APPOINTMENT_STATUSES,
-                },
                 startsAt: {
                   lt: endsAt,
                 },
                 endsAt: {
                   gt: startsAt,
                 },
+                ...buildAppointmentActiveFilter(now),
               },
               select: {
                 id: true,
@@ -182,6 +183,8 @@ export async function POST(request: Request) {
               };
             }
 
+            const requiresOnlinePayment =
+              isMercadoPagoReady(service.tenant) && (service.priceCents ?? 0) > 0;
             const createdAppointment = await tx.appointment.create({
               data: {
                 tenantId: service.tenantId,
@@ -189,16 +192,43 @@ export async function POST(request: Request) {
                 customerProfileId: customerProfile.id,
                 startsAt,
                 endsAt,
-                status: "CONFIRMED",
+                status: requiresOnlinePayment ? "PENDING" : "CONFIRMED",
+                paymentProvider: requiresOnlinePayment ? "MERCADO_PAGO" : null,
+                paymentStatus: requiresOnlinePayment ? "PENDING" : "NOT_REQUIRED",
+                paymentAmountCents: service.priceCents,
+                paymentExternalReference: requiresOnlinePayment ? undefined : null,
+                paymentExpiresAt: requiresOnlinePayment ? getPaymentHoldExpiration(now) : null,
               },
               select: {
                 id: true,
+                startsAt: true,
+                paymentExpiresAt: true,
+                service: {
+                  select: {
+                    name: true,
+                    priceCents: true,
+                  },
+                },
+                tenant: {
+                  select: {
+                    slug: true,
+                    name: true,
+                    mercadoPagoEnabled: true,
+                    mercadoPagoAccessToken: true,
+                  },
+                },
               },
             });
 
             return {
-              ok: true,
+              ok: true as const,
               appointmentId: createdAppointment.id,
+              requiresOnlinePayment,
+              tenantName: createdAppointment.tenant.name,
+              serviceName: createdAppointment.service.name,
+              servicePriceCents: createdAppointment.service.priceCents,
+              mercadoPagoAccessToken: createdAppointment.tenant.mercadoPagoAccessToken,
+              paymentExpiresAt: createdAppointment.paymentExpiresAt?.toISOString() ?? null,
             };
           },
           {
@@ -210,11 +240,92 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: appointment.error }, { status: appointment.status });
         }
 
-        return NextResponse.json({
-          ok: true,
-          appointmentId: appointment.appointmentId,
-          redirectTo,
-        });
+        if (!appointment.requiresOnlinePayment) {
+          return NextResponse.json({
+            ok: true,
+            appointmentId: appointment.appointmentId,
+            redirectTo,
+          });
+        }
+
+        const accessToken = decryptTenantSecret(appointment.mercadoPagoAccessToken);
+
+        if (!accessToken || !appointment.servicePriceCents) {
+          await prisma.appointment.update({
+            where: {
+              id: appointment.appointmentId,
+            },
+            data: {
+              status: "CANCELLED",
+              paymentStatus: "CANCELLED",
+              paymentExpiresAt: null,
+            },
+          });
+
+          return NextResponse.json(
+            { error: "El tenant no tiene Mercado Pago configurado correctamente." },
+            { status: 400 },
+          );
+        }
+
+        const baseUrl = getBaseUrlFromRequest(request);
+        const returnUrls = buildMercadoPagoReturnUrls(
+          baseUrl,
+          payload.tenantSlug,
+          appointment.appointmentId,
+        );
+
+        try {
+          const preference = await createMercadoPagoPreference({
+            accessToken,
+            externalReference: appointment.appointmentId,
+            notificationUrl: returnUrls.notificationUrl,
+            successUrl: returnUrls.successUrl,
+            pendingUrl: returnUrls.pendingUrl,
+            failureUrl: returnUrls.failureUrl,
+            item: {
+              title: `${appointment.serviceName} - ${appointment.tenantName}`,
+              quantity: 1,
+              unit_price: appointment.servicePriceCents / 100,
+              currency_id: "ARS",
+            },
+          });
+
+          await prisma.appointment.update({
+            where: {
+              id: appointment.appointmentId,
+            },
+            data: {
+              paymentPreferenceId: preference.id,
+              paymentExternalReference: appointment.appointmentId,
+            },
+          });
+
+          return NextResponse.json({
+            ok: true,
+            appointmentId: appointment.appointmentId,
+            redirectTo,
+            checkoutUrl: preference.init_point,
+            paymentRequired: true,
+            paymentExpiresAt: appointment.paymentExpiresAt,
+          });
+        } catch {
+          await prisma.appointment.update({
+            where: {
+              id: appointment.appointmentId,
+            },
+            data: {
+              status: "CANCELLED",
+              paymentStatus: "CANCELLED",
+              paymentExpiresAt: null,
+            },
+          });
+
+          return NextResponse.json(
+            { error: "No se pudo iniciar el pago con Mercado Pago." },
+            { status: 502 },
+          );
+        }
       } catch (error) {
         if (isRetryableTransactionError(error) && attempt < MAX_TRANSACTION_RETRIES) {
           continue;

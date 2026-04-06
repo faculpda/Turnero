@@ -6,6 +6,7 @@ import {
 } from "@/lib/mock-data";
 import { generateAvailableSlotsForService } from "@/lib/availability";
 import { formatAppointmentDate, formatPrice } from "@/lib/format";
+import { buildAppointmentActiveFilter } from "@/lib/payments/mercadopago";
 import { prisma } from "@/lib/prisma";
 import type {
   AppointmentSummary,
@@ -75,15 +76,12 @@ const dashboardTenantInclude = {
 const bookingTenantInclude = {
   ...publicTenantInclude,
   appointments: {
-    where: {
-      status: {
-        in: ["PENDING", "CONFIRMED"],
-      },
-    },
+    where: buildAppointmentActiveFilter(),
     select: {
       startsAt: true,
       endsAt: true,
       status: true,
+      paymentExpiresAt: true,
     },
   },
 } satisfies Prisma.TenantInclude;
@@ -140,12 +138,21 @@ function mapPublicTenant(
     primaryColor: tenant.primaryColor ?? undefined,
     secondaryColor: tenant.secondaryColor ?? undefined,
     ctaLabel: tenant.ctaLabel ?? "Reservar turno",
+    paymentSettings: "mercadoPagoEnabled" in tenant
+      ? {
+          mercadoPagoEnabled: tenant.mercadoPagoEnabled ?? false,
+          mercadoPagoPublicKey: tenant.mercadoPagoPublicKey ?? undefined,
+          hasMercadoPagoAccessToken: Boolean(tenant.mercadoPagoAccessToken),
+          hasMercadoPagoWebhookSecret: Boolean(tenant.mercadoPagoWebhookSecret),
+        }
+      : undefined,
     services: tenant.services.map((service) => ({
       id: service.id,
       name: service.name,
       description: service.description ?? undefined,
       durationMin: service.durationMin,
       priceLabel: formatPrice(service.priceCents),
+      priceCents: service.priceCents,
     })),
     nextSlots: buildPreviewSlots(tenant.availability),
   };
@@ -160,6 +167,7 @@ function mapAppointments(
     customerName: appointment.customerProfile.user.name,
     startsAt: formatAppointmentDate(appointment.startsAt),
     status: appointment.status,
+    paymentStatus: appointment.paymentStatus,
   }));
 }
 
@@ -292,6 +300,7 @@ export async function getTenantBookingData(
         description: service.description ?? undefined,
         durationMin: service.durationMin,
         priceLabel: formatPrice(service.priceCents),
+        priceCents: service.priceCents,
       },
       slots: generateAvailableSlotsForService(
         { durationMin: service.durationMin },
@@ -362,6 +371,7 @@ export async function listCustomerAppointments(
       serviceName: appointment.service.name,
       startsAt: formatAppointmentDate(appointment.startsAt),
       status: appointment.status,
+      paymentStatus: appointment.paymentStatus,
     }));
   } catch {
     return [
@@ -370,6 +380,7 @@ export async function listCustomerAppointments(
         serviceName: "Limpieza dental",
         startsAt: "Mar 7 abr, 09:00",
         status: "CONFIRMED",
+        paymentStatus: "APPROVED",
       },
     ];
   }

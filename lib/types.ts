@@ -7,6 +7,13 @@ export type AppointmentStatus =
   | "COMPLETED"
   | "NO_SHOW";
 
+export type PaymentStatus =
+  | "NOT_REQUIRED"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
+
 export type TenantSummary = {
   id: string;
   name: string;
@@ -22,6 +29,7 @@ export type ServiceSummary = {
   description?: string;
   durationMin: number;
   priceLabel: string;
+  priceCents?: number | null;
 };
 
 export type AppointmentSummary = {
@@ -30,6 +38,7 @@ export type AppointmentSummary = {
   customerName: string;
   startsAt: string;
   status: AppointmentStatus;
+  paymentStatus: PaymentStatus;
 };
 
 export type CustomerAppointmentSummary = {
@@ -37,6 +46,14 @@ export type CustomerAppointmentSummary = {
   serviceName: string;
   startsAt: string;
   status: AppointmentStatus;
+  paymentStatus: PaymentStatus;
+};
+
+export type TenantPaymentSettingsSummary = {
+  mercadoPagoEnabled: boolean;
+  mercadoPagoPublicKey?: string;
+  hasMercadoPagoAccessToken: boolean;
+  hasMercadoPagoWebhookSecret: boolean;
 };
 
 export type TenantPublicProfile = {
@@ -51,6 +68,7 @@ export type TenantPublicProfile = {
   primaryColor?: string;
   secondaryColor?: string;
   ctaLabel?: string;
+  paymentSettings?: TenantPaymentSettingsSummary;
   services: ServiceSummary[];
   nextSlots: string[];
 };

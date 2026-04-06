@@ -3,6 +3,7 @@ import { AccessDenied } from "@/components/auth/access-denied";
 import { SessionBanner } from "@/components/auth/session-banner";
 import { AddServiceForm } from "@/components/tenant/add-service-form";
 import { PanelPestanas } from "@/components/tenant/panel-pestanas";
+import { PaymentSettingsForm } from "@/components/tenant/payment-settings-form";
 import { SiteBuilderForm } from "@/components/tenant/site-builder-form";
 import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
 import { getTenantDashboardData } from "@/lib/data/tenants";
@@ -58,6 +59,7 @@ export default async function TenantDashboardPage({
       </section>
 
       <PanelPestanas
+        cobros={<PaymentSettingsForm tenant={profile} />}
         personalizar={<SiteBuilderForm tenant={profile} />}
         resumen={
           <>
