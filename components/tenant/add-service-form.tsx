@@ -62,6 +62,14 @@ export function AddServiceForm({ tenantSlug }: AddServiceFormProps) {
       {isOpen ? (
         <form className="panel service-form" onSubmit={onSubmit}>
           <div className="service-form-grid">
+            <div className="panel subtle-panel field-wide">
+              <strong>Cobro online del servicio</strong>
+              <p className="muted">
+                Si el tenant tiene Mercado Pago activo y este servicio tiene un valor mayor a
+                cero, el cliente sera redirigido al checkout para pagar al reservar.
+              </p>
+            </div>
+
             <label className="field">
               <span>Titulo</span>
               <input

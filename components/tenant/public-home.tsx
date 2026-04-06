@@ -26,6 +26,8 @@ export function TenantPublicHome({
   tenant,
   useSlugRoutes = true,
 }: TenantPublicHomeProps) {
+  const onlinePaymentEnabled = tenant.paymentSettings?.mercadoPagoEnabled ?? false;
+
   return (
     <main className="shell grid tenant-public" style={buildTenantStyle(tenant)}>
       <section className="hero tenant-hero">
@@ -77,7 +79,20 @@ export function TenantPublicHome({
           <div className="service-list">
             {tenant.services.map((service) => (
               <div className="service-chip" key={service.id}>
-                <strong>{service.name}</strong>
+                <div className="service-chip-header">
+                  <strong>{service.name}</strong>
+                  <span
+                    className={`badge ${
+                      onlinePaymentEnabled && (service.priceCents ?? 0) > 0
+                        ? "approved"
+                        : "pending"
+                    }`}
+                  >
+                    {onlinePaymentEnabled && (service.priceCents ?? 0) > 0
+                      ? "Pago online"
+                      : "Reserva directa"}
+                  </span>
+                </div>
                 {service.description ? (
                   <div className="muted service-description">{service.description}</div>
                 ) : null}

@@ -26,6 +26,8 @@ export function TenantBookingPage({
   customerSession,
   useSlugRoutes = true,
 }: TenantBookingPageProps) {
+  const onlinePaymentEnabled = tenant.paymentSettings?.mercadoPagoEnabled ?? false;
+
   if (!customerSession || customerSession.globalRole !== "CUSTOMER") {
     return (
       <AccessDenied
@@ -75,7 +77,20 @@ export function TenantBookingPage({
           <div className="availability-list">
             {availabilityByService.map((entry) => (
               <div className="availability-card" key={entry.service.id}>
-                <strong>{entry.service.name}</strong>
+                <div className="service-chip-header">
+                  <strong>{entry.service.name}</strong>
+                  <span
+                    className={`badge ${
+                      onlinePaymentEnabled && (entry.service.priceCents ?? 0) > 0
+                        ? "approved"
+                        : "pending"
+                    }`}
+                  >
+                    {onlinePaymentEnabled && (entry.service.priceCents ?? 0) > 0
+                      ? "Pago online"
+                      : "Sin pago online"}
+                  </span>
+                </div>
                 <div className="muted">
                   {entry.service.durationMin} min - {entry.service.priceLabel}
                 </div>

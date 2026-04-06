@@ -613,6 +613,19 @@ th:last-child {
   padding: 12px 14px;
 }
 
+.service-chip-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.payment-status-panel {
+  display: grid;
+  gap: 16px;
+}
+
 .service-admin {
   display: grid;
   gap: 14px;

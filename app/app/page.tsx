@@ -32,6 +32,10 @@ export default async function TenantDashboardPage({
   }
 
   const { profile, appointments } = await getTenantDashboardData(tenantSlug);
+  const onlinePaymentEnabled = profile.paymentSettings?.mercadoPagoEnabled ?? false;
+  const onlinePaymentServices = profile.services.filter(
+    (service) => onlinePaymentEnabled && (service.priceCents ?? 0) > 0,
+  ).length;
 
   return (
     <main className="shell grid">
@@ -79,6 +83,40 @@ export default async function TenantDashboardPage({
             </section>
 
             <section className="grid cols-2">
+              <article className="panel payment-status-panel">
+                <div className="header-row">
+                  <div>
+                    <h2>Cobro online</h2>
+                    <p className="muted">
+                      Estado general de Mercado Pago para este tenant.
+                    </p>
+                  </div>
+                  <span
+                    className={`badge ${onlinePaymentEnabled ? "approved" : "cancelled"}`}
+                  >
+                    {onlinePaymentEnabled ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+                <div className="hero-meta">
+                  <span>{onlinePaymentServices} servicios con pago online</span>
+                  <span>
+                    {profile.paymentSettings?.hasMercadoPagoAccessToken
+                      ? "Cuenta de Mercado Pago conectada"
+                      : "Cuenta pendiente de configurar"}
+                  </span>
+                </div>
+              </article>
+
+              <article className="panel">
+                <h2>Como se mostrara al cliente</h2>
+                <p className="muted">
+                  Los servicios pagos muestran una etiqueta clara para indicar que el cobro se
+                  realiza online durante la reserva.
+                </p>
+              </article>
+            </section>
+
+            <section className="grid cols-2">
               <article className="panel">
                 <div className="header-row">
                   <div>
@@ -106,7 +144,20 @@ export default async function TenantDashboardPage({
                 <div className="service-list">
                   {profile.services.map((service) => (
                     <div className="service-chip" key={service.id}>
-                      <strong>{service.name}</strong>
+                      <div className="service-chip-header">
+                        <strong>{service.name}</strong>
+                        <span
+                          className={`badge ${
+                            onlinePaymentEnabled && (service.priceCents ?? 0) > 0
+                              ? "approved"
+                              : "pending"
+                          }`}
+                        >
+                          {onlinePaymentEnabled && (service.priceCents ?? 0) > 0
+                            ? "Pago online"
+                            : "Reserva sin cobro"}
+                        </span>
+                      </div>
                       {service.description ? (
                         <div className="muted service-description">{service.description}</div>
                       ) : null}
@@ -127,6 +178,7 @@ export default async function TenantDashboardPage({
                     <th>Servicio</th>
                     <th>Horario</th>
                     <th>Estado</th>
+                    <th>Pago</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -138,6 +190,11 @@ export default async function TenantDashboardPage({
                       <td>
                         <span className={`badge ${appointment.status.toLowerCase()}`}>
                           {appointment.status}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
+                          {appointment.paymentStatus}
                         </span>
                       </td>
                     </tr>
@@ -160,7 +217,20 @@ export default async function TenantDashboardPage({
               <div className="service-list">
                 {profile.services.map((service) => (
                   <div className="service-chip" key={service.id}>
-                    <strong>{service.name}</strong>
+                    <div className="service-chip-header">
+                      <strong>{service.name}</strong>
+                      <span
+                        className={`badge ${
+                          onlinePaymentEnabled && (service.priceCents ?? 0) > 0
+                            ? "approved"
+                            : "pending"
+                        }`}
+                      >
+                        {onlinePaymentEnabled && (service.priceCents ?? 0) > 0
+                          ? "Pago online"
+                          : "Reserva sin cobro"}
+                      </span>
+                    </div>
                     {service.description ? (
                       <div className="muted service-description">{service.description}</div>
                     ) : null}
