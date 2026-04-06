@@ -558,6 +558,42 @@ th:last-child {
   gap: 14px;
 }
 
+.panel-pestanas {
+  display: grid;
+  gap: 20px;
+}
+
+.tabs-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab-button {
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.tab-button.active {
+  background: var(--brand-soft);
+  border-color: #bfd7fb;
+  color: var(--brand-strong);
+}
+
+.tab-content {
+  display: grid;
+  gap: 20px;
+}
+
 .site-builder-form {
   display: grid;
   gap: 18px;
