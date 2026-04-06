@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { AccessDenied } from "@/components/auth/access-denied";
+import { SessionBanner } from "@/components/auth/session-banner";
+import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
 import { getTenantDashboardData } from "@/lib/data/tenants";
 
 type TenantDashboardPageProps = {
@@ -12,10 +15,24 @@ export default async function TenantDashboardPage({
 }: TenantDashboardPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const tenantSlug = resolvedSearchParams?.tenant ?? "dentista";
+  const session = await getCurrentSession();
+
+  if (!session || !(await hasTenantAccess(tenantSlug))) {
+    return (
+      <AccessDenied
+        description="Necesitas ingresar con una cuenta del tenant o con una cuenta super admin."
+        loginHref={`/app/login?tenant=${tenantSlug}`}
+        title="Panel privado del negocio"
+      />
+    );
+  }
+
   const { profile, appointments } = await getTenantDashboardData(tenantSlug);
 
   return (
     <main className="shell grid">
+      <SessionBanner session={session} subtitle={`Gestion interna de ${profile.name}`} />
+
       <section className="hero spotlight">
         <div className="header-row">
           <div>

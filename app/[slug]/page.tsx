@@ -26,8 +26,11 @@ export default async function TenantPublicPage({ params }: TenantPublicPageProps
           <Link className="button primary" href={`/${tenant.slug}/reservar`}>
             Reservar turno
           </Link>
+          <Link className="button secondary" href={`/${tenant.slug}/ingresar`}>
+            Ingresar a mi perfil
+          </Link>
           <Link className="button secondary" href={`/${tenant.slug}/mi-perfil`}>
-            Ver mi perfil
+            Ver area privada
           </Link>
         </div>
       </section>

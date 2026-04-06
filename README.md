@@ -16,6 +16,7 @@ SaaS multi-tenant para gestion de turnos, pensado para profesionales y negocios 
 - TypeScript
 - Prisma
 - PostgreSQL
+- Sesiones propias con cookies seguras
 
 ## Estructura inicial
 
@@ -34,3 +35,9 @@ SaaS multi-tenant para gestion de turnos, pensado para profesionales y negocios 
 5. Ejecutar `npx prisma migrate dev`.
 6. Ejecutar `npm run prisma:seed`.
 7. Levantar el proyecto con `npm run dev`.
+
+## Credenciales seed
+
+- Super admin: `admin@turnero.com` / `Admin1234!`
+- Tenant demo: `admin@dentista.com` / `Dentista1234!`
+- Cliente demo: `maria@example.com` / `Paciente1234!`

@@ -20,6 +20,9 @@ export default function HomePage() {
           <Link className="button secondary" href="/dentista">
             Ver pagina publica
           </Link>
+          <Link className="button secondary" href="/admin/login">
+            Login super admin
+          </Link>
         </div>
       </section>
 

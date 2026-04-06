@@ -1,11 +1,28 @@
 import Link from "next/link";
+import { AccessDenied } from "@/components/auth/access-denied";
+import { SessionBanner } from "@/components/auth/session-banner";
+import { getCurrentSession } from "@/lib/auth/session";
 import { listAdminTenants } from "@/lib/data/tenants";
 
 export default async function AdminPage() {
+  const session = await getCurrentSession();
+
+  if (!session || session.globalRole !== "SUPER_ADMIN") {
+    return (
+      <AccessDenied
+        description="Necesitas una sesion de super admin para ver el estado global del SaaS."
+        loginHref="/admin/login"
+        title="Panel reservado para super administradores"
+      />
+    );
+  }
+
   const tenants = await listAdminTenants();
 
   return (
     <main className="shell grid">
+      <SessionBanner session={session} subtitle="Vision completa de tenants y operaciones" />
+
       <section className="hero">
         <div className="header-row">
           <div>
@@ -16,7 +33,7 @@ export default async function AdminPage() {
               a su panel para ayudarlo con la configuracion.
             </p>
           </div>
-          <Link className="button primary" href="/">
+          <Link className="button secondary" href="/">
             Volver al inicio
           </Link>
         </div>
@@ -64,7 +81,7 @@ export default async function AdminPage() {
                 <td>{tenant.upcomingAppointments}</td>
                 <td>
                   <Link className="button secondary" href={`/app?tenant=${tenant.slug}`}>
-                    Entrar al panel
+                    Impersonar panel
                   </Link>
                 </td>
               </tr>

@@ -1,4 +1,7 @@
 import { notFound } from "next/navigation";
+import { AccessDenied } from "@/components/auth/access-denied";
+import { SessionBanner } from "@/components/auth/session-banner";
+import { getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
 import { getPublicTenantProfile } from "@/lib/data/tenants";
 
 type CustomerProfilePageProps = {
@@ -12,13 +15,26 @@ export default async function CustomerProfilePage({
 }: CustomerProfilePageProps) {
   const { slug } = await params;
   const tenant = await getPublicTenantProfile(slug);
+  const session = await getCurrentSession();
 
   if (!tenant) {
     notFound();
   }
 
+  if (!session || !(await hasCustomerAccess(slug))) {
+    return (
+      <AccessDenied
+        description="Necesitas ingresar con tu cuenta de cliente para consultar tus reservas."
+        loginHref={`/${slug}/ingresar`}
+        title="Perfil privado del cliente final"
+      />
+    );
+  }
+
   return (
     <main className="shell grid">
+      <SessionBanner session={session} subtitle={`Perfil del cliente en ${tenant.name}`} />
+
       <section className="hero">
         <span className="eyebrow">Perfil del cliente final</span>
         <h1>Mis turnos en {tenant.name}</h1>

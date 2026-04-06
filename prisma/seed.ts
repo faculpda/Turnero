@@ -1,4 +1,5 @@
 import { AppointmentStatus, PrismaClient, TenantStatus, UserRole } from "@prisma/client";
+import { hashPassword } from "../lib/auth/password";
 
 const prisma = new PrismaClient();
 
@@ -33,27 +34,31 @@ async function main() {
 
   const superAdmin = await prisma.user.upsert({
     where: { email: "admin@turnero.com" },
-    update: {
-      name: "Super Admin",
-      globalRole: UserRole.SUPER_ADMIN,
-    },
     create: {
       name: "Super Admin",
       email: "admin@turnero.com",
       globalRole: UserRole.SUPER_ADMIN,
+      passwordHash: hashPassword("Admin1234!"),
+    },
+    update: {
+      name: "Super Admin",
+      globalRole: UserRole.SUPER_ADMIN,
+      passwordHash: hashPassword("Admin1234!"),
     },
   });
 
   const tenantAdmin = await prisma.user.upsert({
     where: { email: "admin@dentista.com" },
-    update: {
-      name: "Dra. Paula Gomez",
-      globalRole: UserRole.TENANT_ADMIN,
-    },
     create: {
       name: "Dra. Paula Gomez",
       email: "admin@dentista.com",
       globalRole: UserRole.TENANT_ADMIN,
+      passwordHash: hashPassword("Dentista1234!"),
+    },
+    update: {
+      name: "Dra. Paula Gomez",
+      globalRole: UserRole.TENANT_ADMIN,
+      passwordHash: hashPassword("Dentista1234!"),
     },
   });
 
@@ -161,14 +166,16 @@ async function main() {
 
   const customerUser = await prisma.user.upsert({
     where: { email: "maria@example.com" },
-    update: {
-      name: "Maria Gomez",
-      globalRole: UserRole.CUSTOMER,
-    },
     create: {
       name: "Maria Gomez",
       email: "maria@example.com",
       globalRole: UserRole.CUSTOMER,
+      passwordHash: hashPassword("Paciente1234!"),
+    },
+    update: {
+      name: "Maria Gomez",
+      globalRole: UserRole.CUSTOMER,
+      passwordHash: hashPassword("Paciente1234!"),
     },
   });
 
