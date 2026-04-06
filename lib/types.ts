@@ -45,6 +45,12 @@ export type TenantPublicProfile = {
   slug: string;
   headline: string;
   description: string;
+  siteTitle?: string;
+  logoUrl?: string;
+  heroImageUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  ctaLabel?: string;
   services: ServiceSummary[];
   nextSlots: string[];
 };

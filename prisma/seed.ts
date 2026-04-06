@@ -9,7 +9,16 @@ async function main() {
     update: {
       name: "Clinica Dental Sonrisa",
       status: TenantStatus.ACTIVE,
-      primaryColor: "#bb5a3c",
+      primaryColor: "#205fc0",
+      secondaryColor: "#dff1ff",
+      siteTitle: "Clinica Dental Sonrisa",
+      heroTitle: "Reserva tu turno odontologico de forma simple",
+      heroDescription:
+        "Atencion profesional, horarios claros y una experiencia de reserva moderna para tus pacientes.",
+      ctaLabel: "Solicitar turno",
+      logoUrl: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=300&q=80",
+      heroImageUrl:
+        "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
       publicDescription:
         "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
       timezone: "America/Argentina/Buenos_Aires",
@@ -18,7 +27,16 @@ async function main() {
       name: "Clinica Dental Sonrisa",
       slug: "dentista",
       status: TenantStatus.ACTIVE,
-      primaryColor: "#bb5a3c",
+      primaryColor: "#205fc0",
+      secondaryColor: "#dff1ff",
+      siteTitle: "Clinica Dental Sonrisa",
+      heroTitle: "Reserva tu turno odontologico de forma simple",
+      heroDescription:
+        "Atencion profesional, horarios claros y una experiencia de reserva moderna para tus pacientes.",
+      ctaLabel: "Solicitar turno",
+      logoUrl: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=300&q=80",
+      heroImageUrl:
+        "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
       publicDescription:
         "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
       timezone: "America/Argentina/Buenos_Aires",

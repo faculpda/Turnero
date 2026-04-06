@@ -553,6 +553,11 @@ th:last-child {
   gap: 14px;
 }
 
+.site-builder-form {
+  display: grid;
+  gap: 18px;
+}
+
 .service-form {
   margin-top: 4px;
 }
@@ -572,13 +577,81 @@ th:last-child {
   max-width: 32ch;
 }
 
+.tenant-public {
+  --tenant-primary: #205fc0;
+  --tenant-secondary: #dff1ff;
+}
+
+.tenant-hero {
+  border-color: color-mix(in srgb, var(--tenant-primary) 16%, var(--line));
+}
+
+.tenant-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.tenant-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.tenant-logo,
+.tenant-logo-placeholder {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 18%, var(--line));
+  background: color-mix(in srgb, var(--tenant-secondary) 78%, white 22%);
+}
+
+.tenant-logo-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tenant-primary);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.tenant-primary-button {
+  background: var(--tenant-primary);
+}
+
+.tenant-hero-media {
+  display: flex;
+}
+
+.tenant-cover,
+.tenant-cover-placeholder {
+  width: 100%;
+  min-height: 280px;
+  border-radius: 22px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 16%, var(--line));
+  background: color-mix(in srgb, var(--tenant-secondary) 70%, white 30%);
+}
+
+.tenant-cover-placeholder {
+  display: grid;
+  align-content: end;
+  gap: 10px;
+  padding: 24px;
+}
+
 @media (max-width: 920px) {
   .hero-grid,
   .info-grid,
   .steps-grid,
   .plans-grid,
   .showcase-mini-grid,
-  .service-form-grid {
+  .service-form-grid,
+  .tenant-hero-grid {
     grid-template-columns: 1fr;
   }
 

@@ -129,10 +129,17 @@ function mapPublicTenant(
     id: tenant.id,
     name: tenant.name,
     slug: tenant.slug,
-    headline: "Reserva tu turno en pocos pasos",
+    headline: tenant.heroTitle ?? "Reserva tu turno en pocos pasos",
     description:
+      tenant.heroDescription ??
       tenant.publicDescription ??
       "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+    siteTitle: tenant.siteTitle ?? tenant.name,
+    logoUrl: tenant.logoUrl ?? undefined,
+    heroImageUrl: tenant.heroImageUrl ?? undefined,
+    primaryColor: tenant.primaryColor ?? undefined,
+    secondaryColor: tenant.secondaryColor ?? undefined,
+    ctaLabel: tenant.ctaLabel ?? "Reservar turno",
     services: tenant.services.map((service) => ({
       id: service.id,
       name: service.name,

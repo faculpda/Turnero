@@ -35,6 +35,13 @@ model Tenant {
   slug             String             @unique
   status           TenantStatus       @default(TRIAL)
   primaryColor     String?
+  secondaryColor   String?
+  logoUrl          String?
+  heroImageUrl     String?
+  siteTitle        String?
+  heroTitle        String?
+  heroDescription  String?
+  ctaLabel         String?
   publicDescription String?
   timezone         String             @default("America/Argentina/Buenos_Aires")
   createdAt        DateTime           @default(now())
