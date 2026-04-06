@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
+import { canManageTenant, getCurrentSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 const createServiceSchema = z.object({
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const payload = createServiceSchema.parse(await request.json());
 
-    if (!(await hasTenantAccess(payload.tenantSlug))) {
+    if (!(await canManageTenant(payload.tenantSlug))) {
       return NextResponse.json(
         { error: "No tienes permisos para gestionar este tenant." },
         { status: 403 },

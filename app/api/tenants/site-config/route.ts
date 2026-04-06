@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
+import { canManageTenant, getCurrentSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 const colorRegex = /^#([A-Fa-f0-9]{6})$/;
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const payload = siteConfigSchema.parse(await request.json());
 
-    if (!(await hasTenantAccess(payload.tenantSlug))) {
+    if (!(await canManageTenant(payload.tenantSlug))) {
       return NextResponse.json(
         { error: "No tienes permisos para modificar este sitio." },
         { status: 403 },

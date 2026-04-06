@@ -12,7 +12,10 @@ const createAppointmentSchema = z.object({
   redirectTo: z.string().min(1).optional(),
 });
 
-const ACTIVE_APPOINTMENT_STATUSES = ["PENDING", "CONFIRMED"] as const;
+const ACTIVE_APPOINTMENT_STATUSES: Array<"PENDING" | "CONFIRMED"> = [
+  "PENDING",
+  "CONFIRMED",
+];
 const MAX_TRANSACTION_RETRIES = 3;
 
 function sanitizeRedirectTo(redirectTo: string | undefined, tenantSlug: string): string {

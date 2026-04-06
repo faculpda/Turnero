@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
-import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
+import { canManageTenant, getCurrentSession } from "@/lib/auth/session";
 
 const allowedExtensions = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg"]);
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Datos de carga invalidos." }, { status: 400 });
     }
 
-    if (!(await hasTenantAccess(tenantSlug))) {
+    if (!(await canManageTenant(tenantSlug))) {
       return NextResponse.json(
         { error: "No tienes permisos para subir archivos a este tenant." },
         { status: 403 },

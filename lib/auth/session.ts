@@ -136,6 +136,23 @@ export async function hasTenantAccess(tenantSlug: string): Promise<boolean> {
   return session.memberships.some((membership) => membership.tenantSlug === tenantSlug);
 }
 
+export async function canManageTenant(tenantSlug: string): Promise<boolean> {
+  const session = await getCurrentSession();
+
+  if (!session) {
+    return false;
+  }
+
+  if (session.globalRole === "SUPER_ADMIN") {
+    return true;
+  }
+
+  return session.memberships.some(
+    (membership) =>
+      membership.tenantSlug === tenantSlug && membership.role === "TENANT_ADMIN",
+  );
+}
+
 export async function hasCustomerAccess(tenantSlug: string): Promise<boolean> {
   const session = await getCurrentSession();
 
