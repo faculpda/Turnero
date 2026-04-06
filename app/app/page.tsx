@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AccessDenied } from "@/components/auth/access-denied";
+import { AppointmentsFocusPanel } from "@/components/tenant/appointments-focus-panel";
 import { SessionBanner } from "@/components/auth/session-banner";
 import { AddServiceForm } from "@/components/tenant/add-service-form";
 import { PanelPestanas } from "@/components/tenant/panel-pestanas";
@@ -37,26 +38,9 @@ export default async function TenantDashboardPage({
   const onlinePaymentServices = profile.services.filter(
     (service) => onlinePaymentEnabled && (service.priceCents ?? 0) > 0,
   ).length;
-  const turnosDestacados = appointments.slice(0, 5);
-  const turnosConfirmados = appointments.filter((appointment) => appointment.status === "CONFIRMED");
-  const turnosPendientes = appointments.filter((appointment) => appointment.status === "PENDING");
   const pagosPendientes = appointments.filter(
     (appointment) => appointment.paymentStatus === "PENDING",
   );
-
-  const estadoTurnoLabel: Record<string, string> = {
-    PENDING: "Pendiente",
-    CONFIRMED: "Confirmado",
-    CANCELLED: "Cancelado",
-  };
-
-  const estadoPagoLabel: Record<string, string> = {
-    NOT_REQUIRED: "Sin cobro",
-    PENDING: "Pendiente",
-    APPROVED: "Aprobado",
-    REJECTED: "Rechazado",
-    CANCELLED: "Cancelado",
-  };
 
   return (
     <main className="shell grid dashboard-shell">
@@ -68,8 +52,8 @@ export default async function TenantDashboardPage({
             <span className="eyebrow">Panel del tenant</span>
             <h1>{profile.name}</h1>
             <p className="muted">
-              Prioriza tu agenda del dia, controla reservas activas y deja el resto de la
-              configuracion en un segundo plano cuando haga falta.
+              La portada privada ahora prioriza los turnos activos para que el profesional vea
+              primero lo que tiene reservado y pueda actuar rapido.
             </p>
           </div>
           <div className="actions">
@@ -84,21 +68,23 @@ export default async function TenantDashboardPage({
         <div className="dashboard-hero-notes">
           <div className="dashboard-note-card dashboard-note-priority">
             <span className="dashboard-note-label">Prioridad de hoy</span>
-            <strong>{appointments.length} turnos para seguir</strong>
+            <strong>{appointments.length} reservas en seguimiento</strong>
             <p className="muted">
-              Ten a mano las reservas confirmadas, los pendientes y los pagos que necesitan
-              atencion.
+              Confirmados y pendientes quedan destacados en la portada para evitar perderlos entre
+              configuraciones.
             </p>
           </div>
           <div className="dashboard-note-card">
             <span className="dashboard-note-label">Contexto rapido</span>
             <strong>{profile.services.length} servicios visibles para reservar</strong>
             <p className="muted">
-              Edita la oferta, ajusta cobros y personaliza la pagina sin perder de vista la agenda.
+              Agenda, cobros, servicios y personalizacion siguen disponibles en pestañas separadas.
             </p>
           </div>
         </div>
       </section>
+
+      <AppointmentsFocusPanel appointments={appointments} />
 
       <PanelPestanas
         cobros={<PaymentSettingsForm tenant={profile} />}
@@ -108,128 +94,14 @@ export default async function TenantDashboardPage({
             <section className="dashboard-section">
               <div className="dashboard-section-header">
                 <div>
-                  <h2>Resumen general</h2>
+                  <h2>Agenda y operacion</h2>
                   <p className="muted">
-                    Una vista clara para entrar al panel y entender rapido que necesita accion.
+                    Lo secundario queda agrupado en pestañas para no competir con la vista de turnos.
                   </p>
                 </div>
-              </div>
-              <div className="dashboard-kpi-grid">
-                <article className="metric dashboard-kpi-card dashboard-kpi-card-highlight">
-                  <span className="dashboard-kpi-label">Turnos de hoy</span>
-                  <h2>{appointments.length}</h2>
-                  <p className="muted">Reservas visibles para seguimiento inmediato.</p>
-                </article>
-                <article className="metric dashboard-kpi-card">
-                  <span className="dashboard-kpi-label">Confirmados</span>
-                  <h2>{turnosConfirmados.length}</h2>
-                  <p className="muted">Turnos listos para atender sin friccion.</p>
-                </article>
-                <article className="metric dashboard-kpi-card">
-                  <span className="dashboard-kpi-label">Pendientes</span>
-                  <h2>{turnosPendientes.length}</h2>
-                  <p className="muted">Reservas o pagos que conviene revisar cuanto antes.</p>
-                </article>
-              </div>
-            </section>
-
-            <section className="dashboard-priority-grid">
-              <article className="panel dashboard-turnos-card">
-                <div className="dashboard-section-header">
-                  <div>
-                    <h2>Turnos a la vista</h2>
-                    <p className="muted">
-                      La agenda reservada queda primero para que puedas decidir y actuar sin buscar.
-                    </p>
-                  </div>
-                  <Link className="button secondary" href={`/${profile.slug}`}>
-                    Ver pagina publica
-                  </Link>
-                </div>
-                <div className="dashboard-turnos-list">
-                  {turnosDestacados.length > 0 ? (
-                    turnosDestacados.map((appointment) => (
-                      <article className="dashboard-turno-item" key={appointment.id}>
-                        <div className="dashboard-turno-main">
-                          <strong>{appointment.customerName}</strong>
-                          <span className="muted">{appointment.serviceName}</span>
-                        </div>
-                        <div className="dashboard-turno-meta">
-                          <strong>{appointment.startsAt}</strong>
-                          <div className="dashboard-turno-badges">
-                            <span className={`badge ${appointment.status.toLowerCase()}`}>
-                              {estadoTurnoLabel[appointment.status] ?? appointment.status}
-                            </span>
-                            <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
-                              {estadoPagoLabel[appointment.paymentStatus] ?? appointment.paymentStatus}
-                            </span>
-                          </div>
-                        </div>
-                      </article>
-                    ))
-                  ) : (
-                    <div className="dashboard-empty-state">
-                      <strong>Aun no hay turnos reservados.</strong>
-                      <p className="muted">
-                        Cuando entren nuevas reservas las veras destacadas aqui, antes que en el
-                        resto del panel.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </article>
-
-              <div className="dashboard-priority-side">
-                <article className="panel dashboard-side-card dashboard-compact-card">
-                  <div className="dashboard-section-header">
-                    <div>
-                      <h2>Agenda visible</h2>
-                      <p className="muted">
-                        Horarios publicados hoy en tu web para recibir nuevas reservas.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="slot-list dashboard-slot-list">
-                    {profile.nextSlots.map((slot) => (
-                      <div className="slot" key={slot}>
-                        {slot}
-                      </div>
-                    ))}
-                  </div>
-                </article>
-
-                <article className="panel dashboard-side-card dashboard-compact-card">
-                  <div className="dashboard-section-header">
-                    <div>
-                      <h2>Control rapido</h2>
-                      <p className="muted">
-                        Indicadores operativos y de cobro para no salir del resumen.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="dashboard-summary-list">
-                    <div className="dashboard-summary-row">
-                      <span className="muted">Servicios activos</span>
-                      <strong>{profile.services.length}</strong>
-                    </div>
-                    <div className="dashboard-summary-row">
-                      <span className="muted">Pagos pendientes</span>
-                      <strong>{pagosPendientes.length}</strong>
-                    </div>
-                    <div className="dashboard-summary-row">
-                      <span className="muted">Cobro online</span>
-                      <strong>{onlinePaymentEnabled ? "Activo" : "Inactivo"}</strong>
-                    </div>
-                    <div className="dashboard-summary-row">
-                      <span className="muted">Cuenta Mercado Pago</span>
-                      <strong>
-                        {profile.paymentSettings?.hasMercadoPagoAccessToken
-                          ? "Conectada"
-                          : "Pendiente"}
-                      </strong>
-                    </div>
-                  </div>
-                </article>
+                <Link className="button secondary" href={`/${profile.slug}`}>
+                  Ver pagina publica
+                </Link>
               </div>
             </section>
 
@@ -305,51 +177,12 @@ export default async function TenantDashboardPage({
                     <span className="muted">Servicios con pago online</span>
                     <strong>{onlinePaymentServices}</strong>
                   </div>
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Pagos pendientes</span>
+                    <strong>{pagosPendientes.length}</strong>
+                  </div>
                 </div>
               </article>
-            </section>
-
-            <section className="dashboard-section">
-              <div className="dashboard-section-header">
-                <div>
-                  <h2>Turnos recientes</h2>
-                  <p className="muted">
-                    Ultimos movimientos de agenda para revisar rapidamente.
-                  </p>
-                </div>
-              </div>
-              <div className="table-wrap dashboard-table-card">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Paciente</th>
-                      <th>Servicio</th>
-                      <th>Horario</th>
-                      <th>Estado</th>
-                      <th>Pago</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.map((appointment) => (
-                      <tr key={appointment.id}>
-                        <td>{appointment.customerName}</td>
-                        <td>{appointment.serviceName}</td>
-                        <td>{appointment.startsAt}</td>
-                        <td>
-                          <span className={`badge ${appointment.status.toLowerCase()}`}>
-                            {estadoTurnoLabel[appointment.status] ?? appointment.status}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
-                            {estadoPagoLabel[appointment.paymentStatus] ?? appointment.paymentStatus}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </section>
           </>
         }

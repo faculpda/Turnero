@@ -29,7 +29,7 @@ export function PanelPestanas({
           role="tab"
           type="button"
         >
-          Resumen
+          Agenda
         </button>
         <button
           aria-selected={tabActiva === "servicios"}

@@ -42,9 +42,12 @@ export type AppointmentSummary = {
   id: string;
   serviceName: string;
   customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
   startsAt: string;
   status: AppointmentStatus;
   paymentStatus: PaymentStatus;
+  notes?: string;
 };
 
 export type CustomerAppointmentSummary = {

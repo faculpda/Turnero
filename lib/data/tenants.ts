@@ -225,9 +225,12 @@ function mapAppointments(
     id: appointment.id,
     serviceName: appointment.service.name,
     customerName: appointment.customerProfile.user.name,
+    customerEmail: appointment.customerProfile.user.email,
+    customerPhone: appointment.customerProfile.phone ?? undefined,
     startsAt: formatAppointmentDate(appointment.startsAt),
     status: appointment.status,
     paymentStatus: appointment.paymentStatus,
+    notes: appointment.notes ?? undefined,
   }));
 }
 
