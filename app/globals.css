@@ -495,6 +495,49 @@ th:last-child {
   padding: 10px 12px;
 }
 
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+}
+
+.color-picker-row input[type="color"] {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.color-picker-row input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker-row input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 12px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.color-value {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 .field input:focus {
   outline: 2px solid #cfe2ff;
   outline-offset: 2px;

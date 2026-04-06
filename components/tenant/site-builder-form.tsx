@@ -210,16 +210,34 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
           <label className="field">
             <span>Color principal</span>
-            <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} />
+            <div className="color-picker-row">
+              <span
+                className="color-swatch"
+                style={{ backgroundColor: primaryColor }}
+              />
+              <input
+                type="color"
+                value={primaryColor}
+                onChange={(e) => setPrimaryColor(e.target.value)}
+              />
+              <span className="color-value">{primaryColor}</span>
+            </div>
           </label>
 
           <label className="field">
             <span>Color secundario</span>
-            <input
-              type="color"
-              value={secondaryColor}
-              onChange={(e) => setSecondaryColor(e.target.value)}
-            />
+            <div className="color-picker-row">
+              <span
+                className="color-swatch"
+                style={{ backgroundColor: secondaryColor }}
+              />
+              <input
+                type="color"
+                value={secondaryColor}
+                onChange={(e) => setSecondaryColor(e.target.value)}
+              />
+              <span className="color-value">{secondaryColor}</span>
+            </div>
           </label>
         </div>
 
