@@ -37,6 +37,26 @@ export default async function TenantDashboardPage({
   const onlinePaymentServices = profile.services.filter(
     (service) => onlinePaymentEnabled && (service.priceCents ?? 0) > 0,
   ).length;
+  const turnosDestacados = appointments.slice(0, 5);
+  const turnosConfirmados = appointments.filter((appointment) => appointment.status === "CONFIRMED");
+  const turnosPendientes = appointments.filter((appointment) => appointment.status === "PENDING");
+  const pagosPendientes = appointments.filter(
+    (appointment) => appointment.paymentStatus === "PENDING",
+  );
+
+  const estadoTurnoLabel: Record<string, string> = {
+    PENDING: "Pendiente",
+    CONFIRMED: "Confirmado",
+    CANCELLED: "Cancelado",
+  };
+
+  const estadoPagoLabel: Record<string, string> = {
+    NOT_REQUIRED: "Sin cobro",
+    PENDING: "Pendiente",
+    APPROVED: "Aprobado",
+    REJECTED: "Rechazado",
+    CANCELLED: "Cancelado",
+  };
 
   return (
     <main className="shell grid dashboard-shell">
@@ -48,8 +68,8 @@ export default async function TenantDashboardPage({
             <span className="eyebrow">Panel del tenant</span>
             <h1>{profile.name}</h1>
             <p className="muted">
-              Un espacio simple para revisar reservas, mantener tus servicios al dia y ajustar
-              la experiencia publica del negocio.
+              Prioriza tu agenda del dia, controla reservas activas y deja el resto de la
+              configuracion en un segundo plano cuando haga falta.
             </p>
           </div>
           <div className="actions">
@@ -62,16 +82,19 @@ export default async function TenantDashboardPage({
           </div>
         </div>
         <div className="dashboard-hero-notes">
-          <div className="dashboard-note-card">
-            <strong>Que puedes hacer aqui</strong>
+          <div className="dashboard-note-card dashboard-note-priority">
+            <span className="dashboard-note-label">Prioridad de hoy</span>
+            <strong>{appointments.length} turnos para seguir</strong>
             <p className="muted">
-              Revisar turnos, editar servicios, configurar cobros y personalizar tu pagina.
+              Ten a mano las reservas confirmadas, los pendientes y los pagos que necesitan
+              atencion.
             </p>
           </div>
           <div className="dashboard-note-card">
-            <strong>Foco principal</strong>
+            <span className="dashboard-note-label">Contexto rapido</span>
+            <strong>{profile.services.length} servicios visibles para reservar</strong>
             <p className="muted">
-              La reserva de turnos sigue siendo el eje central de todo el producto.
+              Edita la oferta, ajusta cobros y personaliza la pagina sin perder de vista la agenda.
             </p>
           </div>
         </div>
@@ -87,84 +110,127 @@ export default async function TenantDashboardPage({
                 <div>
                   <h2>Resumen general</h2>
                   <p className="muted">
-                    Lo mas importante del dia en un solo vistazo.
+                    Una vista clara para entrar al panel y entender rapido que necesita accion.
                   </p>
                 </div>
               </div>
               <div className="dashboard-kpi-grid">
-                <article className="metric dashboard-kpi-card">
-                  <span className="dashboard-kpi-label">Servicios activos</span>
-                  <h2>{profile.services.length}</h2>
-                  <p className="muted">Oferta publicada para que el cliente reserve.</p>
-                </article>
-                <article className="metric dashboard-kpi-card">
+                <article className="metric dashboard-kpi-card dashboard-kpi-card-highlight">
                   <span className="dashboard-kpi-label">Turnos de hoy</span>
                   <h2>{appointments.length}</h2>
-                  <p className="muted">Reservas recientes visibles para seguimiento.</p>
+                  <p className="muted">Reservas visibles para seguimiento inmediato.</p>
                 </article>
                 <article className="metric dashboard-kpi-card">
-                  <span className="dashboard-kpi-label">Ocupacion semanal</span>
-                  <h2>87%</h2>
-                  <p className="muted">Indicador visual para medir la carga estimada.</p>
+                  <span className="dashboard-kpi-label">Confirmados</span>
+                  <h2>{turnosConfirmados.length}</h2>
+                  <p className="muted">Turnos listos para atender sin friccion.</p>
+                </article>
+                <article className="metric dashboard-kpi-card">
+                  <span className="dashboard-kpi-label">Pendientes</span>
+                  <h2>{turnosPendientes.length}</h2>
+                  <p className="muted">Reservas o pagos que conviene revisar cuanto antes.</p>
                 </article>
               </div>
             </section>
 
-            <section className="dashboard-split-grid">
-              <article className="panel dashboard-main-card">
+            <section className="dashboard-priority-grid">
+              <article className="panel dashboard-turnos-card">
                 <div className="dashboard-section-header">
                   <div>
-                    <h2>Agenda visible</h2>
+                    <h2>Turnos a la vista</h2>
                     <p className="muted">
-                      Horarios que hoy aparecen disponibles en tu web publica.
+                      La agenda reservada queda primero para que puedas decidir y actuar sin buscar.
                     </p>
                   </div>
-                  <button className="button secondary">Editar agenda</button>
+                  <Link className="button secondary" href={`/${profile.slug}`}>
+                    Ver pagina publica
+                  </Link>
                 </div>
-                <div className="slot-list dashboard-slot-list">
-                  {profile.nextSlots.map((slot) => (
-                    <div className="slot" key={slot}>
-                      {slot}
+                <div className="dashboard-turnos-list">
+                  {turnosDestacados.length > 0 ? (
+                    turnosDestacados.map((appointment) => (
+                      <article className="dashboard-turno-item" key={appointment.id}>
+                        <div className="dashboard-turno-main">
+                          <strong>{appointment.customerName}</strong>
+                          <span className="muted">{appointment.serviceName}</span>
+                        </div>
+                        <div className="dashboard-turno-meta">
+                          <strong>{appointment.startsAt}</strong>
+                          <div className="dashboard-turno-badges">
+                            <span className={`badge ${appointment.status.toLowerCase()}`}>
+                              {estadoTurnoLabel[appointment.status] ?? appointment.status}
+                            </span>
+                            <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
+                              {estadoPagoLabel[appointment.paymentStatus] ?? appointment.paymentStatus}
+                            </span>
+                          </div>
+                        </div>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="dashboard-empty-state">
+                      <strong>Aun no hay turnos reservados.</strong>
+                      <p className="muted">
+                        Cuando entren nuevas reservas las veras destacadas aqui, antes que en el
+                        resto del panel.
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </article>
 
-              <article className="panel dashboard-side-card">
-                <div className="dashboard-section-header">
-                  <div>
-                    <h2>Cobro online</h2>
-                    <p className="muted">
-                      Estado actual de Mercado Pago para este tenant.
-                    </p>
+              <div className="dashboard-priority-side">
+                <article className="panel dashboard-side-card dashboard-compact-card">
+                  <div className="dashboard-section-header">
+                    <div>
+                      <h2>Agenda visible</h2>
+                      <p className="muted">
+                        Horarios publicados hoy en tu web para recibir nuevas reservas.
+                      </p>
+                    </div>
                   </div>
-                  <span
-                    className={`badge ${onlinePaymentEnabled ? "approved" : "cancelled"}`}
-                  >
-                    {onlinePaymentEnabled ? "Activo" : "Inactivo"}
-                  </span>
-                </div>
-                <div className="dashboard-summary-list">
-                  <div className="dashboard-summary-row">
-                    <span className="muted">Servicios con pago online</span>
-                    <strong>{onlinePaymentServices}</strong>
+                  <div className="slot-list dashboard-slot-list">
+                    {profile.nextSlots.map((slot) => (
+                      <div className="slot" key={slot}>
+                        {slot}
+                      </div>
+                    ))}
                   </div>
-                  <div className="dashboard-summary-row">
-                    <span className="muted">Estado de la cuenta</span>
-                    <strong>
-                      {profile.paymentSettings?.hasMercadoPagoAccessToken
-                        ? "Conectada"
-                        : "Pendiente"}
-                    </strong>
+                </article>
+
+                <article className="panel dashboard-side-card dashboard-compact-card">
+                  <div className="dashboard-section-header">
+                    <div>
+                      <h2>Control rapido</h2>
+                      <p className="muted">
+                        Indicadores operativos y de cobro para no salir del resumen.
+                      </p>
+                    </div>
                   </div>
-                  <div className="dashboard-summary-row">
-                    <span className="muted">Experiencia del cliente</span>
-                    <strong>
-                      {onlinePaymentEnabled ? "Checkout online activo" : "Reserva sin cobro"}
-                    </strong>
+                  <div className="dashboard-summary-list">
+                    <div className="dashboard-summary-row">
+                      <span className="muted">Servicios activos</span>
+                      <strong>{profile.services.length}</strong>
+                    </div>
+                    <div className="dashboard-summary-row">
+                      <span className="muted">Pagos pendientes</span>
+                      <strong>{pagosPendientes.length}</strong>
+                    </div>
+                    <div className="dashboard-summary-row">
+                      <span className="muted">Cobro online</span>
+                      <strong>{onlinePaymentEnabled ? "Activo" : "Inactivo"}</strong>
+                    </div>
+                    <div className="dashboard-summary-row">
+                      <span className="muted">Cuenta Mercado Pago</span>
+                      <strong>
+                        {profile.paymentSettings?.hasMercadoPagoAccessToken
+                          ? "Conectada"
+                          : "Pendiente"}
+                      </strong>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              </div>
             </section>
 
             <section className="dashboard-split-grid">
@@ -235,6 +301,10 @@ export default async function TenantDashboardPage({
                     <span className="muted">Perfil del cliente final</span>
                     <strong>Disponible</strong>
                   </div>
+                  <div className="dashboard-summary-row">
+                    <span className="muted">Servicios con pago online</span>
+                    <strong>{onlinePaymentServices}</strong>
+                  </div>
                 </div>
               </article>
             </section>
@@ -267,12 +337,12 @@ export default async function TenantDashboardPage({
                         <td>{appointment.startsAt}</td>
                         <td>
                           <span className={`badge ${appointment.status.toLowerCase()}`}>
-                            {appointment.status}
+                            {estadoTurnoLabel[appointment.status] ?? appointment.status}
                           </span>
                         </td>
                         <td>
                           <span className={`badge ${appointment.paymentStatus.toLowerCase()}`}>
-                            {appointment.paymentStatus}
+                            {estadoPagoLabel[appointment.paymentStatus] ?? appointment.paymentStatus}
                           </span>
                         </td>
                       </tr>
