@@ -479,7 +479,23 @@ th:last-child {
   font: inherit;
 }
 
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: white;
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
 .field input:focus {
+  outline: 2px solid #cfe2ff;
+  outline-offset: 2px;
+}
+
+.field textarea:focus {
   outline: 2px solid #cfe2ff;
   outline-offset: 2px;
 }
@@ -532,12 +548,37 @@ th:last-child {
   padding: 12px 14px;
 }
 
+.service-admin {
+  display: grid;
+  gap: 14px;
+}
+
+.service-form {
+  margin-top: 4px;
+}
+
+.service-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.service-description {
+  margin: 6px 0 8px;
+  max-width: 32ch;
+}
+
 @media (max-width: 920px) {
   .hero-grid,
   .info-grid,
   .steps-grid,
   .plans-grid,
-  .showcase-mini-grid {
+  .showcase-mini-grid,
+  .service-form-grid {
     grid-template-columns: 1fr;
   }
 

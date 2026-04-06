@@ -1,0 +1,77 @@
+import { z } from "zod";
+import { NextResponse } from "next/server";
+import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
+
+const createServiceSchema = z.object({
+  tenantSlug: z.string().min(1),
+  title: z.string().min(2).max(120),
+  description: z.string().max(500).optional(),
+  durationMin: z.coerce.number().int().min(5).max(480),
+  pricePesos: z.coerce.number().min(0).max(100000000),
+});
+
+export async function POST(request: Request) {
+  try {
+    const session = await getCurrentSession();
+
+    if (!session) {
+      return NextResponse.json({ error: "Necesitas iniciar sesion." }, { status: 401 });
+    }
+
+    const payload = createServiceSchema.parse(await request.json());
+
+    if (!(await hasTenantAccess(payload.tenantSlug))) {
+      return NextResponse.json(
+        { error: "No tienes permisos para gestionar este tenant." },
+        { status: 403 },
+      );
+    }
+
+    const tenant = await prisma.tenant.findUnique({
+      where: {
+        slug: payload.tenantSlug,
+      },
+      include: {
+        services: {
+          orderBy: {
+            sortOrder: "desc",
+          },
+          take: 1,
+        },
+      },
+    });
+
+    if (!tenant) {
+      return NextResponse.json({ error: "Tenant no encontrado." }, { status: 404 });
+    }
+
+    const nextSortOrder = (tenant.services[0]?.sortOrder ?? 0) + 1;
+
+    await prisma.service.create({
+      data: {
+        tenantId: tenant.id,
+        name: payload.title.trim(),
+        description: payload.description?.trim() || null,
+        durationMin: payload.durationMin,
+        priceCents: Math.round(payload.pricePesos * 100),
+        sortOrder: nextSortOrder,
+        isActive: true,
+      },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Revisa los datos del servicio antes de guardar." },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json(
+      { error: "No se pudo crear el servicio en este momento." },
+      { status: 500 },
+    );
+  }
+}

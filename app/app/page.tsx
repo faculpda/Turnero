@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AccessDenied } from "@/components/auth/access-denied";
 import { SessionBanner } from "@/components/auth/session-banner";
+import { AddServiceForm } from "@/components/tenant/add-service-form";
 import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
 import { getTenantDashboardData } from "@/lib/data/tenants";
 
@@ -76,12 +77,15 @@ export default async function TenantDashboardPage({
               <h2>Servicios</h2>
               <p className="muted">Configuracion inicial del negocio</p>
             </div>
-            <button className="button secondary">Agregar servicio</button>
+            <AddServiceForm tenantSlug={tenantSlug} />
           </div>
           <div className="service-list">
             {profile.services.map((service) => (
               <div className="service-chip" key={service.id}>
                 <strong>{service.name}</strong>
+                {service.description ? (
+                  <div className="muted service-description">{service.description}</div>
+                ) : null}
                 <div className="muted">
                   {service.durationMin} min - {service.priceLabel}
                 </div>

@@ -136,6 +136,7 @@ function mapPublicTenant(
     services: tenant.services.map((service) => ({
       id: service.id,
       name: service.name,
+      description: service.description ?? undefined,
       durationMin: service.durationMin,
       priceLabel: formatPrice(service.priceCents),
     })),
@@ -281,6 +282,7 @@ export async function getTenantBookingData(
       service: {
         id: service.id,
         name: service.name,
+        description: service.description ?? undefined,
         durationMin: service.durationMin,
         priceLabel: formatPrice(service.priceCents),
       },

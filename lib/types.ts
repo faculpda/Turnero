@@ -19,6 +19,7 @@ export type TenantSummary = {
 export type ServiceSummary = {
   id: string;
   name: string;
+  description?: string;
   durationMin: number;
   priceLabel: string;
 };
