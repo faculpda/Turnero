@@ -32,4 +32,5 @@ SaaS multi-tenant para gestion de turnos, pensado para profesionales y negocios 
 3. Configurar `.env` a partir de `.env.example`.
 4. Ejecutar `npx prisma generate`.
 5. Ejecutar `npx prisma migrate dev`.
-6. Levantar el proyecto con `npm run dev`.
+6. Ejecutar `npm run prisma:seed`.
+7. Levantar el proyecto con `npm run dev`.

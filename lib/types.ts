@@ -40,3 +40,8 @@ export type TenantPublicProfile = {
   services: ServiceSummary[];
   nextSlots: string[];
 };
+
+export type TenantDashboardData = {
+  profile: TenantPublicProfile;
+  appointments: AppointmentSummary[];
+};

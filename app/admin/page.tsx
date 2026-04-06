@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { tenants } from "@/lib/mock-data";
+import { listAdminTenants } from "@/lib/data/tenants";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const tenants = await listAdminTenants();
+
   return (
     <main className="shell grid">
       <section className="hero">
@@ -61,7 +63,7 @@ export default function AdminPage() {
                 </td>
                 <td>{tenant.upcomingAppointments}</td>
                 <td>
-                  <Link className="button secondary" href="/app">
+                  <Link className="button secondary" href={`/app?tenant=${tenant.slug}`}>
                     Entrar al panel
                   </Link>
                 </td>

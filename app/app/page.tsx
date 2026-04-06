@@ -1,14 +1,26 @@
 import Link from "next/link";
-import { tenantAppointments, tenantPublicProfile } from "@/lib/mock-data";
+import { getTenantDashboardData } from "@/lib/data/tenants";
 
-export default function TenantDashboardPage() {
+type TenantDashboardPageProps = {
+  searchParams?: Promise<{
+    tenant?: string;
+  }>;
+};
+
+export default async function TenantDashboardPage({
+  searchParams,
+}: TenantDashboardPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const tenantSlug = resolvedSearchParams?.tenant ?? "dentista";
+  const { profile, appointments } = await getTenantDashboardData(tenantSlug);
+
   return (
     <main className="shell grid">
       <section className="hero spotlight">
         <div className="header-row">
           <div>
             <span className="eyebrow">Panel del tenant</span>
-            <h1>{tenantPublicProfile.name}</h1>
+            <h1>{profile.name}</h1>
             <p className="muted">
               Desde aqui el profesional revisa su agenda, sus servicios y los turnos
               reservados por sus clientes.
@@ -18,7 +30,7 @@ export default function TenantDashboardPage() {
             <Link className="button secondary" href="/admin">
               Ir al super admin
             </Link>
-            <Link className="button primary" href={`/${tenantPublicProfile.slug}`}>
+            <Link className="button primary" href={`/${profile.slug}`}>
               Ver pagina publica
             </Link>
           </div>
@@ -27,11 +39,11 @@ export default function TenantDashboardPage() {
 
       <section className="grid cols-3">
         <article className="metric">
-          <h2>{tenantPublicProfile.services.length}</h2>
+          <h2>{profile.services.length}</h2>
           <p className="muted">Servicios activos</p>
         </article>
         <article className="metric">
-          <h2>{tenantAppointments.length}</h2>
+          <h2>{appointments.length}</h2>
           <p className="muted">Turnos de hoy</p>
         </article>
         <article className="metric">
@@ -50,11 +62,11 @@ export default function TenantDashboardPage() {
             <button className="button secondary">Agregar servicio</button>
           </div>
           <div className="service-list">
-            {tenantPublicProfile.services.map((service) => (
+            {profile.services.map((service) => (
               <div className="service-chip" key={service.id}>
                 <strong>{service.name}</strong>
                 <div className="muted">
-                  {service.durationMin} min · {service.priceLabel}
+                  {service.durationMin} min - {service.priceLabel}
                 </div>
               </div>
             ))}
@@ -70,7 +82,7 @@ export default function TenantDashboardPage() {
             <button className="button secondary">Editar agenda</button>
           </div>
           <div className="slot-list">
-            {tenantPublicProfile.nextSlots.map((slot) => (
+            {profile.nextSlots.map((slot) => (
               <div className="slot" key={slot}>
                 {slot}
               </div>
@@ -90,7 +102,7 @@ export default function TenantDashboardPage() {
             </tr>
           </thead>
           <tbody>
-            {tenantAppointments.map((appointment) => (
+            {appointments.map((appointment) => (
               <tr key={appointment.id}>
                 <td>{appointment.customerName}</td>
                 <td>{appointment.serviceName}</td>

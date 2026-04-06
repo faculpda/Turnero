@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublicTenantProfile } from "@/lib/tenant";
+import { getPublicTenantProfile } from "@/lib/data/tenants";
 
 type TenantPublicPageProps = {
   params: Promise<{
@@ -10,7 +10,7 @@ type TenantPublicPageProps = {
 
 export default async function TenantPublicPage({ params }: TenantPublicPageProps) {
   const { slug } = await params;
-  const tenant = getPublicTenantProfile(slug);
+  const tenant = await getPublicTenantProfile(slug);
 
   if (!tenant) {
     notFound();
@@ -41,7 +41,7 @@ export default async function TenantPublicPage({ params }: TenantPublicPageProps
               <div className="service-chip" key={service.id}>
                 <strong>{service.name}</strong>
                 <div className="muted">
-                  {service.durationMin} min · {service.priceLabel}
+                  {service.durationMin} min - {service.priceLabel}
                 </div>
               </div>
             ))}

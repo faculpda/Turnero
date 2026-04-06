@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPublicTenantProfile } from "@/lib/tenant";
+import { getPublicTenantProfile } from "@/lib/data/tenants";
 
 type BookingPageProps = {
   params: Promise<{
@@ -9,7 +9,7 @@ type BookingPageProps = {
 
 export default async function BookingPage({ params }: BookingPageProps) {
   const { slug } = await params;
-  const tenant = getPublicTenantProfile(slug);
+  const tenant = await getPublicTenantProfile(slug);
 
   if (!tenant) {
     notFound();
@@ -34,7 +34,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
               <div className="service-chip" key={service.id}>
                 <strong>{service.name}</strong>
                 <div className="muted">
-                  {service.durationMin} min · {service.priceLabel}
+                  {service.durationMin} min - {service.priceLabel}
                 </div>
               </div>
             ))}

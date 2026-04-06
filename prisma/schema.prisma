@@ -36,6 +36,7 @@ model Tenant {
   status           TenantStatus       @default(TRIAL)
   primaryColor     String?
   publicDescription String?
+  timezone         String             @default("America/Argentina/Buenos_Aires")
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   domains          TenantDomain[]
@@ -98,6 +99,7 @@ model Service {
   id          String        @id @default(cuid())
   name        String
   description String?
+  sortOrder   Int           @default(0)
   durationMin Int
   priceCents  Int?
   isActive    Boolean       @default(true)
@@ -113,6 +115,7 @@ model AvailabilityRule {
   dayOfWeek Int
   startTime String
   endTime   String
+  slotStepMin Int    @default(30)
   isActive  Boolean  @default(true)
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)

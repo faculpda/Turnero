@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPublicTenantProfile } from "@/lib/tenant";
+import { getPublicTenantProfile } from "@/lib/data/tenants";
 
 type CustomerProfilePageProps = {
   params: Promise<{
@@ -11,7 +11,7 @@ export default async function CustomerProfilePage({
   params,
 }: CustomerProfilePageProps) {
   const { slug } = await params;
-  const tenant = getPublicTenantProfile(slug);
+  const tenant = await getPublicTenantProfile(slug);
 
   if (!tenant) {
     notFound();
