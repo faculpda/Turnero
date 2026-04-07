@@ -112,13 +112,16 @@ a {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 12px 14px;
   border-radius: 14px;
   color: #5f6780;
   background: #ffffff;
   border: 1px solid transparent;
+  text-align: left;
   font-family: var(--font-body);
   font-weight: 700;
+  cursor: pointer;
 }
 
 .dashboard-sidebar-item.active {
