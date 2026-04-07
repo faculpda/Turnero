@@ -150,6 +150,7 @@ export function TenantDashboardShell({
             <AppointmentsFocusPanel
               appointments={appointments}
               blockedTimeSlots={blockedTimeSlots}
+              services={profile.services}
               tenantSlug={tenantSlug}
             />
           ) : null}

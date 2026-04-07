@@ -14,6 +14,12 @@ type AppointmentsFocusPanelProps = {
     startsAtIso: string;
     endsAtIso: string;
   }>;
+  services: Array<{
+    id: string;
+    name: string;
+    durationMin: number;
+    priceLabel: string;
+  }>;
   tenantSlug: string;
 };
 
@@ -155,6 +161,7 @@ function toDateTimeLocalValue(dateIso: string) {
 export function AppointmentsFocusPanel({
   appointments,
   blockedTimeSlots,
+  services,
   tenantSlug,
 }: AppointmentsFocusPanelProps) {
   const router = useRouter();
@@ -169,6 +176,16 @@ export function AppointmentsFocusPanel({
   const [serviceFilter, setServiceFilter] = useState<string>("ALL");
   const [view, setView] = useState<CalendarView>("WEEK");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | undefined>();
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [manualCustomerName, setManualCustomerName] = useState("");
+  const [manualCustomerEmail, setManualCustomerEmail] = useState("");
+  const [manualCustomerPhone, setManualCustomerPhone] = useState("");
+  const [manualServiceId, setManualServiceId] = useState(services[0]?.id ?? "");
+  const [manualStartsAt, setManualStartsAt] = useState("");
+  const [manualNotes, setManualNotes] = useState("");
+  const [manualPaymentStatus, setManualPaymentStatus] = useState<
+    "NOT_REQUIRED" | "PENDING" | "APPROVED"
+  >("NOT_REQUIRED");
 
   const turnosOperativos = useMemo(
     () =>
@@ -338,6 +355,49 @@ export function AppointmentsFocusPanel({
     }
   }
 
+  async function createManualAppointment() {
+    setError(null);
+
+    try {
+      const response = await fetch("/api/appointments/manual", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tenantSlug,
+          customerName: manualCustomerName,
+          customerEmail: manualCustomerEmail,
+          customerPhone: manualCustomerPhone,
+          serviceId: manualServiceId,
+          startsAt: new Date(manualStartsAt).toISOString(),
+          notes: manualNotes,
+          paymentStatus: manualPaymentStatus,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error ?? "No se pudo crear el turno manual.");
+        return;
+      }
+
+      startTransition(() => {
+        setIsManualModalOpen(false);
+        setManualCustomerName("");
+        setManualCustomerEmail("");
+        setManualCustomerPhone("");
+        setManualStartsAt("");
+        setManualNotes("");
+        setManualPaymentStatus("NOT_REQUIRED");
+        router.refresh();
+      });
+    } catch {
+      setError("No se pudo crear el turno manual.");
+    }
+  }
+
   if (turnosOperativos.length === 0) {
     return (
       <section className="dashboard-section">
@@ -371,6 +431,16 @@ export function AppointmentsFocusPanel({
             turno desde la agenda.
           </p>
         </div>
+        <button
+          className="button primary"
+          onClick={() => {
+            setError(null);
+            setIsManualModalOpen(true);
+          }}
+          type="button"
+        >
+          Agregar turno manual
+        </button>
       </div>
 
       <div className="dashboard-kpi-grid dashboard-turnos-kpi-grid">
@@ -762,6 +832,134 @@ export function AppointmentsFocusPanel({
                 type="button"
               >
                 Marcar como completado
+              </button>
+            </div>
+          </article>
+        </div>
+      ) : null}
+
+      {isManualModalOpen ? (
+        <div
+          aria-modal="true"
+          className="dashboard-modal-backdrop"
+          role="dialog"
+          onClick={() => {
+            if (!isPending) {
+              setIsManualModalOpen(false);
+              setError(null);
+            }
+          }}
+        >
+          <article className="panel dashboard-modal-card" onClick={(event) => event.stopPropagation()}>
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Agregar turno manual</h2>
+                <p className="muted">
+                  Carga reservas tomadas por telefono, WhatsApp o de forma presencial.
+                </p>
+              </div>
+              <button
+                className="dashboard-modal-close"
+                onClick={() => {
+                  if (!isPending) {
+                    setIsManualModalOpen(false);
+                    setError(null);
+                  }
+                }}
+                type="button"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="dashboard-turno-detail-grid">
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Nombre</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) => setManualCustomerName(event.target.value)}
+                  placeholder="Paciente o cliente"
+                  value={manualCustomerName}
+                />
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Mail</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) => setManualCustomerEmail(event.target.value)}
+                  placeholder="mail@ejemplo.com"
+                  value={manualCustomerEmail}
+                />
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Telefono</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) => setManualCustomerPhone(event.target.value)}
+                  placeholder="+54..."
+                  value={manualCustomerPhone}
+                />
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Servicio</span>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) => setManualServiceId(event.target.value)}
+                  value={manualServiceId}
+                >
+                  {services.map((service) => (
+                    <option key={service.id} value={service.id}>
+                      {service.name} - {service.priceLabel}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Fecha y hora</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) => setManualStartsAt(event.target.value)}
+                  type="datetime-local"
+                  value={manualStartsAt}
+                />
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Cobro</span>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) =>
+                    setManualPaymentStatus(
+                      event.target.value as "NOT_REQUIRED" | "PENDING" | "APPROVED",
+                    )
+                  }
+                  value={manualPaymentStatus}
+                >
+                  <option value="NOT_REQUIRED">Sin cobro online</option>
+                  <option value="PENDING">Pago pendiente</option>
+                  <option value="APPROVED">Pago aprobado</option>
+                </select>
+              </div>
+              <div className="dashboard-turno-detail-block dashboard-turno-detail-block-wide">
+                <span className="dashboard-detail-label">Notas</span>
+                <textarea
+                  className="dashboard-modal-textarea"
+                  onChange={(event) => setManualNotes(event.target.value)}
+                  rows={4}
+                  value={manualNotes}
+                />
+              </div>
+            </div>
+
+            {error ? <p className="form-error">{error}</p> : null}
+
+            <div className="dashboard-modal-actions">
+              <button
+                className="button primary"
+                disabled={isPending || !manualCustomerName.trim() || !manualServiceId || !manualStartsAt}
+                onClick={createManualAppointment}
+                type="button"
+              >
+                Guardar turno manual
               </button>
             </div>
           </article>
