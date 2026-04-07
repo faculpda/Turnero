@@ -1818,14 +1818,89 @@ th:last-child {
 @media (max-width: 920px) {
   .dashboard-app-shell {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   .dashboard-sidebar {
-    grid-template-rows: auto;
+    grid-template-rows: auto auto;
+    gap: 14px;
+    padding: 16px;
+    border-right: 0;
+    border-bottom: 1px solid #e9e3f2;
+    box-shadow: none;
   }
 
   .dashboard-sidebar-nav {
     min-height: 0;
+  }
+
+  .dashboard-sidebar-group {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .dashboard-sidebar-label {
+    display: none;
+  }
+
+  .dashboard-sidebar-item {
+    width: auto;
+    min-width: max-content;
+    padding: 10px 12px;
+    border: 1px solid #e8e1f4;
+    border-radius: 999px;
+    background: #ffffff;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .dashboard-sidebar-item.active {
+    border-left: 0;
+    padding-left: 12px;
+    background: rgba(93, 63, 211, 0.1);
+    border-color: #d7c8fb;
+  }
+
+  .dashboard-sidebar-footer {
+    display: none;
+  }
+
+  .dashboard-topbar {
+    padding: 16px;
+  }
+
+  .dashboard-topbar-search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .dashboard-topbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .dashboard-topbar-user {
+    width: 100%;
+    justify-content: space-between;
+    padding-left: 0;
+    padding-top: 8px;
+    border-top: 1px solid #ece5f5;
+  }
+
+  .dashboard-content {
+    padding-top: 20px;
+  }
+
+  .dashboard-overview-header {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-overview-header h1 {
+    font-size: clamp(2.2rem, 8vw, 3rem);
+    line-height: 0.98;
   }
 
   .dashboard-overview-actions,
@@ -1850,6 +1925,58 @@ th:last-child {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-section-header {
+    align-items: stretch;
+  }
+
+  .dashboard-section-header .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-calendar-shell {
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .dashboard-calendar-toolbar,
+  .dashboard-calendar-toolbar-actions {
+    align-items: stretch;
+  }
+
+  .dashboard-week-nav {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .dashboard-week-nav button {
+    flex: 1 1 0;
+  }
+
+  .dashboard-calendar-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow: visible;
+  }
+
+  .dashboard-calendar-day {
+    min-height: 0;
+  }
+
+  .dashboard-calendar-day-header {
+    padding: 14px;
+  }
+
+  .dashboard-calendar-day-body {
+    padding: 12px;
+  }
+
+  .dashboard-modal-card {
+    width: min(100%, 720px);
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+  }
+
   .hero-topbar {
     flex-direction: column;
     align-items: flex-start;
@@ -1857,10 +1984,6 @@ th:last-child {
 }
 
 @media (max-width: 640px) {
-  .dashboard-topbar {
-    padding: 16px;
-  }
-
   .dashboard-content {
     padding: 20px 16px 56px;
   }
@@ -1877,8 +2000,48 @@ th:last-child {
     padding: 18px;
   }
 
+  .dashboard-sidebar {
+    padding: 14px 12px;
+  }
+
+  .dashboard-sidebar-brand {
+    gap: 10px;
+  }
+
+  .dashboard-sidebar-logo,
+  .dashboard-sidebar-logo-image {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .dashboard-sidebar-subtitle {
+    font-size: 0.82rem;
+  }
+
+  .dashboard-sidebar-group {
+    gap: 6px;
+  }
+
+  .dashboard-sidebar-item {
+    padding: 9px 11px;
+    font-size: 0.92rem;
+  }
+
+  .dashboard-topbar-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .dashboard-topbar-actions > .button {
+    width: 100%;
+    justify-content: center;
+  }
+
   .dashboard-topbar-user {
-    padding-left: 0;
+    align-items: flex-start;
+    gap: 10px;
   }
 
   .shell {
@@ -1895,6 +2058,73 @@ th:last-child {
 
   .dashboard-hero {
     padding: 22px;
+  }
+
+  .dashboard-overview-actions {
+    gap: 10px;
+  }
+
+  .dashboard-overview-chip {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .dashboard-kpi-grid {
+    gap: 12px;
+  }
+
+  .dashboard-kpi-card {
+    padding: 16px;
+  }
+
+  .dashboard-calendar-toolbar-actions,
+  .dashboard-week-nav {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-filter-group {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .dashboard-filter-chip {
+    flex-shrink: 0;
+  }
+
+  .dashboard-calendar-event {
+    padding: 14px;
+  }
+
+  .dashboard-quick-action {
+    width: 100%;
+  }
+
+  .dashboard-calendar-insights {
+    gap: 12px;
+  }
+
+  .dashboard-modal-backdrop {
+    padding: 0;
+  }
+
+  .dashboard-modal-card {
+    width: 100%;
+    max-height: 100dvh;
+    min-height: 100dvh;
+    border-radius: 0;
+    padding: 18px 16px 28px;
+  }
+
+  .dashboard-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-modal-actions .button {
+    width: 100%;
+    justify-content: center;
   }
 
   .panel-pestanas {
