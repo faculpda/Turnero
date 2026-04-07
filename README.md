@@ -26,6 +26,14 @@ SaaS multi-tenant para gestion de turnos, pensado para profesionales y negocios 
 - `prisma/`: esquema inicial de base de datos.
 - `docs/`: arquitectura y decisiones del MVP.
 
+## Documentacion recomendada
+
+Para continuar el proyecto con contexto actualizado, leer en este orden:
+
+1. `README.md`
+2. `docs/contexto-proyecto.md`
+3. `docs/architecture.md`
+
 ## Primeros pasos
 
 1. Instalar Node.js 20 o superior.
