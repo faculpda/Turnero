@@ -95,12 +95,15 @@ a {
 
 .dashboard-sidebar-nav,
 .dashboard-sidebar-group {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
+  align-items: stretch;
+  justify-content: flex-start;
 }
 
 .dashboard-sidebar-nav {
-  grid-template-columns: 1fr;
+  min-height: 0;
 }
 
 .dashboard-sidebar-label {
@@ -127,6 +130,7 @@ a {
   font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .dashboard-sidebar-item:hover {
@@ -1807,7 +1811,7 @@ th:last-child {
   }
 
   .dashboard-sidebar-nav {
-    grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .dashboard-overview-actions,
