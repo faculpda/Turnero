@@ -45,6 +45,7 @@ export type AppointmentSummary = {
   customerEmail: string;
   customerPhone?: string;
   startsAt: string;
+  startsAtIso: string;
   status: AppointmentStatus;
   paymentStatus: PaymentStatus;
   notes?: string;

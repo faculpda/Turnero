@@ -228,6 +228,7 @@ function mapAppointments(
     customerEmail: appointment.customerProfile.user.email,
     customerPhone: appointment.customerProfile.phone ?? undefined,
     startsAt: formatAppointmentDate(appointment.startsAt),
+    startsAtIso: appointment.startsAt.toISOString(),
     status: appointment.status,
     paymentStatus: appointment.paymentStatus,
     notes: appointment.notes ?? undefined,
