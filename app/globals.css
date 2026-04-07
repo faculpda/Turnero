@@ -87,6 +87,16 @@ a {
   font-weight: 800;
 }
 
+.dashboard-sidebar-logo-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #f6f1ff;
+  border: 1px solid #ece4fa;
+  flex-shrink: 0;
+}
+
 .dashboard-sidebar-subtitle {
   color: #8a84a0;
   font-size: 0.9rem;
@@ -249,6 +259,10 @@ a {
   display: grid;
   grid-template-columns: repeat(3, minmax(160px, 1fr));
   gap: 14px;
+}
+
+.dashboard-overview-header h1 {
+  margin-bottom: 0;
 }
 
 .dashboard-overview-chip {

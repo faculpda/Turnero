@@ -76,10 +76,18 @@ export function TenantDashboardShell({
     <main className="dashboard-app-shell">
       <aside className="dashboard-sidebar">
         <div className="dashboard-sidebar-brand">
-          <div className="dashboard-sidebar-logo">T</div>
+          {profile.logoUrl ? (
+            <img
+              alt={`Logo de ${profile.name}`}
+              className="dashboard-sidebar-logo-image"
+              src={profile.logoUrl}
+            />
+          ) : (
+            <div className="dashboard-sidebar-logo">{profile.name.charAt(0)}</div>
+          )}
           <div>
-            <strong>Turnero</strong>
-            <div className="dashboard-sidebar-subtitle">Panel profesional</div>
+            <strong>Panel</strong>
+            <div className="dashboard-sidebar-subtitle">{profile.name}</div>
           </div>
         </div>
 
@@ -140,12 +148,7 @@ export function TenantDashboardShell({
         <div className="dashboard-content shell">
           <section className="dashboard-overview-header">
             <div>
-              <span className="eyebrow">Panel del tenant</span>
               <h1>{profile.name}</h1>
-              <p className="muted dashboard-overview-copy">
-                Un tablero claro para controlar reservas activas, atender clientes y gestionar el
-                negocio desde una sola barra lateral.
-              </p>
             </div>
 
             <div className="dashboard-overview-actions">
