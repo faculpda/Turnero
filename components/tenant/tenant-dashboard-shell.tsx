@@ -12,6 +12,14 @@ type TenantDashboardShellProps = {
   tenantSlug: string;
   profile: TenantPublicProfile;
   appointments: AppointmentSummary[];
+  blockedTimeSlots: Array<{
+    id: string;
+    title: string;
+    reason?: string;
+    startsAt: string;
+    startsAtIso: string;
+    endsAtIso: string;
+  }>;
   session: {
     name: string;
     email: string;
@@ -37,6 +45,7 @@ export function TenantDashboardShell({
   tenantSlug,
   profile,
   appointments,
+  blockedTimeSlots,
   session,
   reservasActivas,
   pagosPendientes,
@@ -138,7 +147,11 @@ export function TenantDashboardShell({
           </section>
 
           {activeSection === "turnos" ? (
-            <AppointmentsFocusPanel appointments={appointments} tenantSlug={tenantSlug} />
+            <AppointmentsFocusPanel
+              appointments={appointments}
+              blockedTimeSlots={blockedTimeSlots}
+              tenantSlug={tenantSlug}
+            />
           ) : null}
           {activeSection === "agenda" ? agenda : null}
           {activeSection === "servicios" ? servicios : null}

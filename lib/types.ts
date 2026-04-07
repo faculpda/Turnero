@@ -14,6 +14,22 @@ export type PaymentStatus =
   | "REJECTED"
   | "CANCELLED";
 
+export type AppointmentEventType =
+  | "CREATED"
+  | "CONFIRMED"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "NO_SHOW"
+  | "RESCHEDULED"
+  | "NOTES_UPDATED"
+  | "REMINDER_SCHEDULED"
+  | "REMINDER_SENT"
+  | "REMINDER_FAILED";
+
+export type ReminderChannel = "EMAIL" | "WHATSAPP";
+
+export type ReminderStatus = "SCHEDULED" | "SENT" | "FAILED" | "CANCELLED";
+
 export type TenantSummary = {
   id: string;
   name: string;
@@ -41,6 +57,7 @@ export type ServiceSummary = {
 export type AppointmentSummary = {
   id: string;
   serviceName: string;
+  serviceId: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
@@ -49,6 +66,24 @@ export type AppointmentSummary = {
   status: AppointmentStatus;
   paymentStatus: PaymentStatus;
   notes?: string;
+  isLate?: boolean;
+  events: Array<{
+    id: string;
+    type: AppointmentEventType;
+    title: string;
+    description?: string;
+    createdAt: string;
+    actorName?: string;
+  }>;
+  reminders: Array<{
+    id: string;
+    channel: ReminderChannel;
+    status: ReminderStatus;
+    scheduledFor: string;
+    target: string;
+    sentAt?: string;
+    errorMessage?: string;
+  }>;
 };
 
 export type CustomerAppointmentSummary = {
@@ -97,6 +132,14 @@ export type ServiceAvailability = {
 export type TenantDashboardData = {
   profile: TenantPublicProfile;
   appointments: AppointmentSummary[];
+  blockedTimeSlots: Array<{
+    id: string;
+    title: string;
+    reason?: string;
+    startsAt: string;
+    startsAtIso: string;
+    endsAtIso: string;
+  }>;
 };
 
 export type TenantBookingData = {

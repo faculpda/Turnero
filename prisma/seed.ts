@@ -1,4 +1,12 @@
-import { AppointmentStatus, PrismaClient, TenantStatus, UserRole } from "@prisma/client";
+import {
+  AppointmentEventType,
+  AppointmentStatus,
+  PrismaClient,
+  ReminderChannel,
+  ReminderStatus,
+  TenantStatus,
+  UserRole,
+} from "@prisma/client";
 import { hashPassword } from "../lib/auth/password";
 
 const prisma = new PrismaClient();
@@ -213,6 +221,23 @@ async function main() {
     ],
   });
 
+  await prisma.blockedTimeSlot.deleteMany({
+    where: {
+      tenantId: tenant.id,
+    },
+  });
+
+  await prisma.blockedTimeSlot.create({
+    data: {
+      tenantId: tenant.id,
+      createdByUserId: tenantAdmin.id,
+      title: "Almuerzo del equipo",
+      reason: "Pausa interna",
+      startsAt: new Date("2026-04-07T13:00:00.000Z"),
+      endsAt: new Date("2026-04-07T14:00:00.000Z"),
+    },
+  });
+
   const customerUser = await prisma.user.upsert({
     where: { email: "maria@example.com" },
     create: {
@@ -279,6 +304,59 @@ async function main() {
       },
     ],
   });
+
+  const appointments = await prisma.appointment.findMany({
+    where: {
+      tenantId: tenant.id,
+    },
+    include: {
+      service: true,
+      customerProfile: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+
+  await prisma.appointmentEvent.deleteMany({
+    where: {
+      tenantId: tenant.id,
+    },
+  });
+
+  await prisma.appointmentReminder.deleteMany({
+    where: {
+      tenantId: tenant.id,
+    },
+  });
+
+  for (const appointment of appointments) {
+    await prisma.appointmentEvent.create({
+      data: {
+        appointmentId: appointment.id,
+        tenantId: tenant.id,
+        actorUserId: tenantAdmin.id,
+        type: AppointmentEventType.CREATED,
+        title: "Turno creado",
+        description: `Reserva inicial para ${appointment.service.name}.`,
+      },
+    });
+
+    if (appointment.customerProfile.user.email) {
+      await prisma.appointmentReminder.create({
+        data: {
+          appointmentId: appointment.id,
+          tenantId: tenant.id,
+          channel: ReminderChannel.EMAIL,
+          status: ReminderStatus.SCHEDULED,
+          scheduledFor: new Date(appointment.startsAt.getTime() - 24 * 60 * 60 * 1000),
+          target: appointment.customerProfile.user.email,
+          message: `Recordatorio de turno para ${appointment.customerProfile.user.name}.`,
+        },
+      });
+    }
+  }
 
   console.log(
     `Seed listo para tenant ${tenant.slug}, tenant admin ${tenantAdmin.email} y super admin ${superAdmin.email}`,

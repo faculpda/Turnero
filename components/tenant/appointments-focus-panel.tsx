@@ -2,15 +2,25 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { AppointmentSummary } from "@/lib/types";
+import type { AppointmentSummary, PaymentStatus } from "@/lib/types";
 
 type AppointmentsFocusPanelProps = {
   appointments: AppointmentSummary[];
+  blockedTimeSlots: Array<{
+    id: string;
+    title: string;
+    reason?: string;
+    startsAt: string;
+    startsAtIso: string;
+    endsAtIso: string;
+  }>;
   tenantSlug: string;
 };
 
 type AppointmentFilter = "ALL" | "CONFIRMED" | "PENDING";
-type MutableAppointmentStatus = "COMPLETED" | "CANCELLED";
+type MutableAppointmentStatus = "CONFIRMED" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+type CalendarView = "WEEK" | "DAY";
+type PaymentFilter = "ALL" | PaymentStatus;
 
 type CalendarDay = {
   key: string;
@@ -18,19 +28,20 @@ type CalendarDay = {
   dateNumber: string;
   isToday: boolean;
   appointments: AppointmentSummary[];
+  blockedTimeSlots: AppointmentsFocusPanelProps["blockedTimeSlots"];
 };
 
 const estadoTurnoLabel: Record<string, string> = {
   PENDING: "Pendiente",
   CONFIRMED: "Confirmado",
   CANCELLED: "Cancelado",
-  COMPLETED: "Completado",
+  COMPLETED: "Atendido",
   NO_SHOW: "No asistio",
 };
 
 const estadoPagoLabel: Record<string, string> = {
   NOT_REQUIRED: "Sin cobro online",
-  PENDING: "Pendiente",
+  PENDING: "Pago pendiente",
   APPROVED: "Abonado",
   REJECTED: "Rechazado",
   CANCELLED: "Cancelado",
@@ -40,6 +51,22 @@ const filterLabels: Record<AppointmentFilter, string> = {
   ALL: "Todos",
   CONFIRMED: "Confirmados",
   PENDING: "Pendientes",
+};
+
+const paymentFilterLabels: Record<PaymentFilter, string> = {
+  ALL: "Todos los pagos",
+  NOT_REQUIRED: "Sin cobro",
+  PENDING: "Pendiente",
+  APPROVED: "Abonado",
+  REJECTED: "Rechazado",
+  CANCELLED: "Cancelado",
+};
+
+const reminderStatusLabel: Record<string, string> = {
+  SCHEDULED: "Programado",
+  SENT: "Enviado",
+  FAILED: "Fallido",
+  CANCELLED: "Cancelado",
 };
 
 function startOfDay(date: Date) {
@@ -89,7 +116,24 @@ function formatHour(dateIso: string) {
   }).format(new Date(dateIso));
 }
 
-function formatWeekRange(weekStart: Date) {
+function formatDateTime(dateIso: string) {
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(dateIso));
+}
+
+function formatWeekRange(weekStart: Date, view: CalendarView) {
+  if (view === "DAY") {
+    return new Intl.DateTimeFormat("es-AR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }).format(weekStart);
+  }
+
   const weekEnd = addDays(weekStart, 6);
   const formatter = new Intl.DateTimeFormat("es-AR", {
     day: "numeric",
@@ -110,6 +154,7 @@ function toDateTimeLocalValue(dateIso: string) {
 
 export function AppointmentsFocusPanel({
   appointments,
+  blockedTimeSlots,
   tenantSlug,
 }: AppointmentsFocusPanelProps) {
   const router = useRouter();
@@ -117,13 +162,23 @@ export function AppointmentsFocusPanel({
   const [error, setError] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
   const [rescheduleDraft, setRescheduleDraft] = useState("");
+  const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek(new Date()));
+  const [filter, setFilter] = useState<AppointmentFilter>("ALL");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [serviceFilter, setServiceFilter] = useState<string>("ALL");
+  const [view, setView] = useState<CalendarView>("WEEK");
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | undefined>();
 
-  const turnosActivos = useMemo(
+  const turnosOperativos = useMemo(
     () =>
       appointments
         .filter(
           (appointment) =>
-            appointment.status === "PENDING" || appointment.status === "CONFIRMED",
+            appointment.status === "PENDING" ||
+            appointment.status === "CONFIRMED" ||
+            appointment.status === "COMPLETED" ||
+            appointment.status === "NO_SHOW",
         )
         .sort(
           (left, right) =>
@@ -132,43 +187,35 @@ export function AppointmentsFocusPanel({
     [appointments],
   );
 
-  const referencia = turnosActivos[0]
-    ? startOfDay(new Date(turnosActivos[0].startsAtIso))
-    : startOfDay(new Date());
-
-  const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek(referencia));
-  const [filter, setFilter] = useState<AppointmentFilter>("ALL");
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | undefined>();
-
-  const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
-  }, [weekStart]);
+  const serviceOptions = useMemo(() => {
+    return Array.from(
+      new Map(turnosOperativos.map((appointment) => [appointment.serviceId, appointment.serviceName])).entries(),
+    );
+  }, [turnosOperativos]);
 
   const filteredAppointments = useMemo(() => {
-    if (filter === "ALL") {
-      return turnosActivos;
-    }
+    const normalizedSearch = searchQuery.trim().toLowerCase();
 
-    return turnosActivos.filter((appointment) => appointment.status === filter);
-  }, [filter, turnosActivos]);
+    return turnosOperativos.filter((appointment) => {
+      const matchesStatus =
+        filter === "ALL" ||
+        (filter === "CONFIRMED" && appointment.status === "CONFIRMED") ||
+        (filter === "PENDING" && appointment.status === "PENDING");
+      const matchesPayment =
+        paymentFilter === "ALL" || appointment.paymentStatus === paymentFilter;
+      const matchesService =
+        serviceFilter === "ALL" || appointment.serviceId === serviceFilter;
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        appointment.customerName.toLowerCase().includes(normalizedSearch) ||
+        appointment.customerEmail.toLowerCase().includes(normalizedSearch) ||
+        (appointment.customerPhone ?? "").toLowerCase().includes(normalizedSearch);
 
-  const calendarDays = useMemo<CalendarDay[]>(() => {
-    return weekDays.map((day) => {
-      const appointmentsForDay = filteredAppointments.filter((appointment) =>
-        sameDay(new Date(appointment.startsAtIso), day),
-      );
-
-      return {
-        key: day.toISOString(),
-        label: formatDayLabel(day),
-        dateNumber: formatDayNumber(day),
-        isToday: sameDay(day, new Date()),
-        appointments: appointmentsForDay,
-      };
+      return matchesStatus && matchesPayment && matchesService && matchesSearch;
     });
-  }, [filteredAppointments, weekDays]);
+  }, [filter, paymentFilter, searchQuery, serviceFilter, turnosOperativos]);
 
-  const selectedAppointment = turnosActivos.find(
+  const selectedAppointment = turnosOperativos.find(
     (appointment) => appointment.id === selectedAppointmentId,
   );
 
@@ -183,13 +230,40 @@ export function AppointmentsFocusPanel({
     setRescheduleDraft(toDateTimeLocalValue(selectedAppointment.startsAtIso));
   }, [selectedAppointment]);
 
-  const confirmedAppointments = turnosActivos.filter(
+  const referenceDate = filteredAppointments[0]
+    ? startOfDay(new Date(filteredAppointments[0].startsAtIso))
+    : startOfDay(new Date());
+
+  const visibleDays = useMemo(() => {
+    if (view === "DAY") {
+      return [startOfDay(weekStart)];
+    }
+
+    return Array.from({ length: 7 }, (_, index) => addDays(startOfWeek(weekStart), index));
+  }, [view, weekStart]);
+
+  const calendarDays = useMemo<CalendarDay[]>(() => {
+    return visibleDays.map((day) => ({
+      key: day.toISOString(),
+      label: formatDayLabel(day),
+      dateNumber: formatDayNumber(day),
+      isToday: sameDay(day, new Date()),
+      appointments: filteredAppointments.filter((appointment) =>
+        sameDay(new Date(appointment.startsAtIso), day),
+      ),
+      blockedTimeSlots: blockedTimeSlots.filter((blockedTimeSlot) =>
+        sameDay(new Date(blockedTimeSlot.startsAtIso), day),
+      ),
+    }));
+  }, [blockedTimeSlots, filteredAppointments, visibleDays]);
+
+  const confirmedAppointments = turnosOperativos.filter(
     (appointment) => appointment.status === "CONFIRMED",
   );
-  const pendingAppointments = turnosActivos.filter(
+  const pendingAppointments = turnosOperativos.filter(
     (appointment) => appointment.status === "PENDING",
   );
-  const paidAppointments = turnosActivos.filter(
+  const paidAppointments = turnosOperativos.filter(
     (appointment) => appointment.paymentStatus === "APPROVED",
   );
 
@@ -233,43 +307,53 @@ export function AppointmentsFocusPanel({
     }
   }
 
-  async function updateAppointmentStatus(status: MutableAppointmentStatus) {
-    await submitAppointmentChanges({ status });
-  }
+  async function quickConfirm(appointmentId: string) {
+    setError(null);
 
-  async function saveNotes() {
-    await submitAppointmentChanges({ notes: notesDraft });
-  }
+    try {
+      const response = await fetch("/api/appointments", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tenantSlug,
+          appointmentId,
+          status: "CONFIRMED",
+        }),
+      });
 
-  async function rescheduleAppointment() {
-    if (!rescheduleDraft) {
-      setError("Debes elegir una fecha y hora para reprogramar.");
-      return;
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error ?? "No se pudo confirmar el turno.");
+        return;
+      }
+
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      setError("No se pudo confirmar el turno.");
     }
-
-    await submitAppointmentChanges({
-      startsAt: new Date(rescheduleDraft).toISOString(),
-      notes: notesDraft,
-    });
   }
 
-  if (turnosActivos.length === 0) {
+  if (turnosOperativos.length === 0) {
     return (
       <section className="dashboard-section">
         <div className="dashboard-section-header">
           <div>
             <h2>Calendario de turnos</h2>
             <p className="muted">
-              Aqui apareceran los turnos confirmados y pendientes en formato calendario.
+              Aqui apareceran los turnos operativos, bloqueos y recordatorios de la agenda.
             </p>
           </div>
         </div>
         <article className="panel dashboard-turnos-card">
           <div className="dashboard-empty-state">
-            <strong>No hay turnos pendientes ni confirmados.</strong>
+            <strong>No hay turnos cargados todavia.</strong>
             <p className="muted">
-              Cuando entren nuevas reservas se van a organizar por dia para que puedas operarlas
-              desde esta agenda.
+              Cuando empiecen a entrar reservas se van a organizar por dia con filtros y acciones.
             </p>
           </div>
         </article>
@@ -283,66 +367,122 @@ export function AppointmentsFocusPanel({
         <div>
           <h2>Calendario de turnos</h2>
           <p className="muted">
-            Inspirado en dashboards de agenda profesional: filtros rapidos, vista semanal y una
-            ventana de detalle para operar cada turno.
+            Busca pacientes, filtra por servicio o pago, alterna entre dia y semana y opera cada
+            turno desde la agenda.
           </p>
         </div>
       </div>
 
       <div className="dashboard-kpi-grid dashboard-turnos-kpi-grid">
         <article className="metric dashboard-kpi-card dashboard-kpi-card-highlight dashboard-kpi-card-violet">
-          <span className="dashboard-kpi-label">Turnos activos</span>
-          <h2>{turnosActivos.length}</h2>
-          <p className="muted">Confirmados y pendientes visibles en la agenda principal.</p>
+          <span className="dashboard-kpi-label">Turnos operativos</span>
+          <h2>{turnosOperativos.length}</h2>
+          <p className="muted">Pendientes, confirmados, atendidos y ausencias visibles en agenda.</p>
         </article>
         <article className="metric dashboard-kpi-card dashboard-kpi-card-blue">
           <span className="dashboard-kpi-label">Confirmados</span>
           <h2>{confirmedAppointments.length}</h2>
-          <p className="muted">Reservas listas para atender hoy y en la semana.</p>
+          <p className="muted">Reservas listas para atender y enviar recordatorios.</p>
         </article>
         <article className="metric dashboard-kpi-card dashboard-kpi-card-amber">
           <span className="dashboard-kpi-label">Pagos aprobados</span>
           <h2>{paidAppointments.length}</h2>
-          <p className="muted">Turnos que ya tienen el cobro resuelto.</p>
+          <p className="muted">Ayuda a detectar rapido que citas ya tienen cobro resuelto.</p>
         </article>
       </div>
 
       <article className="panel dashboard-calendar-shell">
         <div className="dashboard-calendar-toolbar">
           <div className="dashboard-calendar-week">
-            <strong>{formatWeekRange(weekStart)}</strong>
-            <span className="muted">Vista semanal para gestionar reservas activas.</span>
+            <strong>{formatWeekRange(weekStart, view)}</strong>
+            <span className="muted">Vista principal de turnos y bloqueos del tenant.</span>
           </div>
 
           <div className="dashboard-calendar-toolbar-actions">
-            <div className="dashboard-filter-group" role="tablist" aria-label="Filtrar turnos">
-              {(["ALL", "CONFIRMED", "PENDING"] as AppointmentFilter[]).map((option) => (
+            <div className="dashboard-filter-group" role="tablist" aria-label="Vista calendario">
+              {(["DAY", "WEEK"] as CalendarView[]).map((option) => (
                 <button
                   key={option}
-                  className={`dashboard-filter-chip ${filter === option ? "active" : ""}`}
-                  onClick={() => setFilter(option)}
+                  className={`dashboard-filter-chip ${view === option ? "active" : ""}`}
+                  onClick={() => setView(option)}
                   type="button"
                 >
-                  {filterLabels[option]}
+                  {option === "DAY" ? "Dia" : "Semana"}
                 </button>
               ))}
             </div>
-
             <div className="dashboard-week-nav">
-              <button onClick={() => setWeekStart((current) => addDays(current, -7))} type="button">
-                Semana anterior
+              <button
+                onClick={() =>
+                  setWeekStart((current) => addDays(current, view === "DAY" ? -1 : -7))
+                }
+                type="button"
+              >
+                Anterior
               </button>
-              <button onClick={() => setWeekStart(startOfWeek(referencia))} type="button">
-                Esta semana
+              <button onClick={() => setWeekStart(startOfDay(referenceDate))} type="button">
+                Hoy
               </button>
-              <button onClick={() => setWeekStart((current) => addDays(current, 7))} type="button">
-                Semana siguiente
+              <button
+                onClick={() =>
+                  setWeekStart((current) => addDays(current, view === "DAY" ? 1 : 7))
+                }
+                type="button"
+              >
+                Siguiente
               </button>
             </div>
           </div>
         </div>
 
-        <div className="dashboard-calendar-grid">
+        <div className="dashboard-calendar-filters">
+          <input
+            className="dashboard-modal-input"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Buscar por nombre, mail o telefono"
+            value={searchQuery}
+          />
+          <select
+            className="dashboard-modal-input"
+            onChange={(event) => setServiceFilter(event.target.value)}
+            value={serviceFilter}
+          >
+            <option value="ALL">Todos los servicios</option>
+            {serviceOptions.map(([serviceId, serviceName]) => (
+              <option key={serviceId} value={serviceId}>
+                {serviceName}
+              </option>
+            ))}
+          </select>
+          <select
+            className="dashboard-modal-input"
+            onChange={(event) => setFilter(event.target.value as AppointmentFilter)}
+            value={filter}
+          >
+            {(["ALL", "CONFIRMED", "PENDING"] as AppointmentFilter[]).map((option) => (
+              <option key={option} value={option}>
+                {filterLabels[option]}
+              </option>
+            ))}
+          </select>
+          <select
+            className="dashboard-modal-input"
+            onChange={(event) => setPaymentFilter(event.target.value as PaymentFilter)}
+            value={paymentFilter}
+          >
+            {(
+              ["ALL", "NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED", "CANCELLED"] as PaymentFilter[]
+            ).map((option) => (
+              <option key={option} value={option}>
+                {paymentFilterLabels[option]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {error ? <p className="form-error">{error}</p> : null}
+
+        <div className={`dashboard-calendar-grid ${view === "DAY" ? "day-view" : ""}`}>
           {calendarDays.map((day) => (
             <section
               key={day.key}
@@ -353,38 +493,61 @@ export function AppointmentsFocusPanel({
                   <span className="dashboard-calendar-day-label">{day.label}</span>
                   <strong>{day.dateNumber}</strong>
                 </div>
-                <span className="dashboard-calendar-day-count">{day.appointments.length}</span>
+                <span className="dashboard-calendar-day-count">
+                  {day.appointments.length + day.blockedTimeSlots.length}
+                </span>
               </header>
 
               <div className="dashboard-calendar-day-body">
+                {day.blockedTimeSlots.map((blockedTimeSlot) => (
+                  <div className="dashboard-calendar-blocked" key={blockedTimeSlot.id}>
+                    <strong>{blockedTimeSlot.title}</strong>
+                    <span>{formatDateTime(blockedTimeSlot.startsAtIso)}</span>
+                  </div>
+                ))}
+
                 {day.appointments.length > 0 ? (
                   day.appointments.map((appointment) => (
-                    <button
-                      key={appointment.id}
-                      className={`dashboard-calendar-event ${appointment.status.toLowerCase()}`}
-                      onClick={() => {
-                        setError(null);
-                        setSelectedAppointmentId(appointment.id);
-                      }}
-                      type="button"
-                    >
-                      <div className="dashboard-calendar-event-time">
-                        {formatHour(appointment.startsAtIso)}
-                      </div>
-                      <div className="dashboard-calendar-event-main">
-                        <strong>{appointment.customerName}</strong>
-                        <span>{appointment.serviceName}</span>
-                      </div>
-                      <div className="dashboard-calendar-event-meta">
-                        <span className={`badge ${appointment.status.toLowerCase()}`}>
-                          {estadoTurnoLabel[appointment.status] ?? appointment.status}
-                        </span>
-                      </div>
-                    </button>
+                    <div className="dashboard-calendar-event-wrap" key={appointment.id}>
+                      <button
+                        className={`dashboard-calendar-event ${appointment.status.toLowerCase()}`}
+                        onClick={() => {
+                          setError(null);
+                          setSelectedAppointmentId(appointment.id);
+                        }}
+                        type="button"
+                      >
+                        <div className="dashboard-calendar-event-time">
+                          {formatHour(appointment.startsAtIso)}
+                        </div>
+                        <div className="dashboard-calendar-event-main">
+                          <strong>{appointment.customerName}</strong>
+                          <span>{appointment.serviceName}</span>
+                        </div>
+                        <div className="dashboard-calendar-event-meta">
+                          <span className={`badge ${appointment.status.toLowerCase()}`}>
+                            {estadoTurnoLabel[appointment.status] ?? appointment.status}
+                          </span>
+                          {appointment.isLate ? (
+                            <span className="badge pending">Llega tarde</span>
+                          ) : null}
+                        </div>
+                      </button>
+                      {appointment.status === "PENDING" ? (
+                        <button
+                          className="dashboard-quick-action"
+                          disabled={isPending}
+                          onClick={() => quickConfirm(appointment.id)}
+                          type="button"
+                        >
+                          Confirmar rapido
+                        </button>
+                      ) : null}
+                    </div>
                   ))
-                ) : (
+                ) : day.blockedTimeSlots.length === 0 ? (
                   <div className="dashboard-calendar-empty">Sin turnos</div>
-                )}
+                ) : null}
               </div>
             </section>
           ))}
@@ -398,14 +561,14 @@ export function AppointmentsFocusPanel({
           <p className="muted">Reservas que conviene confirmar o seguir de cerca.</p>
         </div>
         <div className="dashboard-calendar-insight">
-          <span className="dashboard-detail-label">Confirmados</span>
-          <strong>{confirmedAppointments.length}</strong>
-          <p className="muted">Turnos que ya pueden pasar directo al flujo de atencion.</p>
+          <span className="dashboard-detail-label">No asistio</span>
+          <strong>{turnosOperativos.filter((item) => item.status === "NO_SHOW").length}</strong>
+          <p className="muted">Permite medir ausencias y ajustar recordatorios.</p>
         </div>
         <div className="dashboard-calendar-insight">
-          <span className="dashboard-detail-label">Con pago aprobado</span>
-          <strong>{paidAppointments.length}</strong>
-          <p className="muted">Ayuda a detectar rapido que citas ya tienen cobro resuelto.</p>
+          <span className="dashboard-detail-label">Bloqueos</span>
+          <strong>{blockedTimeSlots.length}</strong>
+          <p className="muted">Pausas internas, ausencias y cierres aplicados a la agenda.</p>
         </div>
       </article>
 
@@ -421,10 +584,7 @@ export function AppointmentsFocusPanel({
             }
           }}
         >
-          <article
-            className="panel dashboard-modal-card"
-            onClick={(event) => event.stopPropagation()}
-          >
+          <article className="panel dashboard-modal-card" onClick={(event) => event.stopPropagation()}>
             <div className="dashboard-section-header">
               <div>
                 <h2>{selectedAppointment.customerName}</h2>
@@ -495,13 +655,63 @@ export function AppointmentsFocusPanel({
               </div>
             </div>
 
+            <div className="dashboard-modal-section">
+              <div className="dashboard-section-header">
+                <div>
+                  <h3>Historial del turno</h3>
+                </div>
+              </div>
+              <div className="dashboard-timeline">
+                {selectedAppointment.events.length > 0 ? (
+                  selectedAppointment.events.map((event) => (
+                    <div className="dashboard-timeline-item" key={event.id}>
+                      <strong>{event.title}</strong>
+                      <span className="muted">{formatDateTime(event.createdAt)}</span>
+                      {event.actorName ? (
+                        <p className="muted">Realizado por {event.actorName}</p>
+                      ) : null}
+                      {event.description ? <p className="muted">{event.description}</p> : null}
+                    </div>
+                  ))
+                ) : (
+                  <div className="dashboard-calendar-empty">Todavia no hay historial.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="dashboard-modal-section">
+              <div className="dashboard-section-header">
+                <div>
+                  <h3>Recordatorios automaticos</h3>
+                </div>
+              </div>
+              <div className="dashboard-reminder-list">
+                {selectedAppointment.reminders.length > 0 ? (
+                  selectedAppointment.reminders.map((reminder) => (
+                    <div className="dashboard-reminder-item" key={reminder.id}>
+                      <div>
+                        <strong>{reminder.channel === "EMAIL" ? "Mail" : "WhatsApp"}</strong>
+                        <div className="muted">{formatDateTime(reminder.scheduledFor)}</div>
+                        <div className="muted">{reminder.target}</div>
+                      </div>
+                      <span className={`badge ${reminder.status === "SENT" ? "approved" : reminder.status === "FAILED" ? "rejected" : reminder.status === "CANCELLED" ? "cancelled" : "pending"}`}>
+                        {reminderStatusLabel[reminder.status] ?? reminder.status}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="dashboard-calendar-empty">No hay recordatorios programados.</div>
+                )}
+              </div>
+            </div>
+
             {error ? <p className="form-error">{error}</p> : null}
 
             <div className="dashboard-modal-actions">
               <button
                 className="button secondary"
                 disabled={isPending}
-                onClick={saveNotes}
+                onClick={() => submitAppointmentChanges({ notes: notesDraft })}
                 type="button"
               >
                 Guardar notas
@@ -509,15 +719,38 @@ export function AppointmentsFocusPanel({
               <button
                 className="button secondary"
                 disabled={isPending}
-                onClick={rescheduleAppointment}
+                onClick={() =>
+                  submitAppointmentChanges({
+                    startsAt: new Date(rescheduleDraft).toISOString(),
+                    notes: notesDraft,
+                  })
+                }
                 type="button"
               >
                 Reprogramar
               </button>
+              {selectedAppointment.status === "PENDING" ? (
+                <button
+                  className="button secondary"
+                  disabled={isPending}
+                  onClick={() => submitAppointmentChanges({ status: "CONFIRMED" })}
+                  type="button"
+                >
+                  Confirmar
+                </button>
+              ) : null}
               <button
                 className="button secondary"
                 disabled={isPending}
-                onClick={() => updateAppointmentStatus("CANCELLED")}
+                onClick={() => submitAppointmentChanges({ status: "NO_SHOW" })}
+                type="button"
+              >
+                Marcar no asistio
+              </button>
+              <button
+                className="button secondary"
+                disabled={isPending}
+                onClick={() => submitAppointmentChanges({ status: "CANCELLED" })}
                 type="button"
               >
                 Cancelar turno
@@ -525,7 +758,7 @@ export function AppointmentsFocusPanel({
               <button
                 className="button primary"
                 disabled={isPending}
-                onClick={() => updateAppointmentStatus("COMPLETED")}
+                onClick={() => submitAppointmentChanges({ status: "COMPLETED" })}
                 type="button"
               >
                 Marcar como completado

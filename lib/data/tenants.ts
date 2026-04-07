@@ -1,9 +1,11 @@
 import { Prisma } from "@prisma/client";
 import {
   tenantAppointments as fallbackAppointments,
+  tenantBlockedTimeSlots as fallbackBlockedTimeSlots,
   tenantPublicProfile as fallbackPublicProfile,
   tenants as fallbackTenants,
 } from "@/lib/mock-data";
+import { processDueAppointmentReminders } from "@/lib/appointments";
 import { generateAvailableSlotsForService } from "@/lib/availability";
 import { formatAppointmentDate, formatPrice } from "@/lib/format";
 import { buildAppointmentActiveFilter } from "@/lib/payments/mercadopago";
@@ -76,13 +78,37 @@ const dashboardTenantInclude = {
     },
   },
   availability: publicTenantInclude.availability,
+  blockedTimeSlots: {
+    orderBy: {
+      startsAt: "asc",
+    },
+  },
   appointments: {
     orderBy: {
       startsAt: "asc",
     },
-    take: 10,
+    take: 30,
     include: {
       service: true,
+      events: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 10,
+        include: {
+          actorUser: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      reminders: {
+        orderBy: {
+          scheduledFor: "asc",
+        },
+        take: 10,
+      },
       customerProfile: {
         include: {
           user: true,
@@ -94,6 +120,12 @@ const dashboardTenantInclude = {
 
 const bookingTenantInclude = {
   ...publicTenantInclude,
+  blockedTimeSlots: {
+    select: {
+      startsAt: true,
+      endsAt: true,
+    },
+  },
   appointments: {
     where: buildAppointmentActiveFilter(),
     select: {
@@ -223,6 +255,7 @@ function mapAppointments(
 ): AppointmentSummary[] {
   return appointments.map((appointment) => ({
     id: appointment.id,
+    serviceId: appointment.serviceId,
     serviceName: appointment.service.name,
     customerName: appointment.customerProfile.user.name,
     customerEmail: appointment.customerProfile.user.email,
@@ -232,6 +265,26 @@ function mapAppointments(
     status: appointment.status,
     paymentStatus: appointment.paymentStatus,
     notes: appointment.notes ?? undefined,
+    isLate:
+      (appointment.status === "PENDING" || appointment.status === "CONFIRMED") &&
+      appointment.startsAt < new Date(),
+    events: appointment.events.map((event) => ({
+      id: event.id,
+      type: event.type,
+      title: event.title,
+      description: event.description ?? undefined,
+      createdAt: event.createdAt.toISOString(),
+      actorName: event.actorUser?.name ?? undefined,
+    })),
+    reminders: appointment.reminders.map((reminder) => ({
+      id: reminder.id,
+      channel: reminder.channel,
+      status: reminder.status,
+      scheduledFor: reminder.scheduledFor.toISOString(),
+      target: reminder.target,
+      sentAt: reminder.sentAt?.toISOString(),
+      errorMessage: reminder.errorMessage ?? undefined,
+    })),
   }));
 }
 
@@ -312,17 +365,44 @@ export async function getTenantDashboardData(
       return {
         profile: fallbackPublicProfile,
         appointments: fallbackAppointments,
+        blockedTimeSlots: fallbackBlockedTimeSlots,
+      };
+    }
+
+    await processDueAppointmentReminders(tenant.id);
+
+    const refreshedTenant = await prisma.tenant.findUnique({
+      where: {
+        slug,
+      },
+      include: dashboardTenantInclude,
+    });
+
+    if (!refreshedTenant) {
+      return {
+        profile: fallbackPublicProfile,
+        appointments: fallbackAppointments,
+        blockedTimeSlots: fallbackBlockedTimeSlots,
       };
     }
 
     return {
-      profile: mapPublicTenant(tenant),
-      appointments: mapAppointments(tenant.appointments),
+      profile: mapPublicTenant(refreshedTenant),
+      appointments: mapAppointments(refreshedTenant.appointments),
+      blockedTimeSlots: refreshedTenant.blockedTimeSlots.map((blockedTimeSlot) => ({
+        id: blockedTimeSlot.id,
+        title: blockedTimeSlot.title,
+        reason: blockedTimeSlot.reason ?? undefined,
+        startsAt: formatAppointmentDate(blockedTimeSlot.startsAt),
+        startsAtIso: blockedTimeSlot.startsAt.toISOString(),
+        endsAtIso: blockedTimeSlot.endsAt.toISOString(),
+      })),
     };
   } catch {
     return {
       profile: fallbackPublicProfile,
       appointments: fallbackAppointments,
+      blockedTimeSlots: fallbackBlockedTimeSlots,
     };
   }
 }
@@ -376,6 +456,7 @@ export async function getTenantBookingData(
         { durationMin: service.durationMin },
         tenant.availability,
         tenant.appointments,
+        tenant.blockedTimeSlots,
       ),
     }));
 

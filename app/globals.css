@@ -643,6 +643,12 @@ p {
   align-items: center;
 }
 
+.dashboard-calendar-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .dashboard-filter-group,
 .dashboard-week-nav {
   display: inline-flex;
@@ -682,6 +688,10 @@ p {
   gap: 14px;
   overflow-x: auto;
   padding-bottom: 4px;
+}
+
+.dashboard-calendar-grid.day-view {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .dashboard-calendar-day {
@@ -736,6 +746,25 @@ p {
   gap: 10px;
   align-content: start;
   padding: 14px;
+}
+
+.dashboard-calendar-blocked {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #f1d7b1;
+  background: #fff4df;
+}
+
+.dashboard-calendar-blocked span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.dashboard-calendar-event-wrap {
+  display: grid;
+  gap: 8px;
 }
 
 .dashboard-calendar-event {
@@ -809,6 +838,18 @@ p {
   background: #fbf8ff;
 }
 
+.dashboard-quick-action {
+  border: 1px solid #d8c8ff;
+  background: #f2ebff;
+  color: #5130c7;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  font-family: var(--font-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .dashboard-turno-detail-panel {
   display: grid;
   gap: 18px;
@@ -880,6 +921,32 @@ p {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.dashboard-modal-section {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-timeline,
+.dashboard-reminder-list,
+.dashboard-block-list,
+.dashboard-block-form {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-timeline-item,
+.dashboard-reminder-item,
+.dashboard-block-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #ece5f5;
+  border-radius: 14px;
+  background: #fbf9ff;
 }
 
 .dashboard-modal-input,
@@ -1703,6 +1770,7 @@ th:last-child {
   .dashboard-overview-actions,
   .dashboard-turno-detail-grid,
   .dashboard-calendar-insights,
+  .dashboard-calendar-filters,
   .hero-grid,
   .dashboard-hero-notes,
   .dashboard-kpi-grid,

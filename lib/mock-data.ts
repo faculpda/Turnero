@@ -26,6 +26,7 @@ export const tenants: TenantSummary[] = [
 export const tenantAppointments: AppointmentSummary[] = [
   {
     id: "app_1",
+    serviceId: "srv_1",
     serviceName: "Limpieza dental",
     customerName: "Maria Gomez",
     customerEmail: "maria@example.com",
@@ -34,9 +35,12 @@ export const tenantAppointments: AppointmentSummary[] = [
     startsAtIso: "2026-04-07T09:00:00.000Z",
     status: "CONFIRMED",
     paymentStatus: "APPROVED",
+    events: [],
+    reminders: [],
   },
   {
     id: "app_2",
+    serviceId: "srv_2",
     serviceName: "Control general",
     customerName: "Juan Perez",
     customerEmail: "juan@example.com",
@@ -45,9 +49,12 @@ export const tenantAppointments: AppointmentSummary[] = [
     startsAtIso: "2026-04-07T11:30:00.000Z",
     status: "CONFIRMED",
     paymentStatus: "NOT_REQUIRED",
+    events: [],
+    reminders: [],
   },
   {
     id: "app_3",
+    serviceId: "srv_3",
     serviceName: "Blanqueamiento",
     customerName: "Lucia Diaz",
     customerEmail: "lucia@example.com",
@@ -57,6 +64,19 @@ export const tenantAppointments: AppointmentSummary[] = [
     status: "PENDING",
     paymentStatus: "PENDING",
     notes: "Prefiere atencion por la tarde.",
+    events: [],
+    reminders: [],
+  },
+];
+
+export const tenantBlockedTimeSlots = [
+  {
+    id: "blocked_1",
+    title: "Almuerzo del equipo",
+    reason: "Pausa interna",
+    startsAt: "2026-04-07 13:00",
+    startsAtIso: "2026-04-07T13:00:00.000Z",
+    endsAtIso: "2026-04-07T14:00:00.000Z",
   },
 ];
 

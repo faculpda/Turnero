@@ -2,6 +2,11 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { canManageTenant, getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
+import {
+  cancelScheduledAppointmentReminders,
+  logAppointmentEvent,
+  scheduleAppointmentReminders,
+} from "@/lib/appointments";
 import { generateAvailableSlotsForService } from "@/lib/availability";
 import {
   buildAppointmentActiveFilter,
@@ -24,7 +29,7 @@ const createAppointmentSchema = z.object({
 const updateAppointmentSchema = z.object({
   tenantSlug: z.string().min(1),
   appointmentId: z.string().min(1),
-  status: z.enum(["COMPLETED", "CANCELLED"]).optional(),
+  status: z.enum(["CONFIRMED", "COMPLETED", "CANCELLED", "NO_SHOW"]).optional(),
   startsAt: z.string().datetime().optional(),
   notes: z.string().max(1000).optional(),
 }).refine(
@@ -113,6 +118,12 @@ export async function POST(request: Request) {
                         paymentExpiresAt: true,
                       },
                     },
+                    blockedTimeSlots: {
+                      select: {
+                        startsAt: true,
+                        endsAt: true,
+                      },
+                    },
                   },
                 },
               },
@@ -160,6 +171,7 @@ export async function POST(request: Request) {
               { durationMin: service.durationMin },
               service.tenant.availability,
               service.tenant.appointments,
+              service.tenant.blockedTimeSlots,
               500,
               21,
             );
@@ -217,6 +229,17 @@ export async function POST(request: Request) {
                 id: true,
                 startsAt: true,
                 paymentExpiresAt: true,
+                customerProfile: {
+                  select: {
+                    phone: true,
+                    user: {
+                      select: {
+                        email: true,
+                        name: true,
+                      },
+                    },
+                  },
+                },
                 service: {
                   select: {
                     name: true,
@@ -237,10 +260,14 @@ export async function POST(request: Request) {
             return {
               ok: true as const,
               appointmentId: createdAppointment.id,
+              tenantId: service.tenantId,
               requiresOnlinePayment,
               tenantName: createdAppointment.tenant.name,
               serviceName: createdAppointment.service.name,
               servicePriceCents: createdAppointment.service.priceCents,
+              customerEmail: createdAppointment.customerProfile.user.email,
+              customerPhone: createdAppointment.customerProfile.phone,
+              customerName: createdAppointment.customerProfile.user.name,
               mercadoPagoAccessToken: createdAppointment.tenant.mercadoPagoAccessToken,
               paymentExpiresAt: createdAppointment.paymentExpiresAt?.toISOString() ?? null,
             };
@@ -255,6 +282,25 @@ export async function POST(request: Request) {
         }
 
         if (!appointment.requiresOnlinePayment) {
+          await logAppointmentEvent({
+            appointmentId: appointment.appointmentId,
+            tenantId: appointment.tenantId,
+            actorUserId: session.userId,
+            type: "CREATED",
+            title: "Turno creado",
+            description: `Se registro una nueva reserva para ${appointment.serviceName}.`,
+          });
+
+          await scheduleAppointmentReminders({
+            appointmentId: appointment.appointmentId,
+            tenantId: appointment.tenantId,
+            startsAt,
+            customerEmail: appointment.customerEmail,
+            customerPhone: appointment.customerPhone,
+            customerName: appointment.customerName,
+            serviceName: appointment.serviceName,
+          });
+
           return NextResponse.json({
             ok: true,
             appointmentId: appointment.appointmentId,
@@ -313,6 +359,25 @@ export async function POST(request: Request) {
               paymentPreferenceId: preference.id,
               paymentExternalReference: appointment.appointmentId,
             },
+          });
+
+          await logAppointmentEvent({
+            appointmentId: appointment.appointmentId,
+            tenantId: appointment.tenantId,
+            actorUserId: session.userId,
+            type: "CREATED",
+            title: "Turno creado",
+            description: `Se registro una nueva reserva para ${appointment.serviceName}.`,
+          });
+
+          await scheduleAppointmentReminders({
+            appointmentId: appointment.appointmentId,
+            tenantId: appointment.tenantId,
+            startsAt,
+            customerEmail: appointment.customerEmail,
+            customerPhone: appointment.customerPhone,
+            customerName: appointment.customerName,
+            serviceName: appointment.serviceName,
           });
 
           return NextResponse.json({
@@ -406,6 +471,12 @@ export async function PATCH(request: Request) {
                 },
               ],
             },
+            blockedTimeSlots: {
+              select: {
+                startsAt: true,
+                endsAt: true,
+              },
+            },
             appointments: {
               where: buildAppointmentActiveFilter(),
               select: {
@@ -470,6 +541,7 @@ export async function PATCH(request: Request) {
         { durationMin: appointment.service.durationMin },
         appointment.tenant.availability,
         otherAppointments,
+        appointment.tenant.blockedTimeSlots,
         500,
         21,
       );
@@ -539,6 +611,81 @@ export async function PATCH(request: Request) {
         },
       },
     });
+
+    if (
+      payload.status === "CANCELLED" ||
+      payload.status === "COMPLETED" ||
+      payload.status === "NO_SHOW"
+    ) {
+      await cancelScheduledAppointmentReminders(updatedAppointment.id);
+    }
+
+    if (
+      payload.status === "CONFIRMED" ||
+      payload.status === "COMPLETED" ||
+      payload.status === "CANCELLED" ||
+      payload.status === "NO_SHOW"
+    ) {
+      await logAppointmentEvent({
+        appointmentId: updatedAppointment.id,
+        tenantId: updatedAppointment.tenantId,
+        actorUserId: session.userId,
+        type: payload.status,
+        title:
+          payload.status === "CONFIRMED"
+            ? "Turno confirmado"
+            : payload.status === "COMPLETED"
+              ? "Turno completado"
+              : payload.status === "NO_SHOW"
+                ? "Paciente ausente"
+                : "Turno cancelado",
+        description: `El estado del turno cambio a ${payload.status}.`,
+      });
+    }
+
+    if (payload.startsAt) {
+      await logAppointmentEvent({
+        appointmentId: updatedAppointment.id,
+        tenantId: updatedAppointment.tenantId,
+        actorUserId: session.userId,
+        type: "RESCHEDULED",
+        title: "Turno reprogramado",
+        description: `Nuevo horario: ${updatedAppointment.startsAt.toISOString()}.`,
+      });
+
+      await scheduleAppointmentReminders({
+        appointmentId: updatedAppointment.id,
+        tenantId: updatedAppointment.tenantId,
+        startsAt: updatedAppointment.startsAt,
+        customerEmail: updatedAppointment.customerProfile.user.email,
+        customerPhone: updatedAppointment.customerProfile.phone,
+        customerName: updatedAppointment.customerProfile.user.name,
+        serviceName: updatedAppointment.service.name,
+      });
+    }
+
+    if (payload.status === "CONFIRMED" && !payload.startsAt) {
+      await scheduleAppointmentReminders({
+        appointmentId: updatedAppointment.id,
+        tenantId: updatedAppointment.tenantId,
+        startsAt: updatedAppointment.startsAt,
+        customerEmail: updatedAppointment.customerProfile.user.email,
+        customerPhone: updatedAppointment.customerProfile.phone,
+        customerName: updatedAppointment.customerProfile.user.name,
+        serviceName: updatedAppointment.service.name,
+      });
+    }
+
+    if (payload.notes !== undefined) {
+      await logAppointmentEvent({
+        appointmentId: updatedAppointment.id,
+        tenantId: updatedAppointment.tenantId,
+        actorUserId: session.userId,
+        type: "NOTES_UPDATED",
+        title: "Notas actualizadas",
+        description: "Se actualizaron las notas administrativas del turno.",
+      });
+    }
 
     return NextResponse.json({
       ok: true,

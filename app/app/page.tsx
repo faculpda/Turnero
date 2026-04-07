@@ -2,6 +2,7 @@ import { AccessDenied } from "@/components/auth/access-denied";
 import { AddServiceForm } from "@/components/tenant/add-service-form";
 import { PaymentSettingsForm } from "@/components/tenant/payment-settings-form";
 import { ServiceEditorCard } from "@/components/tenant/service-editor-card";
+import { TenantAgendaPanel } from "@/components/tenant/tenant-agenda-panel";
 import { SiteBuilderForm } from "@/components/tenant/site-builder-form";
 import { TenantDashboardShell } from "@/components/tenant/tenant-dashboard-shell";
 import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
@@ -30,7 +31,7 @@ export default async function TenantDashboardPage({
     );
   }
 
-  const { profile, appointments } = await getTenantDashboardData(tenantSlug);
+  const { profile, appointments, blockedTimeSlots } = await getTenantDashboardData(tenantSlug);
   const onlinePaymentEnabled = profile.paymentSettings?.mercadoPagoEnabled ?? false;
   const onlinePaymentServices = profile.services.filter(
     (service) => onlinePaymentEnabled && (service.priceCents ?? 0) > 0,
@@ -45,98 +46,17 @@ export default async function TenantDashboardPage({
   return (
     <TenantDashboardShell
       agenda={
-        <>
-          <section className="dashboard-section">
-            <div className="dashboard-section-header">
-              <div>
-                <h2>Agenda y operacion</h2>
-                <p className="muted">
-                  Mantiene a mano la oferta visible y el estado general de la experiencia del cliente.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="dashboard-split-grid">
-            <article className="panel dashboard-main-card">
-              <div className="dashboard-section-header">
-                <div>
-                  <h2>Servicios visibles</h2>
-                  <p className="muted">Asi se ve hoy la oferta principal del negocio.</p>
-                </div>
-              </div>
-              <div className="service-list dashboard-service-preview-list">
-                {profile.services.map((service) => (
-                  <div className="service-chip dashboard-service-preview-card" key={service.id}>
-                    {service.images?.[0] ? (
-                      <img
-                        alt={service.images[0].altText ?? service.name}
-                        className="service-inline-image"
-                        src={service.images[0].url}
-                      />
-                    ) : null}
-                    <div className="service-chip-header">
-                      <strong>{service.name}</strong>
-                      <span
-                        className={`badge ${
-                          onlinePaymentEnabled && (service.priceCents ?? 0) > 0
-                            ? "approved"
-                            : "pending"
-                        }`}
-                      >
-                        {onlinePaymentEnabled && (service.priceCents ?? 0) > 0
-                          ? "Pago online"
-                          : "Reserva sin cobro"}
-                      </span>
-                    </div>
-                    {service.description ? (
-                      <div className="muted service-description">{service.description}</div>
-                    ) : null}
-                    <div className="muted">
-                      {service.durationMin} min - {service.priceLabel}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </article>
-
-            <article className="panel dashboard-side-card">
-              <div className="dashboard-section-header">
-                <div>
-                  <h2>Lo que ve el cliente</h2>
-                  <p className="muted">
-                    Los servicios pagos y los horarios visibles se reflejan automaticamente en la
-                    web publica.
-                  </p>
-                </div>
-              </div>
-              <div className="dashboard-summary-list">
-                <div className="dashboard-summary-row">
-                  <span className="muted">Web publica</span>
-                  <strong>Actualizada</strong>
-                </div>
-                <div className="dashboard-summary-row">
-                  <span className="muted">Cobro online</span>
-                  <strong>{onlinePaymentEnabled ? "Visible" : "No visible"}</strong>
-                </div>
-                <div className="dashboard-summary-row">
-                  <span className="muted">Perfil del cliente final</span>
-                  <strong>Disponible</strong>
-                </div>
-                <div className="dashboard-summary-row">
-                  <span className="muted">Servicios con pago online</span>
-                  <strong>{onlinePaymentServices}</strong>
-                </div>
-                <div className="dashboard-summary-row">
-                  <span className="muted">Pagos pendientes</span>
-                  <strong>{pagosPendientes}</strong>
-                </div>
-              </div>
-            </article>
-          </section>
-        </>
+        <TenantAgendaPanel
+          blockedTimeSlots={blockedTimeSlots}
+          onlinePaymentEnabled={onlinePaymentEnabled}
+          onlinePaymentServices={onlinePaymentServices}
+          pagosPendientes={pagosPendientes}
+          services={profile.services}
+          tenantSlug={tenantSlug}
+        />
       }
       appointments={appointments}
+      blockedTimeSlots={blockedTimeSlots}
       cobros={<PaymentSettingsForm tenant={profile} />}
       pagosPendientes={pagosPendientes}
       personalizar={<SiteBuilderForm tenant={profile} />}

@@ -12,6 +12,11 @@ type ExistingAppointmentShape = {
   paymentExpiresAt?: Date | null;
 };
 
+type BlockedPeriodShape = {
+  startsAt: Date;
+  endsAt: Date;
+};
+
 type ServiceShape = {
   durationMin: number;
 };
@@ -49,10 +54,11 @@ function overlaps(
   slotStart: Date,
   slotEnd: Date,
   appointments: ExistingAppointmentShape[],
+  blockedPeriods: BlockedPeriodShape[],
 ): boolean {
   const now = new Date();
 
-  return appointments.some((appointment) => {
+  const overlapsAppointment = appointments.some((appointment) => {
     if (!ACTIVE_APPOINTMENT_STATUSES.has(appointment.status)) {
       return false;
     }
@@ -67,12 +73,21 @@ function overlaps(
 
     return slotStart < appointment.endsAt && slotEnd > appointment.startsAt;
   });
+
+  if (overlapsAppointment) {
+    return true;
+  }
+
+  return blockedPeriods.some(
+    (blockedPeriod) => slotStart < blockedPeriod.endsAt && slotEnd > blockedPeriod.startsAt,
+  );
 }
 
 export function generateAvailableSlotsForService(
   service: ServiceShape,
   availabilityRules: AvailabilityRuleShape[],
   existingAppointments: ExistingAppointmentShape[],
+  blockedPeriods: BlockedPeriodShape[] = [],
   maxSlots = 12,
   daysAhead = 21,
 ): BookingSlotResult[] {
@@ -102,7 +117,7 @@ export function generateAvailableSlotsForService(
           continue;
         }
 
-        if (overlaps(slotStart, slotEnd, existingAppointments)) {
+        if (overlaps(slotStart, slotEnd, existingAppointments, blockedPeriods)) {
           continue;
         }
 
