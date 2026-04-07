@@ -823,6 +823,10 @@ p {
   gap: 0 18px;
 }
 
+.dashboard-turno-detail-block-wide {
+  grid-column: 1 / -1;
+}
+
 .dashboard-calendar-insights {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -833,6 +837,46 @@ p {
   display: grid;
   gap: 8px;
   padding: 4px 0;
+}
+
+.dashboard-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(31, 36, 52, 0.45);
+  backdrop-filter: blur(6px);
+}
+
+.dashboard-modal-card {
+  width: min(860px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  background: #ffffff;
+  border-color: #dfd5ef;
+  box-shadow: 0 24px 60px rgba(31, 36, 52, 0.18);
+}
+
+.dashboard-modal-close {
+  border: 1px solid #e4dff0;
+  background: #ffffff;
+  color: #665d7d;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font: inherit;
+  font-family: var(--font-body);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dashboard-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .dashboard-kpi-card {
@@ -1675,6 +1719,14 @@ th:last-child {
 
   .dashboard-calendar-shell {
     padding: 16px;
+  }
+
+  .dashboard-modal-backdrop {
+    padding: 16px;
+  }
+
+  .dashboard-modal-card {
+    padding: 18px;
   }
 
   .dashboard-topbar-user {

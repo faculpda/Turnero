@@ -146,7 +146,7 @@ export default async function TenantDashboardPage({
             </div>
           </section>
 
-          <AppointmentsFocusPanel appointments={appointments} />
+          <AppointmentsFocusPanel appointments={appointments} tenantSlug={tenantSlug} />
 
           <PanelPestanas
             cobros={<PaymentSettingsForm tenant={profile} />}

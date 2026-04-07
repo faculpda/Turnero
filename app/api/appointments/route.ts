@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
+import { canManageTenant, getCurrentSession, hasCustomerAccess } from "@/lib/auth/session";
 import { generateAvailableSlotsForService } from "@/lib/availability";
 import {
   buildAppointmentActiveFilter,
@@ -19,6 +19,12 @@ const createAppointmentSchema = z.object({
   serviceId: z.string().min(1),
   startsAt: z.string().datetime(),
   redirectTo: z.string().min(1).optional(),
+});
+
+const updateAppointmentStatusSchema = z.object({
+  tenantSlug: z.string().min(1),
+  appointmentId: z.string().min(1),
+  status: z.enum(["COMPLETED", "CANCELLED"]),
 });
 
 const MAX_TRANSACTION_RETRIES = 3;
@@ -349,6 +355,97 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { error: "No se pudo crear el turno en este momento." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await getCurrentSession();
+
+    if (!session) {
+      return NextResponse.json({ error: "Necesitas iniciar sesion." }, { status: 401 });
+    }
+
+    const payload = updateAppointmentStatusSchema.parse(await request.json());
+
+    if (!(await canManageTenant(payload.tenantSlug))) {
+      return NextResponse.json(
+        { error: "No tienes permisos para gestionar turnos de este tenant." },
+        { status: 403 },
+      );
+    }
+
+    const appointment = await prisma.appointment.findUnique({
+      where: {
+        id: payload.appointmentId,
+      },
+      include: {
+        tenant: {
+          select: {
+            slug: true,
+          },
+        },
+      },
+    });
+
+    if (!appointment || appointment.tenant.slug !== payload.tenantSlug) {
+      return NextResponse.json(
+        { error: "El turno seleccionado no pertenece a este tenant." },
+        { status: 404 },
+      );
+    }
+
+    if (appointment.status !== "PENDING" && appointment.status !== "CONFIRMED") {
+      return NextResponse.json(
+        { error: "Solo se pueden actualizar turnos pendientes o confirmados." },
+        { status: 400 },
+      );
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: {
+        id: appointment.id,
+      },
+      data: {
+        status: payload.status,
+        paymentExpiresAt: payload.status === "CANCELLED" ? null : appointment.paymentExpiresAt,
+        paymentStatus:
+          payload.status === "CANCELLED" && appointment.paymentStatus === "PENDING"
+            ? "CANCELLED"
+            : appointment.paymentStatus,
+      },
+      include: {
+        service: true,
+        customerProfile: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      ok: true,
+      appointment: {
+        id: updatedAppointment.id,
+        status: updatedAppointment.status,
+        paymentStatus: updatedAppointment.paymentStatus,
+        serviceName: updatedAppointment.service.name,
+        customerName: updatedAppointment.customerProfile.user.name,
+      },
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Los datos enviados no son validos." },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json(
+      { error: "No se pudo actualizar el turno en este momento." },
       { status: 500 },
     );
   }

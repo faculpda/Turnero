@@ -1,13 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { AppointmentSummary } from "@/lib/types";
 
 type AppointmentsFocusPanelProps = {
   appointments: AppointmentSummary[];
+  tenantSlug: string;
 };
 
 type AppointmentFilter = "ALL" | "CONFIRMED" | "PENDING";
+type MutableAppointmentStatus = "COMPLETED" | "CANCELLED";
 
 type CalendarDay = {
   key: string;
@@ -98,7 +101,12 @@ function formatWeekRange(weekStart: Date) {
 
 export function AppointmentsFocusPanel({
   appointments,
+  tenantSlug,
 }: AppointmentsFocusPanelProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
   const turnosActivos = useMemo(
     () =>
       appointments
@@ -119,9 +127,7 @@ export function AppointmentsFocusPanel({
 
   const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek(referencia));
   const [filter, setFilter] = useState<AppointmentFilter>("ALL");
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | undefined>(
-    turnosActivos[0]?.id,
-  );
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | undefined>();
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
@@ -151,9 +157,9 @@ export function AppointmentsFocusPanel({
     });
   }, [filteredAppointments, weekDays]);
 
-  const selectedAppointment =
-    filteredAppointments.find((appointment) => appointment.id === selectedAppointmentId) ??
-    filteredAppointments[0];
+  const selectedAppointment = turnosActivos.find(
+    (appointment) => appointment.id === selectedAppointmentId,
+  );
 
   const confirmedAppointments = turnosActivos.filter(
     (appointment) => appointment.status === "CONFIRMED",
@@ -164,6 +170,42 @@ export function AppointmentsFocusPanel({
   const paidAppointments = turnosActivos.filter(
     (appointment) => appointment.paymentStatus === "APPROVED",
   );
+
+  async function updateAppointmentStatus(status: MutableAppointmentStatus) {
+    if (!selectedAppointment) {
+      return;
+    }
+
+    setError(null);
+
+    try {
+      const response = await fetch("/api/appointments", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tenantSlug,
+          appointmentId: selectedAppointment.id,
+          status,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error ?? "No se pudo actualizar el turno.");
+        return;
+      }
+
+      startTransition(() => {
+        setSelectedAppointmentId(undefined);
+        router.refresh();
+      });
+    } catch {
+      setError("No se pudo actualizar el turno.");
+    }
+  }
 
   if (turnosActivos.length === 0) {
     return (
@@ -195,8 +237,8 @@ export function AppointmentsFocusPanel({
         <div>
           <h2>Calendario de turnos</h2>
           <p className="muted">
-            Inspirado en dashboards de agenda profesional: filtros rapidos, vista semanal y detalle
-            del turno sin perder el contexto del calendario.
+            Inspirado en dashboards de agenda profesional: filtros rapidos, vista semanal y una
+            ventana de detalle para operar cada turno.
           </p>
         </div>
       </div>
@@ -270,33 +312,30 @@ export function AppointmentsFocusPanel({
 
               <div className="dashboard-calendar-day-body">
                 {day.appointments.length > 0 ? (
-                  day.appointments.map((appointment) => {
-                    const isActive = appointment.id === selectedAppointment?.id;
-
-                    return (
-                      <button
-                        key={appointment.id}
-                        className={`dashboard-calendar-event ${appointment.status.toLowerCase()} ${
-                          isActive ? "active" : ""
-                        }`}
-                        onClick={() => setSelectedAppointmentId(appointment.id)}
-                        type="button"
-                      >
-                        <div className="dashboard-calendar-event-time">
-                          {formatHour(appointment.startsAtIso)}
-                        </div>
-                        <div className="dashboard-calendar-event-main">
-                          <strong>{appointment.customerName}</strong>
-                          <span>{appointment.serviceName}</span>
-                        </div>
-                        <div className="dashboard-calendar-event-meta">
-                          <span className={`badge ${appointment.status.toLowerCase()}`}>
-                            {estadoTurnoLabel[appointment.status] ?? appointment.status}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })
+                  day.appointments.map((appointment) => (
+                    <button
+                      key={appointment.id}
+                      className={`dashboard-calendar-event ${appointment.status.toLowerCase()}`}
+                      onClick={() => {
+                        setError(null);
+                        setSelectedAppointmentId(appointment.id);
+                      }}
+                      type="button"
+                    >
+                      <div className="dashboard-calendar-event-time">
+                        {formatHour(appointment.startsAtIso)}
+                      </div>
+                      <div className="dashboard-calendar-event-main">
+                        <strong>{appointment.customerName}</strong>
+                        <span>{appointment.serviceName}</span>
+                      </div>
+                      <div className="dashboard-calendar-event-meta">
+                        <span className={`badge ${appointment.status.toLowerCase()}`}>
+                          {estadoTurnoLabel[appointment.status] ?? appointment.status}
+                        </span>
+                      </div>
+                    </button>
+                  ))
                 ) : (
                   <div className="dashboard-calendar-empty">Sin turnos</div>
                 )}
@@ -305,54 +344,6 @@ export function AppointmentsFocusPanel({
           ))}
         </div>
       </article>
-
-      {selectedAppointment ? (
-        <article className="panel dashboard-turno-detail-panel">
-          <div className="dashboard-section-header">
-            <div>
-              <h2>Detalle del turno seleccionado</h2>
-              <p className="muted">
-                Mantiene toda la informacion importante sin ocupar una columna permanente.
-              </p>
-            </div>
-            <div className="dashboard-turno-detail-badges">
-              <span className={`badge ${selectedAppointment.status.toLowerCase()}`}>
-                {estadoTurnoLabel[selectedAppointment.status] ?? selectedAppointment.status}
-              </span>
-              <span className={`badge ${selectedAppointment.paymentStatus.toLowerCase()}`}>
-                {estadoPagoLabel[selectedAppointment.paymentStatus] ?? selectedAppointment.paymentStatus}
-              </span>
-            </div>
-          </div>
-
-          <div className="dashboard-turno-detail-grid">
-            <div className="dashboard-turno-detail-block">
-              <span className="dashboard-detail-label">Paciente</span>
-              <strong>{selectedAppointment.customerName}</strong>
-            </div>
-            <div className="dashboard-turno-detail-block">
-              <span className="dashboard-detail-label">Telefono</span>
-              <strong>{selectedAppointment.customerPhone ?? "No informado"}</strong>
-            </div>
-            <div className="dashboard-turno-detail-block">
-              <span className="dashboard-detail-label">Mail</span>
-              <strong>{selectedAppointment.customerEmail}</strong>
-            </div>
-            <div className="dashboard-turno-detail-block">
-              <span className="dashboard-detail-label">Servicio</span>
-              <strong>{selectedAppointment.serviceName}</strong>
-            </div>
-            <div className="dashboard-turno-detail-block">
-              <span className="dashboard-detail-label">Horario</span>
-              <strong>{selectedAppointment.startsAt}</strong>
-            </div>
-            <div className="dashboard-turno-detail-block">
-              <span className="dashboard-detail-label">Notas</span>
-              <strong>{selectedAppointment.notes ?? "Sin observaciones."}</strong>
-            </div>
-          </div>
-        </article>
-      ) : null}
 
       <article className="panel dashboard-calendar-insights">
         <div className="dashboard-calendar-insight">
@@ -371,6 +362,102 @@ export function AppointmentsFocusPanel({
           <p className="muted">Ayuda a detectar rapido que citas ya tienen cobro resuelto.</p>
         </div>
       </article>
+
+      {selectedAppointment ? (
+        <div
+          aria-modal="true"
+          className="dashboard-modal-backdrop"
+          role="dialog"
+          onClick={() => {
+            if (!isPending) {
+              setSelectedAppointmentId(undefined);
+              setError(null);
+            }
+          }}
+        >
+          <article
+            className="panel dashboard-modal-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="dashboard-section-header">
+              <div>
+                <h2>{selectedAppointment.customerName}</h2>
+                <p className="muted">
+                  {selectedAppointment.serviceName} - {selectedAppointment.startsAt}
+                </p>
+              </div>
+              <button
+                className="dashboard-modal-close"
+                onClick={() => {
+                  if (!isPending) {
+                    setSelectedAppointmentId(undefined);
+                    setError(null);
+                  }
+                }}
+                type="button"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="dashboard-turno-detail-grid">
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Paciente</span>
+                <strong>{selectedAppointment.customerName}</strong>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Telefono</span>
+                <strong>{selectedAppointment.customerPhone ?? "No informado"}</strong>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Mail</span>
+                <strong>{selectedAppointment.customerEmail}</strong>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Servicio</span>
+                <strong>{selectedAppointment.serviceName}</strong>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Estado del turno</span>
+                <span className={`badge ${selectedAppointment.status.toLowerCase()}`}>
+                  {estadoTurnoLabel[selectedAppointment.status] ?? selectedAppointment.status}
+                </span>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Estado del pago</span>
+                <span className={`badge ${selectedAppointment.paymentStatus.toLowerCase()}`}>
+                  {estadoPagoLabel[selectedAppointment.paymentStatus] ?? selectedAppointment.paymentStatus}
+                </span>
+              </div>
+              <div className="dashboard-turno-detail-block dashboard-turno-detail-block-wide">
+                <span className="dashboard-detail-label">Observaciones</span>
+                <strong>{selectedAppointment.notes ?? "Sin observaciones."}</strong>
+              </div>
+            </div>
+
+            {error ? <p className="form-error">{error}</p> : null}
+
+            <div className="dashboard-modal-actions">
+              <button
+                className="button secondary"
+                disabled={isPending}
+                onClick={() => updateAppointmentStatus("CANCELLED")}
+                type="button"
+              >
+                Cancelar turno
+              </button>
+              <button
+                className="button primary"
+                disabled={isPending}
+                onClick={() => updateAppointmentStatus("COMPLETED")}
+                type="button"
+              >
+                Marcar como completado
+              </button>
+            </div>
+          </article>
+        </div>
+      ) : null}
     </section>
   );
 }
