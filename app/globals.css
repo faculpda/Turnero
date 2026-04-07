@@ -1,5 +1,7 @@
 :root {
-  --font-sans: "Montserrat", sans-serif;
+  --font-body: "Manrope", sans-serif;
+  --font-display: "Sora", sans-serif;
+  --font-accent: "Montserrat", sans-serif;
   --bg: #f6f4fb;
   --panel: #ffffff;
   --panel-soft: #f8f5ff;
@@ -22,7 +24,7 @@
 }
 
 html {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
 }
@@ -31,6 +33,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background: var(--bg);
+  font-family: var(--font-body);
 }
 
 a {
@@ -87,6 +90,7 @@ a {
 .dashboard-sidebar-subtitle {
   color: #8a84a0;
   font-size: 0.9rem;
+  font-family: var(--font-body);
 }
 
 .dashboard-sidebar-nav,
@@ -101,6 +105,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-family: var(--font-accent);
 }
 
 .dashboard-sidebar-item {
@@ -112,6 +117,8 @@ a {
   color: #5f6780;
   background: #ffffff;
   border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 700;
 }
 
 .dashboard-sidebar-item.active {
@@ -232,12 +239,22 @@ a {
   box-shadow: var(--shadow);
 }
 
+.dashboard-overview-chip strong,
+.dashboard-kpi-card h2,
+.dashboard-turno-main strong,
+.dashboard-turno-meta strong,
+.dashboard-turno-detail-block strong,
+.dashboard-sidebar-brand strong {
+  font-family: var(--font-display);
+}
+
 .dashboard-overview-chip-label {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-family: var(--font-accent);
 }
 
 .dashboard-overview-chip-violet {
@@ -337,6 +354,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-family: var(--font-accent);
 }
 
 .hero-sales {
@@ -384,18 +402,20 @@ a {
   text-transform: uppercase;
   color: var(--brand-strong);
   font-weight: 700;
+  font-family: var(--font-accent);
 }
 
 .muted {
   color: var(--muted);
   line-height: 1.65;
+  font-family: var(--font-body);
 }
 
 h1,
 h2,
-h3,
-strong {
+h3 {
   letter-spacing: -0.03em;
+  font-family: var(--font-display);
 }
 
 h1 {
@@ -414,6 +434,7 @@ h2 {
 
 p {
   margin: 0;
+  font-family: var(--font-body);
 }
 
 .hero-copy {
@@ -610,6 +631,7 @@ p {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-family: var(--font-accent);
 }
 
 .dashboard-kpi-card-violet {
@@ -758,6 +780,7 @@ p {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-family: var(--font-accent);
 }
 
 .dashboard-summary-list {
@@ -849,6 +872,7 @@ p {
   font-size: 0.8rem;
   font-weight: 600;
   border: 1px solid transparent;
+  font-family: var(--font-accent);
 }
 
 .badge.active,
@@ -894,6 +918,7 @@ p {
   padding: 12px 18px;
   border: 1px solid transparent;
   font-weight: 600;
+  font-family: var(--font-body);
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -935,6 +960,7 @@ th {
   color: var(--muted);
   font-size: 0.9rem;
   font-weight: 700;
+  font-family: var(--font-accent);
 }
 
 td:last-child,
@@ -962,6 +988,7 @@ th:last-child {
   display: grid;
   gap: 8px;
   font-weight: 700;
+  font-family: var(--font-body);
 }
 
 .field-checkbox {
@@ -1043,6 +1070,7 @@ th:last-child {
   font-size: 0.92rem;
   font-weight: 600;
   text-transform: uppercase;
+  font-family: var(--font-accent);
 }
 
 .field input:focus {
@@ -1209,6 +1237,7 @@ th:last-child {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  font-family: var(--font-body);
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 

@@ -1,10 +1,22 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Manrope, Montserrat, Sora } from "next/font/google";
 import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
 
 const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-accent",
+  display: "swap",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -19,7 +31,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={montserrat.variable} lang="es">
+    <html
+      className={`${manrope.variable} ${montserrat.variable} ${sora.variable}`}
+      lang="es"
+    >
       <body>{children}</body>
     </html>
   );
