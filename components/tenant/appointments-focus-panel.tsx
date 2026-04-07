@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AppointmentSummary } from "@/lib/types";
 
@@ -99,6 +99,15 @@ function formatWeekRange(weekStart: Date) {
   return `${formatter.format(weekStart)} al ${formatter.format(weekEnd)}`;
 }
 
+function toDateTimeLocalValue(dateIso: string) {
+  const date = new Date(dateIso);
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
+    date.getHours(),
+  )}:${pad(date.getMinutes())}`;
+}
+
 export function AppointmentsFocusPanel({
   appointments,
   tenantSlug,
@@ -106,6 +115,8 @@ export function AppointmentsFocusPanel({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [rescheduleDraft, setRescheduleDraft] = useState("");
 
   const turnosActivos = useMemo(
     () =>
@@ -161,6 +172,17 @@ export function AppointmentsFocusPanel({
     (appointment) => appointment.id === selectedAppointmentId,
   );
 
+  useEffect(() => {
+    if (!selectedAppointment) {
+      setNotesDraft("");
+      setRescheduleDraft("");
+      return;
+    }
+
+    setNotesDraft(selectedAppointment.notes ?? "");
+    setRescheduleDraft(toDateTimeLocalValue(selectedAppointment.startsAtIso));
+  }, [selectedAppointment]);
+
   const confirmedAppointments = turnosActivos.filter(
     (appointment) => appointment.status === "CONFIRMED",
   );
@@ -171,7 +193,11 @@ export function AppointmentsFocusPanel({
     (appointment) => appointment.paymentStatus === "APPROVED",
   );
 
-  async function updateAppointmentStatus(status: MutableAppointmentStatus) {
+  async function submitAppointmentChanges(payload: {
+    status?: MutableAppointmentStatus;
+    startsAt?: string;
+    notes?: string;
+  }) {
     if (!selectedAppointment) {
       return;
     }
@@ -187,7 +213,7 @@ export function AppointmentsFocusPanel({
         body: JSON.stringify({
           tenantSlug,
           appointmentId: selectedAppointment.id,
-          status,
+          ...payload,
         }),
       });
 
@@ -205,6 +231,26 @@ export function AppointmentsFocusPanel({
     } catch {
       setError("No se pudo actualizar el turno.");
     }
+  }
+
+  async function updateAppointmentStatus(status: MutableAppointmentStatus) {
+    await submitAppointmentChanges({ status });
+  }
+
+  async function saveNotes() {
+    await submitAppointmentChanges({ notes: notesDraft });
+  }
+
+  async function rescheduleAppointment() {
+    if (!rescheduleDraft) {
+      setError("Debes elegir una fecha y hora para reprogramar.");
+      return;
+    }
+
+    await submitAppointmentChanges({
+      startsAt: new Date(rescheduleDraft).toISOString(),
+      notes: notesDraft,
+    });
   }
 
   if (turnosActivos.length === 0) {
@@ -431,13 +477,43 @@ export function AppointmentsFocusPanel({
               </div>
               <div className="dashboard-turno-detail-block dashboard-turno-detail-block-wide">
                 <span className="dashboard-detail-label">Observaciones</span>
-                <strong>{selectedAppointment.notes ?? "Sin observaciones."}</strong>
+                <textarea
+                  className="dashboard-modal-textarea"
+                  onChange={(event) => setNotesDraft(event.target.value)}
+                  rows={4}
+                  value={notesDraft}
+                />
+              </div>
+              <div className="dashboard-turno-detail-block dashboard-turno-detail-block-wide">
+                <span className="dashboard-detail-label">Reprogramar turno</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) => setRescheduleDraft(event.target.value)}
+                  type="datetime-local"
+                  value={rescheduleDraft}
+                />
               </div>
             </div>
 
             {error ? <p className="form-error">{error}</p> : null}
 
             <div className="dashboard-modal-actions">
+              <button
+                className="button secondary"
+                disabled={isPending}
+                onClick={saveNotes}
+                type="button"
+              >
+                Guardar notas
+              </button>
+              <button
+                className="button secondary"
+                disabled={isPending}
+                onClick={rescheduleAppointment}
+                type="button"
+              >
+                Reprogramar
+              </button>
               <button
                 className="button secondary"
                 disabled={isPending}

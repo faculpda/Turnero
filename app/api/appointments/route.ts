@@ -21,11 +21,19 @@ const createAppointmentSchema = z.object({
   redirectTo: z.string().min(1).optional(),
 });
 
-const updateAppointmentStatusSchema = z.object({
+const updateAppointmentSchema = z.object({
   tenantSlug: z.string().min(1),
   appointmentId: z.string().min(1),
-  status: z.enum(["COMPLETED", "CANCELLED"]),
-});
+  status: z.enum(["COMPLETED", "CANCELLED"]).optional(),
+  startsAt: z.string().datetime().optional(),
+  notes: z.string().max(1000).optional(),
+}).refine(
+  (payload) =>
+    payload.status !== undefined || payload.startsAt !== undefined || payload.notes !== undefined,
+  {
+    message: "Debes enviar al menos un cambio.",
+  },
+);
 
 const MAX_TRANSACTION_RETRIES = 3;
 
@@ -368,7 +376,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Necesitas iniciar sesion." }, { status: 401 });
     }
 
-    const payload = updateAppointmentStatusSchema.parse(await request.json());
+    const payload = updateAppointmentSchema.parse(await request.json());
 
     if (!(await canManageTenant(payload.tenantSlug))) {
       return NextResponse.json(
@@ -385,6 +393,35 @@ export async function PATCH(request: Request) {
         tenant: {
           select: {
             slug: true,
+            availability: {
+              where: {
+                isActive: true,
+              },
+              orderBy: [
+                {
+                  dayOfWeek: "asc",
+                },
+                {
+                  startTime: "asc",
+                },
+              ],
+            },
+            appointments: {
+              where: buildAppointmentActiveFilter(),
+              select: {
+                id: true,
+                startsAt: true,
+                endsAt: true,
+                status: true,
+                paymentExpiresAt: true,
+              },
+            },
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            durationMin: true,
           },
         },
       },
@@ -397,11 +434,84 @@ export async function PATCH(request: Request) {
       );
     }
 
-    if (appointment.status !== "PENDING" && appointment.status !== "CONFIRMED") {
+    if (
+      payload.status &&
+      appointment.status !== "PENDING" &&
+      appointment.status !== "CONFIRMED"
+    ) {
       return NextResponse.json(
         { error: "Solo se pueden actualizar turnos pendientes o confirmados." },
         { status: 400 },
       );
+    }
+
+    let nextStartsAt = appointment.startsAt;
+    let nextEndsAt = appointment.endsAt;
+
+    if (payload.startsAt) {
+      const startsAt = new Date(payload.startsAt);
+
+      if (Number.isNaN(startsAt.getTime())) {
+        return NextResponse.json({ error: "La nueva fecha no es valida." }, { status: 400 });
+      }
+
+      if (startsAt <= new Date()) {
+        return NextResponse.json(
+          { error: "No puedes reprogramar un turno a una fecha pasada." },
+          { status: 400 },
+        );
+      }
+
+      const endsAt = new Date(startsAt.getTime() + appointment.service.durationMin * 60 * 1000);
+      const otherAppointments = appointment.tenant.appointments.filter(
+        (tenantAppointment) => tenantAppointment.id !== appointment.id,
+      );
+      const availableSlots = generateAvailableSlotsForService(
+        { durationMin: appointment.service.durationMin },
+        appointment.tenant.availability,
+        otherAppointments,
+        500,
+        21,
+      );
+      const isPublishedSlot = availableSlots.some(
+        (slot) => new Date(slot.startsAt).getTime() === startsAt.getTime(),
+      );
+
+      if (!isPublishedSlot) {
+        return NextResponse.json(
+          { error: "Ese horario ya no esta disponible para reprogramar." },
+          { status: 409 },
+        );
+      }
+
+      const conflictingAppointment = await prisma.appointment.findFirst({
+        where: {
+          id: {
+            not: appointment.id,
+          },
+          tenantId: appointment.tenantId,
+          startsAt: {
+            lt: endsAt,
+          },
+          endsAt: {
+            gt: startsAt,
+          },
+          ...buildAppointmentActiveFilter(),
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (conflictingAppointment) {
+        return NextResponse.json(
+          { error: "Ese horario ya no esta disponible para reprogramar." },
+          { status: 409 },
+        );
+      }
+
+      nextStartsAt = startsAt;
+      nextEndsAt = endsAt;
     }
 
     const updatedAppointment = await prisma.appointment.update({
@@ -409,8 +519,12 @@ export async function PATCH(request: Request) {
         id: appointment.id,
       },
       data: {
-        status: payload.status,
-        paymentExpiresAt: payload.status === "CANCELLED" ? null : appointment.paymentExpiresAt,
+        startsAt: nextStartsAt,
+        endsAt: nextEndsAt,
+        notes: payload.notes !== undefined ? payload.notes.trim() || null : appointment.notes,
+        status: payload.status ?? appointment.status,
+        paymentExpiresAt:
+          payload.status === "CANCELLED" ? null : appointment.paymentExpiresAt,
         paymentStatus:
           payload.status === "CANCELLED" && appointment.paymentStatus === "PENDING"
             ? "CANCELLED"
@@ -432,6 +546,8 @@ export async function PATCH(request: Request) {
         id: updatedAppointment.id,
         status: updatedAppointment.status,
         paymentStatus: updatedAppointment.paymentStatus,
+        startsAt: updatedAppointment.startsAt.toISOString(),
+        notes: updatedAppointment.notes,
         serviceName: updatedAppointment.service.name,
         customerName: updatedAppointment.customerProfile.user.name,
       },

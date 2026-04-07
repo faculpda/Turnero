@@ -879,6 +879,22 @@ p {
   gap: 12px;
 }
 
+.dashboard-modal-input,
+.dashboard-modal-textarea {
+  width: 100%;
+  border: 1px solid #e4dff0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+  color: var(--text);
+  font: inherit;
+  font-family: var(--font-body);
+}
+
+.dashboard-modal-textarea {
+  resize: vertical;
+}
+
 .dashboard-kpi-card {
   border-color: #e7e0f2;
   background: #ffffff;
