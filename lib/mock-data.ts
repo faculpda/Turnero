@@ -28,6 +28,9 @@ export const tenantAppointments: AppointmentSummary[] = [
     id: "app_1",
     serviceId: "srv_1",
     serviceName: "Limpieza dental",
+    providerId: "prov_1",
+    providerName: "Dra. Paula Gomez",
+    providerColor: "#5d3fd3",
     customerName: "Maria Gomez",
     customerEmail: "maria@example.com",
     customerPhone: "+54 11 5555-0101",
@@ -42,6 +45,9 @@ export const tenantAppointments: AppointmentSummary[] = [
     id: "app_2",
     serviceId: "srv_2",
     serviceName: "Control general",
+    providerId: "prov_2",
+    providerName: "Dr. Martin Lopez",
+    providerColor: "#2784e6",
     customerName: "Juan Perez",
     customerEmail: "juan@example.com",
     customerPhone: "+54 11 5555-0130",
@@ -56,6 +62,9 @@ export const tenantAppointments: AppointmentSummary[] = [
     id: "app_3",
     serviceId: "srv_3",
     serviceName: "Blanqueamiento",
+    providerId: "prov_1",
+    providerName: "Dra. Paula Gomez",
+    providerColor: "#5d3fd3",
     customerName: "Lucia Diaz",
     customerEmail: "lucia@example.com",
     customerPhone: "+54 11 5555-0160",
@@ -66,6 +75,25 @@ export const tenantAppointments: AppointmentSummary[] = [
     notes: "Prefiere atencion por la tarde.",
     events: [],
     reminders: [],
+  },
+];
+
+export const tenantProviders = [
+  {
+    id: "prov_1",
+    name: "Dra. Paula Gomez",
+    email: "admin@dentista.com",
+    phone: "+54 11 4444-1101",
+    color: "#5d3fd3",
+    isActive: true,
+  },
+  {
+    id: "prov_2",
+    name: "Dr. Martin Lopez",
+    email: "martin@dentista.com",
+    phone: "+54 11 4444-2202",
+    color: "#2784e6",
+    isActive: true,
   },
 ];
 

@@ -821,6 +821,18 @@ p {
   font-size: 0.94rem;
 }
 
+.dashboard-provider-tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 2px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-family: var(--font-accent);
+  font-weight: 700;
+}
+
 .dashboard-calendar-event-meta {
   display: flex;
   flex-wrap: wrap;
@@ -947,6 +959,21 @@ p {
   border: 1px solid #ece5f5;
   border-radius: 14px;
   background: #fbf9ff;
+}
+
+.dashboard-provider-item,
+.dashboard-provider-identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dashboard-provider-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-top: 6px;
+  flex-shrink: 0;
 }
 
 .dashboard-modal-input,

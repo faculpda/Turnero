@@ -20,6 +20,12 @@ type AppointmentsFocusPanelProps = {
     durationMin: number;
     priceLabel: string;
   }>;
+  providers: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    isActive: boolean;
+  }>;
   tenantSlug: string;
 };
 
@@ -162,6 +168,7 @@ export function AppointmentsFocusPanel({
   appointments,
   blockedTimeSlots,
   services,
+  providers,
   tenantSlug,
 }: AppointmentsFocusPanelProps) {
   const router = useRouter();
@@ -174,6 +181,7 @@ export function AppointmentsFocusPanel({
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [serviceFilter, setServiceFilter] = useState<string>("ALL");
+  const [providerFilter, setProviderFilter] = useState<string>("ALL");
   const [view, setView] = useState<CalendarView>("WEEK");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | undefined>();
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -181,6 +189,7 @@ export function AppointmentsFocusPanel({
   const [manualCustomerEmail, setManualCustomerEmail] = useState("");
   const [manualCustomerPhone, setManualCustomerPhone] = useState("");
   const [manualServiceId, setManualServiceId] = useState(services[0]?.id ?? "");
+  const [manualProviderId, setManualProviderId] = useState(providers[0]?.id ?? "");
   const [manualStartsAt, setManualStartsAt] = useState("");
   const [manualNotes, setManualNotes] = useState("");
   const [manualPaymentStatus, setManualPaymentStatus] = useState<
@@ -222,15 +231,17 @@ export function AppointmentsFocusPanel({
         paymentFilter === "ALL" || appointment.paymentStatus === paymentFilter;
       const matchesService =
         serviceFilter === "ALL" || appointment.serviceId === serviceFilter;
+      const matchesProvider =
+        providerFilter === "ALL" || appointment.providerId === providerFilter;
       const matchesSearch =
         normalizedSearch.length === 0 ||
         appointment.customerName.toLowerCase().includes(normalizedSearch) ||
         appointment.customerEmail.toLowerCase().includes(normalizedSearch) ||
         (appointment.customerPhone ?? "").toLowerCase().includes(normalizedSearch);
 
-      return matchesStatus && matchesPayment && matchesService && matchesSearch;
+      return matchesStatus && matchesPayment && matchesService && matchesProvider && matchesSearch;
     });
-  }, [filter, paymentFilter, searchQuery, serviceFilter, turnosOperativos]);
+  }, [filter, paymentFilter, providerFilter, searchQuery, serviceFilter, turnosOperativos]);
 
   const selectedAppointment = turnosOperativos.find(
     (appointment) => appointment.id === selectedAppointmentId,
@@ -288,6 +299,7 @@ export function AppointmentsFocusPanel({
     status?: MutableAppointmentStatus;
     startsAt?: string;
     notes?: string;
+    providerId?: string | null;
   }) {
     if (!selectedAppointment) {
       return;
@@ -370,6 +382,7 @@ export function AppointmentsFocusPanel({
           customerEmail: manualCustomerEmail,
           customerPhone: manualCustomerPhone,
           serviceId: manualServiceId,
+          providerId: manualProviderId || undefined,
           startsAt: new Date(manualStartsAt).toISOString(),
           notes: manualNotes,
           paymentStatus: manualPaymentStatus,
@@ -427,7 +440,7 @@ export function AppointmentsFocusPanel({
         <div>
           <h2>Calendario de turnos</h2>
           <p className="muted">
-            Busca pacientes, filtra por servicio o pago, alterna entre dia y semana y opera cada
+            Busca clientes, filtra por servicio o pago, alterna entre dia y semana y opera cada
             turno desde la agenda.
           </p>
         </div>
@@ -548,6 +561,18 @@ export function AppointmentsFocusPanel({
               </option>
             ))}
           </select>
+          <select
+            className="dashboard-modal-input"
+            onChange={(event) => setProviderFilter(event.target.value)}
+            value={providerFilter}
+          >
+            <option value="ALL">Todos los prestadores</option>
+            {providers.filter((provider) => provider.isActive).map((provider) => (
+              <option key={provider.id} value={provider.id}>
+                {provider.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {error ? <p className="form-error">{error}</p> : null}
@@ -590,10 +615,21 @@ export function AppointmentsFocusPanel({
                         <div className="dashboard-calendar-event-time">
                           {formatHour(appointment.startsAtIso)}
                         </div>
-                        <div className="dashboard-calendar-event-main">
-                          <strong>{appointment.customerName}</strong>
-                          <span>{appointment.serviceName}</span>
-                        </div>
+                      <div className="dashboard-calendar-event-main">
+                        <strong>{appointment.customerName}</strong>
+                        <span>{appointment.serviceName}</span>
+                        {appointment.providerName ? (
+                          <span
+                            className="dashboard-provider-tag"
+                            style={{
+                              backgroundColor: `${appointment.providerColor ?? "#5d3fd3"}22`,
+                              color: appointment.providerColor ?? "#5d3fd3",
+                            }}
+                          >
+                            {appointment.providerName}
+                          </span>
+                        ) : null}
+                      </div>
                         <div className="dashboard-calendar-event-meta">
                           <span className={`badge ${appointment.status.toLowerCase()}`}>
                             {estadoTurnoLabel[appointment.status] ?? appointment.status}
@@ -678,7 +714,7 @@ export function AppointmentsFocusPanel({
 
             <div className="dashboard-turno-detail-grid">
               <div className="dashboard-turno-detail-block">
-                <span className="dashboard-detail-label">Paciente</span>
+                <span className="dashboard-detail-label">Cliente</span>
                 <strong>{selectedAppointment.customerName}</strong>
               </div>
               <div className="dashboard-turno-detail-block">
@@ -692,6 +728,25 @@ export function AppointmentsFocusPanel({
               <div className="dashboard-turno-detail-block">
                 <span className="dashboard-detail-label">Servicio</span>
                 <strong>{selectedAppointment.serviceName}</strong>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Prestador</span>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) =>
+                    submitAppointmentChanges({
+                      providerId: event.target.value || null,
+                    })
+                  }
+                  value={selectedAppointment.providerId ?? ""}
+                >
+                  <option value="">Sin asignar</option>
+                  {providers.filter((provider) => provider.isActive).map((provider) => (
+                    <option key={provider.id} value={provider.id}>
+                      {provider.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="dashboard-turno-detail-block">
                 <span className="dashboard-detail-label">Estado del turno</span>
@@ -878,7 +933,7 @@ export function AppointmentsFocusPanel({
                 <input
                   className="dashboard-modal-input"
                   onChange={(event) => setManualCustomerName(event.target.value)}
-                  placeholder="Paciente o cliente"
+                  placeholder="Cliente"
                   value={manualCustomerName}
                 />
               </div>
@@ -910,6 +965,21 @@ export function AppointmentsFocusPanel({
                   {services.map((service) => (
                     <option key={service.id} value={service.id}>
                       {service.name} - {service.priceLabel}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="dashboard-turno-detail-block">
+                <span className="dashboard-detail-label">Prestador</span>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) => setManualProviderId(event.target.value)}
+                  value={manualProviderId}
+                >
+                  <option value="">Sin asignar</option>
+                  {providers.filter((provider) => provider.isActive).map((provider) => (
+                    <option key={provider.id} value={provider.id}>
+                      {provider.name}
                     </option>
                   ))}
                 </select>

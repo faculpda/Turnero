@@ -14,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 const createManualAppointmentSchema = z.object({
   tenantSlug: z.string().min(1),
   serviceId: z.string().min(1),
+  providerId: z.string().min(1).optional(),
   customerName: z.string().min(2).max(120),
   customerEmail: z.string().email().optional().or(z.literal("")),
   customerPhone: z.string().max(40).optional().or(z.literal("")),
@@ -167,6 +168,7 @@ export async function POST(request: Request) {
         data: {
           tenantId: service.tenantId,
           serviceId: service.id,
+          providerId: payload.providerId || null,
           customerProfileId: customerProfile.id,
           startsAt,
           endsAt,

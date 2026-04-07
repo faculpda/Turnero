@@ -29,12 +29,16 @@ const createAppointmentSchema = z.object({
 const updateAppointmentSchema = z.object({
   tenantSlug: z.string().min(1),
   appointmentId: z.string().min(1),
+  providerId: z.string().min(1).nullable().optional(),
   status: z.enum(["CONFIRMED", "COMPLETED", "CANCELLED", "NO_SHOW"]).optional(),
   startsAt: z.string().datetime().optional(),
   notes: z.string().max(1000).optional(),
 }).refine(
   (payload) =>
-    payload.status !== undefined || payload.startsAt !== undefined || payload.notes !== undefined,
+    payload.status !== undefined ||
+    payload.startsAt !== undefined ||
+    payload.notes !== undefined ||
+    payload.providerId !== undefined,
   {
     message: "Debes enviar al menos un cambio.",
   },
@@ -594,6 +598,7 @@ export async function PATCH(request: Request) {
         startsAt: nextStartsAt,
         endsAt: nextEndsAt,
         notes: payload.notes !== undefined ? payload.notes.trim() || null : appointment.notes,
+        providerId: payload.providerId !== undefined ? payload.providerId : appointment.providerId,
         status: payload.status ?? appointment.status,
         paymentExpiresAt:
           payload.status === "CANCELLED" ? null : appointment.paymentExpiresAt,
@@ -684,6 +689,19 @@ export async function PATCH(request: Request) {
         type: "NOTES_UPDATED",
         title: "Notas actualizadas",
         description: "Se actualizaron las notas administrativas del turno.",
+      });
+    }
+
+    if (payload.providerId !== undefined) {
+      await logAppointmentEvent({
+        appointmentId: updatedAppointment.id,
+        tenantId: updatedAppointment.tenantId,
+        actorUserId: session.userId,
+        type: "NOTES_UPDATED",
+        title: "Prestador actualizado",
+        description: payload.providerId
+          ? "Se asigno o cambio el prestador del turno."
+          : "Se quito el prestador asignado al turno.",
       });
     }
 

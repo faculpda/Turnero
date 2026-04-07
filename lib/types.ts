@@ -58,6 +58,9 @@ export type AppointmentSummary = {
   id: string;
   serviceName: string;
   serviceId: string;
+  providerId?: string;
+  providerName?: string;
+  providerColor?: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
@@ -131,6 +134,14 @@ export type ServiceAvailability = {
 
 export type TenantDashboardData = {
   profile: TenantPublicProfile;
+  providers: Array<{
+    id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    color?: string;
+    isActive: boolean;
+  }>;
   appointments: AppointmentSummary[];
   blockedTimeSlots: Array<{
     id: string;

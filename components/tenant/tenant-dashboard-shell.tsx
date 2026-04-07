@@ -6,7 +6,13 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { AppointmentsFocusPanel } from "@/components/tenant/appointments-focus-panel";
 import type { AppointmentSummary, TenantPublicProfile } from "@/lib/types";
 
-type DashboardSection = "turnos" | "agenda" | "servicios" | "cobros" | "personalizar";
+type DashboardSection =
+  | "turnos"
+  | "agenda"
+  | "prestadores"
+  | "servicios"
+  | "cobros"
+  | "personalizar";
 
 type TenantDashboardShellProps = {
   tenantSlug: string;
@@ -20,6 +26,12 @@ type TenantDashboardShellProps = {
     startsAtIso: string;
     endsAtIso: string;
   }>;
+  providers: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    isActive: boolean;
+  }>;
   session: {
     name: string;
     email: string;
@@ -28,6 +40,7 @@ type TenantDashboardShellProps = {
   reservasActivas: number;
   pagosPendientes: number;
   agenda: React.ReactNode;
+  prestadores: React.ReactNode;
   servicios: React.ReactNode;
   cobros: React.ReactNode;
   personalizar: React.ReactNode;
@@ -36,6 +49,7 @@ type TenantDashboardShellProps = {
 const sectionTitles: Record<DashboardSection, string> = {
   turnos: "Turnos",
   agenda: "Agenda",
+  prestadores: "Prestadores",
   servicios: "Servicios",
   cobros: "Cobros",
   personalizar: "Personalizar pagina",
@@ -46,10 +60,12 @@ export function TenantDashboardShell({
   profile,
   appointments,
   blockedTimeSlots,
+  providers,
   session,
   reservasActivas,
   pagosPendientes,
   agenda,
+  prestadores,
   servicios,
   cobros,
   personalizar,
@@ -70,7 +86,9 @@ export function TenantDashboardShell({
         <nav className="dashboard-sidebar-nav" aria-label="Secciones del panel">
           <div className="dashboard-sidebar-group">
             <span className="dashboard-sidebar-label">Operacion</span>
-            {(["turnos", "agenda", "servicios", "cobros", "personalizar"] as DashboardSection[]).map(
+            {(
+              ["turnos", "agenda", "prestadores", "servicios", "cobros", "personalizar"] as DashboardSection[]
+            ).map(
               (section) => (
                 <button
                   key={section}
@@ -125,7 +143,7 @@ export function TenantDashboardShell({
               <span className="eyebrow">Panel del tenant</span>
               <h1>{profile.name}</h1>
               <p className="muted dashboard-overview-copy">
-                Un tablero claro para controlar reservas activas, atender pacientes y gestionar el
+                Un tablero claro para controlar reservas activas, atender clientes y gestionar el
                 negocio desde una sola barra lateral.
               </p>
             </div>
@@ -150,11 +168,13 @@ export function TenantDashboardShell({
             <AppointmentsFocusPanel
               appointments={appointments}
               blockedTimeSlots={blockedTimeSlots}
+              providers={providers}
               services={profile.services}
               tenantSlug={tenantSlug}
             />
           ) : null}
           {activeSection === "agenda" ? agenda : null}
+          {activeSection === "prestadores" ? prestadores : null}
           {activeSection === "servicios" ? servicios : null}
           {activeSection === "cobros" ? cobros : null}
           {activeSection === "personalizar" ? personalizar : null}

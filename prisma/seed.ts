@@ -88,6 +88,21 @@ async function main() {
     },
   });
 
+  const staffProvider = await prisma.user.upsert({
+    where: { email: "martin@dentista.com" },
+    create: {
+      name: "Dr. Martin Lopez",
+      email: "martin@dentista.com",
+      globalRole: UserRole.STAFF,
+      passwordHash: hashPassword("Prestador1234!"),
+    },
+    update: {
+      name: "Dr. Martin Lopez",
+      globalRole: UserRole.STAFF,
+      passwordHash: hashPassword("Prestador1234!"),
+    },
+  });
+
   await prisma.membership.upsert({
     where: {
       userId_tenantId: {
@@ -104,6 +119,52 @@ async function main() {
       role: UserRole.TENANT_ADMIN,
     },
   });
+
+  await prisma.membership.upsert({
+    where: {
+      userId_tenantId: {
+        userId: staffProvider.id,
+        tenantId: tenant.id,
+      },
+    },
+    update: {
+      role: UserRole.STAFF,
+    },
+    create: {
+      userId: staffProvider.id,
+      tenantId: tenant.id,
+      role: UserRole.STAFF,
+    },
+  });
+
+  await prisma.serviceProvider.deleteMany({
+    where: {
+      tenantId: tenant.id,
+    },
+  });
+
+  const [providerPaula, providerMartin] = await Promise.all([
+    prisma.serviceProvider.create({
+      data: {
+        tenantId: tenant.id,
+        userId: tenantAdmin.id,
+        name: "Dra. Paula Gomez",
+        email: tenantAdmin.email,
+        phone: "+54 11 4444 1101",
+        color: "#5d3fd3",
+      },
+    }),
+    prisma.serviceProvider.create({
+      data: {
+        tenantId: tenant.id,
+        userId: staffProvider.id,
+        name: "Dr. Martin Lopez",
+        email: staffProvider.email,
+        phone: "+54 11 4444 2202",
+        color: "#2784e6",
+      },
+    }),
+  ]);
 
   const [cleaning, checkup, whitening] = await Promise.all([
     prisma.service.upsert({
@@ -282,6 +343,7 @@ async function main() {
         tenantId: tenant.id,
         serviceId: cleaning.id,
         customerProfileId: customerProfile.id,
+        providerId: providerPaula.id,
         startsAt: new Date("2026-04-07T12:00:00.000Z"),
         endsAt: new Date("2026-04-07T12:30:00.000Z"),
         status: AppointmentStatus.CONFIRMED,
@@ -290,6 +352,7 @@ async function main() {
         tenantId: tenant.id,
         serviceId: checkup.id,
         customerProfileId: customerProfile.id,
+        providerId: providerMartin.id,
         startsAt: new Date("2026-04-07T14:30:00.000Z"),
         endsAt: new Date("2026-04-07T15:15:00.000Z"),
         status: AppointmentStatus.PENDING,
@@ -298,6 +361,7 @@ async function main() {
         tenantId: tenant.id,
         serviceId: whitening.id,
         customerProfileId: customerProfile.id,
+        providerId: providerPaula.id,
         startsAt: new Date("2026-04-08T17:00:00.000Z"),
         endsAt: new Date("2026-04-08T18:00:00.000Z"),
         status: AppointmentStatus.CONFIRMED,

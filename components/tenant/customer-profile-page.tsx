@@ -22,9 +22,7 @@ export function TenantCustomerProfilePage({
       <section className="hero">
         <span className="eyebrow">Perfil del cliente final</span>
         <h1>Mis turnos en {tenant.name}</h1>
-        <p className="muted">
-          Aqui el cliente final puede consultar sus proximas reservas y su historial.
-        </p>
+        <p className="muted">Aqui el cliente puede consultar sus proximas reservas y su historial.</p>
         {paymentMessage ? <p className="form-error">{paymentMessage}</p> : null}
       </section>
 

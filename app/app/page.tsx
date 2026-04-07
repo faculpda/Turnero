@@ -1,6 +1,7 @@
 import { AccessDenied } from "@/components/auth/access-denied";
 import { AddServiceForm } from "@/components/tenant/add-service-form";
 import { PaymentSettingsForm } from "@/components/tenant/payment-settings-form";
+import { ProvidersPanel } from "@/components/tenant/providers-panel";
 import { ServiceEditorCard } from "@/components/tenant/service-editor-card";
 import { TenantAgendaPanel } from "@/components/tenant/tenant-agenda-panel";
 import { SiteBuilderForm } from "@/components/tenant/site-builder-form";
@@ -31,7 +32,9 @@ export default async function TenantDashboardPage({
     );
   }
 
-  const { profile, appointments, blockedTimeSlots } = await getTenantDashboardData(tenantSlug);
+  const { profile, providers, appointments, blockedTimeSlots } = await getTenantDashboardData(
+    tenantSlug,
+  );
   const onlinePaymentEnabled = profile.paymentSettings?.mercadoPagoEnabled ?? false;
   const onlinePaymentServices = profile.services.filter(
     (service) => onlinePaymentEnabled && (service.priceCents ?? 0) > 0,
@@ -57,9 +60,11 @@ export default async function TenantDashboardPage({
       }
       appointments={appointments}
       blockedTimeSlots={blockedTimeSlots}
+      providers={providers}
       cobros={<PaymentSettingsForm tenant={profile} />}
       pagosPendientes={pagosPendientes}
       personalizar={<SiteBuilderForm tenant={profile} />}
+      prestadores={<ProvidersPanel providers={providers} tenantSlug={tenantSlug} />}
       profile={profile}
       reservasActivas={reservasActivas}
       servicios={

@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import {
   tenantAppointments as fallbackAppointments,
   tenantBlockedTimeSlots as fallbackBlockedTimeSlots,
+  tenantProviders as fallbackProviders,
   tenantPublicProfile as fallbackPublicProfile,
   tenants as fallbackTenants,
 } from "@/lib/mock-data";
@@ -83,6 +84,11 @@ const dashboardTenantInclude = {
       startsAt: "asc",
     },
   },
+  providers: {
+    orderBy: {
+      createdAt: "asc",
+    },
+  },
   appointments: {
     orderBy: {
       startsAt: "asc",
@@ -90,6 +96,7 @@ const dashboardTenantInclude = {
     take: 30,
     include: {
       service: true,
+      provider: true,
       events: {
         orderBy: {
           createdAt: "desc",
@@ -257,6 +264,9 @@ function mapAppointments(
     id: appointment.id,
     serviceId: appointment.serviceId,
     serviceName: appointment.service.name,
+    providerId: appointment.providerId ?? undefined,
+    providerName: appointment.provider?.name ?? undefined,
+    providerColor: appointment.provider?.color ?? undefined,
     customerName: appointment.customerProfile.user.name,
     customerEmail: appointment.customerProfile.user.email,
     customerPhone: appointment.customerProfile.phone ?? undefined,
@@ -364,6 +374,7 @@ export async function getTenantDashboardData(
     if (!tenant) {
       return {
         profile: fallbackPublicProfile,
+        providers: fallbackProviders,
         appointments: fallbackAppointments,
         blockedTimeSlots: fallbackBlockedTimeSlots,
       };
@@ -381,6 +392,7 @@ export async function getTenantDashboardData(
     if (!refreshedTenant) {
       return {
         profile: fallbackPublicProfile,
+        providers: fallbackProviders,
         appointments: fallbackAppointments,
         blockedTimeSlots: fallbackBlockedTimeSlots,
       };
@@ -388,6 +400,14 @@ export async function getTenantDashboardData(
 
     return {
       profile: mapPublicTenant(refreshedTenant),
+      providers: refreshedTenant.providers.map((provider) => ({
+        id: provider.id,
+        name: provider.name,
+        email: provider.email ?? undefined,
+        phone: provider.phone ?? undefined,
+        color: provider.color ?? undefined,
+        isActive: provider.isActive,
+      })),
       appointments: mapAppointments(refreshedTenant.appointments),
       blockedTimeSlots: refreshedTenant.blockedTimeSlots.map((blockedTimeSlot) => ({
         id: blockedTimeSlot.id,
@@ -401,6 +421,7 @@ export async function getTenantDashboardData(
   } catch {
     return {
       profile: fallbackPublicProfile,
+      providers: fallbackProviders,
       appointments: fallbackAppointments,
       blockedTimeSlots: fallbackBlockedTimeSlots,
     };
