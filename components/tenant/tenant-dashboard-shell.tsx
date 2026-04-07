@@ -85,7 +85,7 @@ export function TenantDashboardShell({
 
         <nav className="dashboard-sidebar-nav" aria-label="Secciones del panel">
           <div className="dashboard-sidebar-group">
-            <span className="dashboard-sidebar-label">Operacion</span>
+            <span className="dashboard-sidebar-label">Navegacion</span>
             {(
               ["turnos", "agenda", "prestadores", "servicios", "cobros", "personalizar"] as DashboardSection[]
             ).map(
@@ -105,7 +105,7 @@ export function TenantDashboardShell({
         </nav>
 
         <div className="dashboard-sidebar-footer">
-          <span className="dashboard-sidebar-label">Tenant activo</span>
+          <span className="dashboard-sidebar-label">Tenant</span>
           <strong>{profile.name}</strong>
           <div className="dashboard-sidebar-subtitle">{profile.slug}</div>
         </div>

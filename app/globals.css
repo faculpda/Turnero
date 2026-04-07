@@ -62,8 +62,8 @@ a {
 .dashboard-sidebar {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 28px;
-  padding: 28px 22px;
+  gap: 20px;
+  padding: 22px 18px;
   background: #ffffff;
   border-right: 1px solid #e9e3f2;
   box-shadow: 12px 0 30px rgba(85, 65, 160, 0.04);
@@ -96,16 +96,21 @@ a {
 .dashboard-sidebar-nav,
 .dashboard-sidebar-group {
   display: grid;
-  gap: 12px;
+  gap: 6px;
+}
+
+.dashboard-sidebar-nav {
+  grid-template-columns: 1fr;
 }
 
 .dashboard-sidebar-label {
   color: #9b92b1;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: var(--font-accent);
+  padding: 0 10px 8px;
 }
 
 .dashboard-sidebar-item {
@@ -113,39 +118,50 @@ a {
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
+  padding: 8px 10px;
+  border-radius: 8px;
   color: #5f6780;
-  background: #ffffff;
-  border: 1px solid transparent;
+  background: transparent;
+  border: 0;
   text-align: left;
   font-family: var(--font-body);
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 
+.dashboard-sidebar-item:hover {
+  background: rgba(93, 63, 211, 0.04);
+  color: #433e57;
+}
+
 .dashboard-sidebar-item.active {
-  background: #f1ebff;
+  background: rgba(93, 63, 211, 0.07);
   color: #5130c7;
-  border-color: #dfd1ff;
-  box-shadow: 0 10px 20px rgba(93, 63, 211, 0.08);
+  border-left: 2px solid #5130c7;
+  padding-left: 8px;
+  box-shadow: none;
 }
 
 .dashboard-sidebar-icon {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: currentColor;
-  opacity: 0.9;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid currentColor;
+  background: transparent;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .dashboard-sidebar-footer {
   display: grid;
-  gap: 6px;
-  padding: 18px 16px;
-  border-radius: 18px;
-  background: #fbf9ff;
-  border: 1px solid #e8def9;
+  gap: 4px;
+  padding: 14px 10px 0;
+  border-top: 1px solid #ece5f5;
+  background: transparent;
+  border-radius: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
 }
 
 .dashboard-topbar {
@@ -1791,7 +1807,7 @@ th:last-child {
   }
 
   .dashboard-sidebar-nav {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .dashboard-overview-actions,
