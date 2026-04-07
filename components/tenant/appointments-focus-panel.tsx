@@ -89,17 +89,17 @@ export function AppointmentsFocusPanel({
       </div>
 
       <div className="dashboard-kpi-grid dashboard-turnos-kpi-grid">
-        <article className="metric dashboard-kpi-card dashboard-kpi-card-highlight">
+        <article className="metric dashboard-kpi-card dashboard-kpi-card-highlight dashboard-kpi-card-violet">
           <span className="dashboard-kpi-label">Turnos activos</span>
           <h2>{turnosVisibles.length}</h2>
           <p className="muted">Suma de reservas pendientes y confirmadas visibles en portada.</p>
         </article>
-        <article className="metric dashboard-kpi-card">
+        <article className="metric dashboard-kpi-card dashboard-kpi-card-blue">
           <span className="dashboard-kpi-label">Confirmados</span>
           <h2>{confirmados.length}</h2>
           <p className="muted">Listos para atencion sin acciones extra.</p>
         </article>
-        <article className="metric dashboard-kpi-card">
+        <article className="metric dashboard-kpi-card dashboard-kpi-card-amber">
           <span className="dashboard-kpi-label">Pendientes</span>
           <h2>{pendientes.length}</h2>
           <p className="muted">Reservas que conviene revisar o terminar de validar.</p>

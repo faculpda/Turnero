@@ -131,15 +131,15 @@ export default async function TenantDashboardPage({
             </div>
 
             <div className="dashboard-overview-actions">
-              <div className="dashboard-overview-chip">
+              <div className="dashboard-overview-chip dashboard-overview-chip-violet">
                 <span className="dashboard-overview-chip-label">Turnos activos</span>
                 <strong>{reservasActivas}</strong>
               </div>
-              <div className="dashboard-overview-chip">
+              <div className="dashboard-overview-chip dashboard-overview-chip-blue">
                 <span className="dashboard-overview-chip-label">Servicios visibles</span>
                 <strong>{profile.services.length}</strong>
               </div>
-              <div className="dashboard-overview-chip">
+              <div className="dashboard-overview-chip dashboard-overview-chip-amber">
                 <span className="dashboard-overview-chip-label">Pagos pendientes</span>
                 <strong>{pagosPendientes.length}</strong>
               </div>
