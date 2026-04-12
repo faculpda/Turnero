@@ -2074,6 +2074,36 @@ th:last-child {
   gap: 8px;
 }
 
+.site-template-list {
+  display: grid;
+  gap: 12px;
+}
+
+.site-template-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #dfe7f2;
+  border-radius: 18px;
+  background: #fbfcff;
+}
+
+.site-template-card p {
+  margin: 0;
+}
+
+.site-template-swatch-row {
+  display: flex;
+  gap: 8px;
+}
+
+.site-template-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
 .site-live-layer-item {
   width: 100%;
   padding: 10px 12px;

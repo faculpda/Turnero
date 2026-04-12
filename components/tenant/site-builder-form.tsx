@@ -16,6 +16,17 @@ type SelectedTarget =
   | { kind: "hero"; field: "brand" | "title" | "description" | "image" }
   | { kind: "block"; blockId: string };
 
+type TemplatePreset = {
+  id: string;
+  name: string;
+  description: string;
+  primaryColor: string;
+  secondaryColor: string;
+  heroLayout: "content-left" | "image-left";
+  heroImageUrl: string;
+  siteBlocks: SiteBuilderBlock[];
+};
+
 const blockTypeLabel: Record<BlockTemplate, string> = {
   text: "Texto",
   image: "Imagen",
@@ -168,6 +179,172 @@ function textToneClass(tone?: "dark" | "brand" | "muted") {
   return `site-tone-${tone ?? "dark"}`;
 }
 
+function buildTemplatePresets(copy: {
+  siteTitle: string;
+  heroTitle: string;
+  heroDescription: string;
+  ctaLabel: string;
+}): TemplatePreset[] {
+  return [
+    {
+      id: "template_aura",
+      name: "Plantilla Aura",
+      description: "Limpia, clara y enfocada en transmitir confianza.",
+      primaryColor: "#2f5bff",
+      secondaryColor: "#e9f0ff",
+      heroLayout: "content-left",
+      heroImageUrl:
+        "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1400&q=80",
+      siteBlocks: [
+        {
+          id: createId("text"),
+          type: "text",
+          eyebrow: "Atencion profesional",
+          title: copy.heroTitle,
+          body: copy.heroDescription,
+          align: "left",
+          titleSize: "xl",
+          bodySize: "lg",
+          tone: "dark",
+          width: "wide",
+        },
+        {
+          id: createId("columns"),
+          type: "columns",
+          layout: "equal",
+          columns: [
+            {
+              id: createId("col"),
+              title: "Reserva clara",
+              body: "Tus clientes entienden rapido como reservar y que esperar del servicio.",
+            },
+            {
+              id: createId("col"),
+              title: "Imagen cuidada",
+              body: "La pagina muestra una presencia profesional sin verse sobrecargada.",
+            },
+            {
+              id: createId("col"),
+              title: "Conversion directa",
+              body: "Todo acompana para que la persona termine reservando sin friccion.",
+            },
+          ],
+        },
+        {
+          id: createId("cta"),
+          type: "cta",
+          title: `${copy.siteTitle} listo para recibir reservas`,
+          body: "Invita a la accion con una propuesta clara y un recorrido simple.",
+          buttonLabel: copy.ctaLabel,
+          buttonHref: "/reservar",
+          titleSize: "lg",
+          bodySize: "md",
+          theme: "solid",
+        },
+      ],
+    },
+    {
+      id: "template_horizonte",
+      name: "Plantilla Horizonte",
+      description: "Mas visual, con imagen protagonista y ritmo editorial.",
+      primaryColor: "#1543a7",
+      secondaryColor: "#eef6ff",
+      heroLayout: "image-left",
+      heroImageUrl:
+        "https://images.unsplash.com/photo-1516549655669-df6c8ca700e9?auto=format&fit=crop&w=1400&q=80",
+      siteBlocks: [
+        {
+          id: createId("image"),
+          type: "image",
+          imageUrl:
+            "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1400&q=80",
+          altText: `Espacio visual de ${copy.siteTitle}`,
+          caption: "Una imagen fuerte ayuda a que la pagina tenga mas personalidad.",
+          layout: "wide",
+          height: "large",
+        },
+        {
+          id: createId("text"),
+          type: "text",
+          eyebrow: "Experiencia digital",
+          title: "Presenta tu negocio como una marca moderna y confiable",
+          body: "Esta composicion prioriza la imagen, el aire visual y un mensaje corto pero potente.",
+          align: "center",
+          titleSize: "xl",
+          bodySize: "md",
+          tone: "brand",
+          width: "wide",
+        },
+        {
+          id: createId("cta"),
+          type: "cta",
+          title: "Convierte visitas en reservas",
+          body: "Haz que cada seccion acerque al visitante a la agenda de turnos.",
+          buttonLabel: copy.ctaLabel,
+          buttonHref: "/reservar",
+          titleSize: "xl",
+          bodySize: "md",
+          theme: "soft",
+        },
+      ],
+    },
+    {
+      id: "template_editorial",
+      name: "Plantilla Editorial",
+      description: "Mas narrativa, con contraste y bloques amplios.",
+      primaryColor: "#1f3d74",
+      secondaryColor: "#f3f7fd",
+      heroLayout: "content-left",
+      heroImageUrl:
+        "https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?auto=format&fit=crop&w=1400&q=80",
+      siteBlocks: [
+        {
+          id: createId("text"),
+          type: "text",
+          eyebrow: "Propuesta de valor",
+          title: `${copy.siteTitle}: una experiencia de reserva que se siente propia`,
+          body: "Ideal para negocios que quieren una portada mas de marca, con narrativa y secciones bien diferenciadas.",
+          align: "left",
+          titleSize: "xl",
+          bodySize: "md",
+          tone: "dark",
+          width: "wide",
+        },
+        {
+          id: createId("columns"),
+          type: "columns",
+          layout: "feature-left",
+          columns: [
+            {
+              id: createId("col"),
+              title: "Diseno flexible",
+              body: "Acomoda mensajes, imagenes y llamados a la accion segun tu estilo.",
+            },
+            {
+              id: createId("col"),
+              title: "Edicion simple",
+              body: "Selecciona cualquier bloque y ajustalo desde el propio lienzo.",
+            },
+            {
+              id: createId("col"),
+              title: "Reserva como eje",
+              body: "Todo sigue orientado a que el cliente llegue rapido al turno.",
+            },
+          ],
+        },
+        {
+          id: createId("video"),
+          type: "video",
+          title: "Muestra tu espacio o tu servicio",
+          videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          caption: "Puedes cambiar este video por una presentacion real del negocio.",
+          width: "wide",
+        },
+      ],
+    },
+  ];
+}
+
 export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const router = useRouter();
   const logoInputRef = useRef<HTMLInputElement | null>(null);
@@ -200,6 +377,16 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const previewStyle = useMemo(
     () => buildPreviewStyle(primaryColor, secondaryColor),
     [primaryColor, secondaryColor],
+  );
+  const templatePresets = useMemo(
+    () =>
+      buildTemplatePresets({
+        siteTitle,
+        heroTitle,
+        heroDescription,
+        ctaLabel,
+      }),
+    [ctaLabel, heroDescription, heroTitle, siteTitle],
   );
 
   function updateBlock(blockId: string, updater: (current: SiteBuilderBlock) => SiteBuilderBlock) {
@@ -373,6 +560,21 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
     setHeroLayout(target === "content" ? "image-left" : "content-left");
     setDraggedHeroPart(null);
+  }
+
+  function applyTemplatePreset(templateId: string) {
+    const template = templatePresets.find((item) => item.id === templateId);
+
+    if (!template) {
+      return;
+    }
+
+    setPrimaryColor(template.primaryColor);
+    setSecondaryColor(template.secondaryColor);
+    setHeroLayout(template.heroLayout);
+    setHeroImageUrl(template.heroImageUrl);
+    setSiteBlocks(template.siteBlocks);
+    setSelectedTarget({ kind: "hero", field: "title" });
   }
 
   function renderInspector() {
@@ -1015,6 +1217,35 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             {isSaving ? "Guardando..." : "Guardar sitio"}
           </button>
         </div>
+
+        <section className="site-live-sidebar-section">
+          <h3>Plantillas iniciales</h3>
+          <div className="site-template-list">
+            {templatePresets.map((template) => (
+              <article className="site-template-card" key={template.id}>
+                <div className="site-template-swatch-row">
+                  <span
+                    className="site-template-swatch"
+                    style={{ backgroundColor: template.primaryColor }}
+                  />
+                  <span
+                    className="site-template-swatch"
+                    style={{ backgroundColor: template.secondaryColor }}
+                  />
+                </div>
+                <strong>{template.name}</strong>
+                <p className="muted">{template.description}</p>
+                <button
+                  className="button secondary"
+                  onClick={() => applyTemplatePreset(template.id)}
+                  type="button"
+                >
+                  Usar plantilla
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <section className="site-live-sidebar-section">
           <h3>Agregar bloques</h3>
