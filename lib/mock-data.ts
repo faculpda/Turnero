@@ -115,6 +115,7 @@ export const tenantPublicProfile: TenantPublicProfile = {
   headline: "Reserva tu turno en pocos pasos",
   description:
     "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+  heroLayout: "content-left",
   siteBlocks: [
     {
       id: "block_text_intro",
@@ -123,10 +124,15 @@ export const tenantPublicProfile: TenantPublicProfile = {
       title: "Una experiencia simple para reservar con confianza",
       body: "Muestra tus principales beneficios, responde dudas frecuentes y ayuda a que cada visita avance naturalmente hacia la reserva.",
       align: "left",
+      titleSize: "xl",
+      bodySize: "md",
+      tone: "dark",
+      width: "wide",
     },
     {
       id: "block_columns_highlights",
       type: "columns",
+      layout: "feature-left",
       columns: [
         {
           id: "col_1",
@@ -152,6 +158,9 @@ export const tenantPublicProfile: TenantPublicProfile = {
       body: "Elige el servicio, la fecha y el horario disponible que mejor te quede.",
       buttonLabel: "Ver disponibilidad",
       buttonHref: "/reservar",
+      titleSize: "lg",
+      bodySize: "md",
+      theme: "solid",
     },
   ],
   paymentSettings: {

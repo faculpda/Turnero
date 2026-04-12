@@ -104,6 +104,14 @@ export type TenantPaymentSettingsSummary = {
   hasMercadoPagoWebhookSecret: boolean;
 };
 
+export type HeroLayout = "content-left" | "image-left";
+export type SiteTitleScale = "md" | "lg" | "xl";
+export type SiteBodyScale = "sm" | "md" | "lg";
+export type SiteTextTone = "dark" | "brand" | "muted";
+export type SiteSectionWidth = "normal" | "wide";
+export type SiteColumnsLayout = "equal" | "feature-left" | "feature-right";
+export type SiteCtaTheme = "soft" | "solid";
+
 export type SiteTextBlock = {
   id: string;
   type: "text";
@@ -111,6 +119,10 @@ export type SiteTextBlock = {
   title: string;
   body: string;
   align?: "left" | "center";
+  titleSize?: SiteTitleScale;
+  bodySize?: SiteBodyScale;
+  tone?: SiteTextTone;
+  width?: SiteSectionWidth;
 };
 
 export type SiteImageBlock = {
@@ -120,6 +132,7 @@ export type SiteImageBlock = {
   altText?: string;
   caption?: string;
   layout?: "contained" | "wide";
+  height?: "medium" | "large";
 };
 
 export type SiteVideoBlock = {
@@ -128,11 +141,13 @@ export type SiteVideoBlock = {
   title?: string;
   videoUrl: string;
   caption?: string;
+  width?: SiteSectionWidth;
 };
 
 export type SiteColumnsBlock = {
   id: string;
   type: "columns";
+  layout?: SiteColumnsLayout;
   columns: Array<{
     id: string;
     title: string;
@@ -147,6 +162,9 @@ export type SiteCallToActionBlock = {
   body: string;
   buttonLabel: string;
   buttonHref: string;
+  titleSize?: SiteTitleScale;
+  bodySize?: SiteBodyScale;
+  theme?: SiteCtaTheme;
 };
 
 export type SiteBuilderBlock =
@@ -165,6 +183,7 @@ export type TenantPublicProfile = {
   siteTitle?: string;
   logoUrl?: string;
   heroImageUrl?: string;
+  heroLayout?: HeroLayout;
   primaryColor?: string;
   secondaryColor?: string;
   ctaLabel?: string;

@@ -46,6 +46,10 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         title: "Cuenta algo importante sobre tu negocio",
         body: "Puedes usar este bloque para mostrar beneficios, diferenciales o informacion clara para quien visita la pagina.",
         align: "left",
+        titleSize: "lg",
+        bodySize: "md",
+        tone: "dark",
+        width: "normal",
       };
     case "image":
       return {
@@ -55,6 +59,7 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         altText: "",
         caption: "Agrega una imagen que apoye la propuesta del negocio.",
         layout: "contained",
+        height: "medium",
       };
     case "video":
       return {
@@ -63,11 +68,13 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         title: "Presenta tu negocio en video",
         videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         caption: "Pega un link de YouTube o Vimeo.",
+        width: "normal",
       };
     case "columns":
       return {
         id: createId("columns"),
         type: "columns",
+        layout: "equal",
         columns: [
           {
             id: createId("col"),
@@ -94,6 +101,9 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         body: "Invita a la accion con un mensaje breve, claro y directo.",
         buttonLabel: "Reservar turno",
         buttonHref: "/reservar",
+        titleSize: "lg",
+        bodySize: "md",
+        theme: "soft",
       };
   }
 }
@@ -154,6 +164,10 @@ function buildPreviewStyle(primaryColor: string, secondaryColor: string): CSSPro
   } as CSSProperties;
 }
 
+function textToneClass(tone?: "dark" | "brand" | "muted") {
+  return `site-tone-${tone ?? "dark"}`;
+}
+
 export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const router = useRouter();
   const logoInputRef = useRef<HTMLInputElement | null>(null);
@@ -167,11 +181,13 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const [ctaLabel, setCtaLabel] = useState(tenant.ctaLabel ?? "Reservar turno");
   const [logoUrl, setLogoUrl] = useState(tenant.logoUrl ?? "");
   const [heroImageUrl, setHeroImageUrl] = useState(tenant.heroImageUrl ?? "");
+  const [heroLayout, setHeroLayout] = useState(tenant.heroLayout ?? "content-left");
   const [primaryColor, setPrimaryColor] = useState(tenant.primaryColor ?? "#205fc0");
   const [secondaryColor, setSecondaryColor] = useState(tenant.secondaryColor ?? "#dff1ff");
   const [siteBlocks, setSiteBlocks] = useState<SiteBuilderBlock[]>(tenant.siteBlocks ?? []);
   const [selectedTarget, setSelectedTarget] = useState<SelectedTarget>({ kind: "hero", field: "title" });
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
+  const [draggedHeroPart, setDraggedHeroPart] = useState<"content" | "image" | null>(null);
   const [pendingImageBlockId, setPendingImageBlockId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -308,6 +324,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
           ctaLabel,
           logoUrl,
           heroImageUrl,
+          heroLayout,
           primaryColor,
           secondaryColor,
           siteBlocks,
@@ -349,6 +366,15 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
     setDraggedBlockId(null);
   }
 
+  function onHeroDrop(target: "content" | "image") {
+    if (!draggedHeroPart || draggedHeroPart === target) {
+      return;
+    }
+
+    setHeroLayout(target === "content" ? "image-left" : "content-left");
+    setDraggedHeroPart(null);
+  }
+
   function renderInspector() {
     if (selectedTarget.kind === "hero") {
       if (selectedTarget.field === "brand") {
@@ -386,6 +412,17 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 <span className="color-value">{primaryColor}</span>
               </div>
             </label>
+            <button
+              className="button secondary"
+              onClick={() =>
+                setHeroLayout((current) =>
+                  current === "content-left" ? "image-left" : "content-left",
+                )
+              }
+              type="button"
+            >
+              Intercambiar imagen y texto
+            </button>
           </div>
         );
       }
@@ -483,6 +520,87 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             />
           </label>
           <label className="field">
+            <span>Tamano de titulo</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "text"
+                    ? {
+                        ...current,
+                        titleSize:
+                          e.target.value === "md" || e.target.value === "xl" ? e.target.value : "lg",
+                      }
+                    : current,
+                )
+              }
+              value={selectedBlock.titleSize ?? "lg"}
+            >
+              <option value="md">Medio</option>
+              <option value="lg">Grande</option>
+              <option value="xl">Extra grande</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Tamano de texto</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "text"
+                    ? {
+                        ...current,
+                        bodySize:
+                          e.target.value === "sm" || e.target.value === "lg" ? e.target.value : "md",
+                      }
+                    : current,
+                )
+              }
+              value={selectedBlock.bodySize ?? "md"}
+            >
+              <option value="sm">Pequeno</option>
+              <option value="md">Medio</option>
+              <option value="lg">Grande</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Tono</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "text"
+                    ? {
+                        ...current,
+                        tone:
+                          e.target.value === "brand" || e.target.value === "muted"
+                            ? e.target.value
+                            : "dark",
+                      }
+                    : current,
+                )
+              }
+              value={selectedBlock.tone ?? "dark"}
+            >
+              <option value="dark">Oscuro</option>
+              <option value="brand">Marca</option>
+              <option value="muted">Suave</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Ancho del bloque</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "text"
+                    ? { ...current, width: e.target.value === "wide" ? "wide" : "normal" }
+                    : current,
+                )
+              }
+              value={selectedBlock.width ?? "normal"}
+            >
+              <option value="normal">Normal</option>
+              <option value="wide">Amplio</option>
+            </select>
+          </label>
+          <label className="field">
             <span>Alineacion</span>
             <select
               onChange={(e) =>
@@ -567,6 +685,22 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <option value="wide">Ancho completo</option>
             </select>
           </label>
+          <label className="field">
+            <span>Altura visual</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "image"
+                    ? { ...current, height: e.target.value === "large" ? "large" : "medium" }
+                    : current,
+                )
+              }
+              value={selectedBlock.height ?? "medium"}
+            >
+              <option value="medium">Media</option>
+              <option value="large">Grande</option>
+            </select>
+          </label>
         </div>
       );
     }
@@ -609,6 +743,22 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               value={selectedBlock.caption ?? ""}
             />
           </label>
+          <label className="field">
+            <span>Ancho del bloque</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "video"
+                    ? { ...current, width: e.target.value === "wide" ? "wide" : "normal" }
+                    : current,
+                )
+              }
+              value={selectedBlock.width ?? "normal"}
+            >
+              <option value="normal">Normal</option>
+              <option value="wide">Amplio</option>
+            </select>
+          </label>
         </div>
       );
     }
@@ -617,6 +767,29 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
       return (
         <div className="site-live-panel-section">
           <h3>Bloque de columnas</h3>
+          <label className="field">
+            <span>Distribucion</span>
+            <select
+              onChange={(e) =>
+                updateBlock(selectedBlock.id, (current) =>
+                  current.type === "columns"
+                    ? {
+                        ...current,
+                        layout:
+                          e.target.value === "feature-left" || e.target.value === "feature-right"
+                            ? e.target.value
+                            : "equal",
+                      }
+                    : current,
+                )
+              }
+              value={selectedBlock.layout ?? "equal"}
+            >
+              <option value="equal">Equilibrada</option>
+              <option value="feature-left">Destacada a la izquierda</option>
+              <option value="feature-right">Destacada a la derecha</option>
+            </select>
+          </label>
           <div className="site-live-columns-editor">
             {selectedBlock.columns.map((column, index) => (
               <div className="site-column-editor-card" key={column.id}>
@@ -725,6 +898,64 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             }
             value={selectedBlock.buttonHref}
           />
+        </label>
+        <label className="field">
+          <span>Tamano de titulo</span>
+          <select
+            onChange={(e) =>
+              updateBlock(selectedBlock.id, (current) =>
+                current.type === "cta"
+                  ? {
+                      ...current,
+                      titleSize:
+                        e.target.value === "md" || e.target.value === "xl" ? e.target.value : "lg",
+                    }
+                  : current,
+              )
+            }
+            value={selectedBlock.titleSize ?? "lg"}
+          >
+            <option value="md">Medio</option>
+            <option value="lg">Grande</option>
+            <option value="xl">Extra grande</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Tamano de texto</span>
+          <select
+            onChange={(e) =>
+              updateBlock(selectedBlock.id, (current) =>
+                current.type === "cta"
+                  ? {
+                      ...current,
+                      bodySize:
+                        e.target.value === "sm" || e.target.value === "lg" ? e.target.value : "md",
+                    }
+                  : current,
+              )
+            }
+            value={selectedBlock.bodySize ?? "md"}
+          >
+            <option value="sm">Pequeno</option>
+            <option value="md">Medio</option>
+            <option value="lg">Grande</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Estilo</span>
+          <select
+            onChange={(e) =>
+              updateBlock(selectedBlock.id, (current) =>
+                current.type === "cta"
+                  ? { ...current, theme: e.target.value === "solid" ? "solid" : "soft" }
+                  : current,
+              )
+            }
+            value={selectedBlock.theme ?? "soft"}
+          >
+            <option value="soft">Suave</option>
+            <option value="solid">Solido</option>
+          </select>
         </label>
       </div>
     );
@@ -845,8 +1076,18 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
         <div className="site-live-canvas">
           <section className="hero tenant-hero">
-            <div className="tenant-hero-grid">
-              <div>
+            <div
+              className={`tenant-hero-grid ${
+                heroLayout === "image-left" ? "tenant-hero-grid-image-left" : ""
+              }`}
+            >
+              <div
+                draggable
+                onDragEnd={() => setDraggedHeroPart(null)}
+                onDragOver={(event) => event.preventDefault()}
+                onDragStart={() => setDraggedHeroPart("content")}
+                onDrop={() => onHeroDrop("content")}
+              >
                 <button
                   className={`site-live-selectable ${selectedTarget.kind === "hero" && selectedTarget.field === "brand" ? "is-selected" : ""}`}
                   onClick={() => setSelectedTarget({ kind: "hero", field: "brand" })}
@@ -870,7 +1111,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                   onClick={() => setSelectedTarget({ kind: "hero", field: "title" })}
                   type="button"
                 >
-                  <h1>{heroTitle}</h1>
+                  <h1
+                    contentEditable
+                    onBlur={(event) => setHeroTitle(event.currentTarget.textContent ?? heroTitle)}
+                    onClick={() => setSelectedTarget({ kind: "hero", field: "title" })}
+                    suppressContentEditableWarning
+                  >
+                    {heroTitle}
+                  </h1>
                 </button>
 
                 <button
@@ -878,7 +1126,17 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                   onClick={() => setSelectedTarget({ kind: "hero", field: "description" })}
                   type="button"
                 >
-                  <p className="muted hero-copy">{heroDescription}</p>
+                  <p
+                    className="muted hero-copy"
+                    contentEditable
+                    onBlur={(event) =>
+                      setHeroDescription(event.currentTarget.textContent ?? heroDescription)
+                    }
+                    onClick={() => setSelectedTarget({ kind: "hero", field: "description" })}
+                    suppressContentEditableWarning
+                  >
+                    {heroDescription}
+                  </p>
                 </button>
 
                 <div className="actions">
@@ -893,6 +1151,11 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
               <button
                 className={`tenant-hero-media site-live-media-button ${selectedTarget.kind === "hero" && selectedTarget.field === "image" ? "is-selected" : ""}`}
+                draggable
+                onDragEnd={() => setDraggedHeroPart(null)}
+                onDragStart={() => setDraggedHeroPart("image")}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => onHeroDrop("image")}
                 onClick={() => setSelectedTarget({ kind: "hero", field: "image" })}
                 type="button"
               >
@@ -937,15 +1200,42 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 </div>
 
                 {block.type === "text" ? (
-                  <div className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""}`}>
+                  <div
+                    className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""} site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} ${textToneClass(block.tone)} site-width-${block.width ?? "normal"}`}
+                  >
                     {block.eyebrow ? <span className="eyebrow">{block.eyebrow}</span> : null}
-                    <h2>{block.title}</h2>
-                    <p className="muted">{block.body}</p>
+                    <h2
+                      contentEditable
+                      onBlur={(event) =>
+                        updateBlock(block.id, (current) =>
+                          current.type === "text"
+                            ? { ...current, title: event.currentTarget.textContent ?? current.title }
+                            : current,
+                        )
+                      }
+                      suppressContentEditableWarning
+                    >
+                      {block.title}
+                    </h2>
+                    <p
+                      className="muted"
+                      contentEditable
+                      onBlur={(event) =>
+                        updateBlock(block.id, (current) =>
+                          current.type === "text"
+                            ? { ...current, body: event.currentTarget.textContent ?? current.body }
+                            : current,
+                        )
+                      }
+                      suppressContentEditableWarning
+                    >
+                      {block.body}
+                    </p>
                   </div>
                 ) : null}
 
                 {block.type === "image" ? (
-                  <figure className={`site-block site-block-image ${block.layout === "wide" ? "is-wide" : ""}`}>
+                  <figure className={`site-block site-block-image ${block.layout === "wide" ? "is-wide" : ""} site-image-height-${block.height ?? "medium"}`}>
                     {block.imageUrl ? (
                       <img alt={block.altText ?? "Imagen del sitio"} src={block.imageUrl} />
                     ) : (
@@ -959,8 +1249,22 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 ) : null}
 
                 {block.type === "video" ? (
-                  <div className="site-block site-block-video">
-                    {block.title ? <h2>{block.title}</h2> : null}
+                  <div className={`site-block site-block-video site-width-${block.width ?? "normal"}`}>
+                    {block.title ? (
+                      <h2
+                        contentEditable
+                        onBlur={(event) =>
+                          updateBlock(block.id, (current) =>
+                            current.type === "video"
+                              ? { ...current, title: event.currentTarget.textContent ?? current.title }
+                              : current,
+                          )
+                        }
+                        suppressContentEditableWarning
+                      >
+                        {block.title}
+                      </h2>
+                    ) : null}
                     <div className="site-video-frame">
                       <iframe
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -970,26 +1274,105 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                         title={block.title ?? "Video del sitio"}
                       />
                     </div>
-                    {block.caption ? <p className="muted">{block.caption}</p> : null}
+                    {block.caption ? (
+                      <p
+                        className="muted"
+                        contentEditable
+                        onBlur={(event) =>
+                          updateBlock(block.id, (current) =>
+                            current.type === "video"
+                              ? { ...current, caption: event.currentTarget.textContent ?? current.caption }
+                              : current,
+                          )
+                        }
+                        suppressContentEditableWarning
+                      >
+                        {block.caption}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
 
                 {block.type === "columns" ? (
-                  <div className="site-block site-block-columns">
+                  <div className={`site-block site-block-columns site-columns-layout-${block.layout ?? "equal"}`}>
                     {block.columns.map((column) => (
                       <article className="site-column-card" key={column.id}>
-                        <h3>{column.title}</h3>
-                        <p className="muted">{column.body}</p>
+                        <h3
+                          contentEditable
+                          onBlur={(event) =>
+                            updateBlock(block.id, (current) =>
+                              current.type === "columns"
+                                ? {
+                                    ...current,
+                                    columns: current.columns.map((item) =>
+                                      item.id === column.id
+                                        ? { ...item, title: event.currentTarget.textContent ?? item.title }
+                                        : item,
+                                    ),
+                                  }
+                                : current,
+                            )
+                          }
+                          suppressContentEditableWarning
+                        >
+                          {column.title}
+                        </h3>
+                        <p
+                          className="muted"
+                          contentEditable
+                          onBlur={(event) =>
+                            updateBlock(block.id, (current) =>
+                              current.type === "columns"
+                                ? {
+                                    ...current,
+                                    columns: current.columns.map((item) =>
+                                      item.id === column.id
+                                        ? { ...item, body: event.currentTarget.textContent ?? item.body }
+                                        : item,
+                                    ),
+                                  }
+                                : current,
+                            )
+                          }
+                          suppressContentEditableWarning
+                        >
+                          {column.body}
+                        </p>
                       </article>
                     ))}
                   </div>
                 ) : null}
 
                 {block.type === "cta" ? (
-                  <div className="site-block site-block-cta">
+                  <div className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"}`}>
                     <div>
-                      <h2>{block.title}</h2>
-                      <p className="muted">{block.body}</p>
+                      <h2
+                        contentEditable
+                        onBlur={(event) =>
+                          updateBlock(block.id, (current) =>
+                            current.type === "cta"
+                              ? { ...current, title: event.currentTarget.textContent ?? current.title }
+                              : current,
+                          )
+                        }
+                        suppressContentEditableWarning
+                      >
+                        {block.title}
+                      </h2>
+                      <p
+                        className="muted"
+                        contentEditable
+                        onBlur={(event) =>
+                          updateBlock(block.id, (current) =>
+                            current.type === "cta"
+                              ? { ...current, body: event.currentTarget.textContent ?? current.body }
+                              : current,
+                          )
+                        }
+                        suppressContentEditableWarning
+                      >
+                        {block.body}
+                      </p>
                     </div>
                     <button className="button primary tenant-primary-button" type="button">
                       {block.buttonLabel}

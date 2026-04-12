@@ -189,6 +189,7 @@ type TenantProfileRecord = {
   siteTitle: string | null;
   logoUrl: string | null;
   heroImageUrl: string | null;
+  heroLayout: string | null;
   primaryColor: string | null;
   secondaryColor: string | null;
   ctaLabel: string | null;
@@ -239,6 +240,19 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         title: item.title,
         body: item.body,
         align: item.align === "center" ? "center" : "left",
+        titleSize:
+          item.titleSize === "md" || item.titleSize === "lg" || item.titleSize === "xl"
+            ? item.titleSize
+            : "lg",
+        bodySize:
+          item.bodySize === "sm" || item.bodySize === "md" || item.bodySize === "lg"
+            ? item.bodySize
+            : "md",
+        tone:
+          item.tone === "brand" || item.tone === "muted" || item.tone === "dark"
+            ? item.tone
+            : "dark",
+        width: item.width === "wide" ? "wide" : "normal",
       });
       return blocks;
     }
@@ -251,6 +265,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         altText: typeof item.altText === "string" ? item.altText : undefined,
         caption: typeof item.caption === "string" ? item.caption : undefined,
         layout: item.layout === "wide" ? "wide" : "contained",
+        height: item.height === "large" ? "large" : "medium",
       });
       return blocks;
     }
@@ -262,6 +277,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         title: typeof item.title === "string" ? item.title : undefined,
         videoUrl: item.videoUrl,
         caption: typeof item.caption === "string" ? item.caption : undefined,
+        width: item.width === "wide" ? "wide" : "normal",
       });
       return blocks;
     }
@@ -289,6 +305,10 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         blocks.push({
           id: item.id,
           type: "columns",
+          layout:
+            item.layout === "feature-left" || item.layout === "feature-right"
+              ? item.layout
+              : "equal",
           columns,
         });
       }
@@ -310,6 +330,15 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         body: item.body,
         buttonLabel: item.buttonLabel,
         buttonHref: item.buttonHref,
+        titleSize:
+          item.titleSize === "md" || item.titleSize === "lg" || item.titleSize === "xl"
+            ? item.titleSize
+            : "lg",
+        bodySize:
+          item.bodySize === "sm" || item.bodySize === "md" || item.bodySize === "lg"
+            ? item.bodySize
+            : "md",
+        theme: item.theme === "solid" ? "solid" : "soft",
       });
     }
 
@@ -330,6 +359,7 @@ function mapPublicTenant(tenant: TenantProfileRecord): TenantPublicProfile {
     siteTitle: tenant.siteTitle ?? tenant.name,
     logoUrl: tenant.logoUrl ?? undefined,
     heroImageUrl: tenant.heroImageUrl ?? undefined,
+    heroLayout: tenant.heroLayout === "image-left" ? "image-left" : "content-left",
     primaryColor: tenant.primaryColor ?? undefined,
     secondaryColor: tenant.secondaryColor ?? undefined,
     ctaLabel: tenant.ctaLabel ?? "Reservar turno",

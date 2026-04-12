@@ -13,6 +13,10 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     title: z.string().min(2).max(140),
     body: z.string().min(2).max(1200),
     align: z.enum(["left", "center"]).optional(),
+    titleSize: z.enum(["md", "lg", "xl"]).optional(),
+    bodySize: z.enum(["sm", "md", "lg"]).optional(),
+    tone: z.enum(["dark", "brand", "muted"]).optional(),
+    width: z.enum(["normal", "wide"]).optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -21,6 +25,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     altText: z.string().max(180).optional(),
     caption: z.string().max(300).optional(),
     layout: z.enum(["contained", "wide"]).optional(),
+    height: z.enum(["medium", "large"]).optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -28,10 +33,12 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     title: z.string().max(140).optional(),
     videoUrl: z.string().url(),
     caption: z.string().max(300).optional(),
+    width: z.enum(["normal", "wide"]).optional(),
   }),
   z.object({
     id: z.string().min(1),
     type: z.literal("columns"),
+    layout: z.enum(["equal", "feature-left", "feature-right"]).optional(),
     columns: z
       .array(
         z.object({
@@ -50,6 +57,9 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     body: z.string().min(2).max(500),
     buttonLabel: z.string().min(2).max(40),
     buttonHref: z.string().min(1).max(200),
+    titleSize: z.enum(["md", "lg", "xl"]).optional(),
+    bodySize: z.enum(["sm", "md", "lg"]).optional(),
+    theme: z.enum(["soft", "solid"]).optional(),
   }),
 ]);
 
@@ -62,6 +72,7 @@ const siteConfigSchema = z.object({
   ctaLabel: z.string().min(2).max(40),
   logoUrl: z.string().url().or(z.literal("")).optional(),
   heroImageUrl: z.string().url().or(z.literal("")).optional(),
+  heroLayout: z.enum(["content-left", "image-left"]).optional(),
   primaryColor: z.string().regex(colorRegex),
   secondaryColor: z.string().regex(colorRegex),
   siteBlocks: z.array(siteBlockSchema).max(20).optional(),
@@ -96,6 +107,7 @@ export async function POST(request: Request) {
         ctaLabel: payload.ctaLabel.trim(),
         logoUrl: payload.logoUrl?.trim() || null,
         heroImageUrl: payload.heroImageUrl?.trim() || null,
+        heroLayout: payload.heroLayout ?? "content-left",
         primaryColor: payload.primaryColor,
         secondaryColor: payload.secondaryColor,
         siteBlocks: payload.siteBlocks ?? [],

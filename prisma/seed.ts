@@ -29,6 +29,7 @@ async function main() {
         "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
       publicDescription:
         "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+      heroLayout: "content-left",
       siteBlocks: [
         {
           id: "seed_text_intro",
@@ -37,10 +38,15 @@ async function main() {
           title: "Cuidamos tu sonrisa con una experiencia clara y profesional",
           body: "Personaliza este espacio con tus diferenciales, tratamientos o informacion importante para que cada negocio tenga una web realmente propia.",
           align: "left",
+          titleSize: "xl",
+          bodySize: "md",
+          tone: "dark",
+          width: "wide",
         },
         {
           id: "seed_columns_features",
           type: "columns",
+          layout: "feature-left",
           columns: [
             {
               id: "seed_col_1",
@@ -66,6 +72,9 @@ async function main() {
           body: "Combina agenda, web publica y personalizacion visual en un mismo lugar.",
           buttonLabel: "Reservar ahora",
           buttonHref: "/reservar",
+          titleSize: "lg",
+          bodySize: "md",
+          theme: "solid",
         },
       ],
       timezone: "America/Argentina/Buenos_Aires",
@@ -86,6 +95,7 @@ async function main() {
         "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
       publicDescription:
         "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+      heroLayout: "content-left",
       siteBlocks: [
         {
           id: "seed_text_intro",
@@ -94,10 +104,15 @@ async function main() {
           title: "Cuidamos tu sonrisa con una experiencia clara y profesional",
           body: "Personaliza este espacio con tus diferenciales, tratamientos o informacion importante para que cada negocio tenga una web realmente propia.",
           align: "left",
+          titleSize: "xl",
+          bodySize: "md",
+          tone: "dark",
+          width: "wide",
         },
         {
           id: "seed_columns_features",
           type: "columns",
+          layout: "feature-left",
           columns: [
             {
               id: "seed_col_1",
@@ -123,6 +138,9 @@ async function main() {
           body: "Combina agenda, web publica y personalizacion visual en un mismo lugar.",
           buttonLabel: "Reservar ahora",
           buttonHref: "/reservar",
+          titleSize: "lg",
+          bodySize: "md",
+          theme: "solid",
         },
       ],
       timezone: "America/Argentina/Buenos_Aires",

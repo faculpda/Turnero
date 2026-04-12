@@ -28,11 +28,13 @@ export function TenantPublicHome({
   useSlugRoutes = true,
 }: TenantPublicHomeProps) {
   const onlinePaymentEnabled = tenant.paymentSettings?.mercadoPagoEnabled ?? false;
+  const heroGridClass =
+    tenant.heroLayout === "image-left" ? "tenant-hero-grid tenant-hero-grid-image-left" : "tenant-hero-grid";
 
   return (
     <main className="shell grid tenant-public" style={buildTenantStyle(tenant)}>
       <section className="hero tenant-hero">
-        <div className="tenant-hero-grid">
+        <div className={heroGridClass}>
           <div>
             <div className="tenant-brand-row">
               {tenant.logoUrl ? (
