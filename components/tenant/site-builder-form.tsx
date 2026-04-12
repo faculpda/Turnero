@@ -27,6 +27,20 @@ type TemplatePreset = {
   siteBlocks: SiteBuilderBlock[];
 };
 
+type BuilderSnapshot = {
+  siteTitle: string;
+  heroTitle: string;
+  heroDescription: string;
+  publicDescription: string;
+  ctaLabel: string;
+  logoUrl: string;
+  heroImageUrl: string;
+  heroLayout: "content-left" | "image-left";
+  primaryColor: string;
+  secondaryColor: string;
+  siteBlocks: SiteBuilderBlock[];
+};
+
 const blockTypeLabel: Record<BlockTemplate, string> = {
   text: "Texto",
   image: "Imagen",
@@ -45,6 +59,24 @@ const blockTypeDescription: Record<BlockTemplate, string> = {
 
 function createId(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function cloneBlock(block: SiteBuilderBlock): SiteBuilderBlock {
+  if (block.type === "columns") {
+    return {
+      ...block,
+      id: createId("columns"),
+      columns: block.columns.map((column) => ({
+        ...column,
+        id: createId("col"),
+      })),
+    };
+  }
+
+  return {
+    ...block,
+    id: createId(block.type),
+  };
 }
 
 function createBlock(template: BlockTemplate): SiteBuilderBlock {
@@ -241,6 +273,13 @@ function renderResizeControls(
   );
 }
 
+function reorderItems<T>(items: T[], fromIndex: number, toIndex: number) {
+  const next = [...items];
+  const [item] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, item);
+  return next;
+}
+
 function buildTemplatePresets(copy: {
   siteTitle: string;
   heroTitle: string;
@@ -430,6 +469,8 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const [pendingImageBlockId, setPendingImageBlockId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [historyPast, setHistoryPast] = useState<BuilderSnapshot[]>([]);
+  const [historyFuture, setHistoryFuture] = useState<BuilderSnapshot[]>([]);
 
   const selectedBlock =
     selectedTarget.kind === "block"
@@ -451,15 +492,55 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
     [ctaLabel, heroDescription, heroTitle, siteTitle],
   );
 
+  function currentSnapshot(): BuilderSnapshot {
+    return {
+      siteTitle,
+      heroTitle,
+      heroDescription,
+      publicDescription,
+      ctaLabel,
+      logoUrl,
+      heroImageUrl,
+      heroLayout,
+      primaryColor,
+      secondaryColor,
+      siteBlocks,
+    };
+  }
+
+  function applySnapshot(snapshot: BuilderSnapshot) {
+    setSiteTitle(snapshot.siteTitle);
+    setHeroTitle(snapshot.heroTitle);
+    setHeroDescription(snapshot.heroDescription);
+    setPublicDescription(snapshot.publicDescription);
+    setCtaLabel(snapshot.ctaLabel);
+    setLogoUrl(snapshot.logoUrl);
+    setHeroImageUrl(snapshot.heroImageUrl);
+    setHeroLayout(snapshot.heroLayout);
+    setPrimaryColor(snapshot.primaryColor);
+    setSecondaryColor(snapshot.secondaryColor);
+    setSiteBlocks(snapshot.siteBlocks);
+  }
+
+  function commitChange(mutator: () => void) {
+    setHistoryPast((current) => [...current, currentSnapshot()]);
+    setHistoryFuture([]);
+    mutator();
+  }
+
   function updateBlock(blockId: string, updater: (current: SiteBuilderBlock) => SiteBuilderBlock) {
-    setSiteBlocks((current) =>
-      current.map((block) => (block.id === blockId ? updater(block) : block)),
-    );
+    commitChange(() => {
+      setSiteBlocks((current) =>
+        current.map((block) => (block.id === blockId ? updater(block) : block)),
+      );
+    });
   }
 
   function deleteBlock(blockId: string) {
-    setSiteBlocks((current) => current.filter((block) => block.id !== blockId));
-    setSelectedTarget({ kind: "hero", field: "title" });
+    commitChange(() => {
+      setSiteBlocks((current) => current.filter((block) => block.id !== blockId));
+      setSelectedTarget({ kind: "hero", field: "title" });
+    });
   }
 
   function moveBlock(fromId: string, toId: string) {
@@ -467,24 +548,26 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
       return;
     }
 
-    setSiteBlocks((current) => {
-      const fromIndex = current.findIndex((block) => block.id === fromId);
-      const toIndex = current.findIndex((block) => block.id === toId);
+    commitChange(() => {
+      setSiteBlocks((current) => {
+        const fromIndex = current.findIndex((block) => block.id === fromId);
+        const toIndex = current.findIndex((block) => block.id === toId);
 
-      if (fromIndex === -1 || toIndex === -1) {
-        return current;
-      }
+        if (fromIndex === -1 || toIndex === -1) {
+          return current;
+        }
 
-      const next = [...current];
-      const [dragged] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, dragged);
-      return next;
+        const next = [...current];
+        const [dragged] = next.splice(fromIndex, 1);
+        next.splice(toIndex, 0, dragged);
+        return next;
+      });
     });
   }
 
   function addColumn(blockId: string) {
     updateBlock(blockId, (current) =>
-      current.type === "columns" && current.columns.length < 3
+      current.type === "columns" && current.columns.length < 4
         ? {
             ...current,
             columns: [
@@ -509,6 +592,66 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
           }
         : current,
     );
+  }
+
+  function duplicateBlock(blockId: string) {
+    commitChange(() => {
+      setSiteBlocks((current) => {
+        const index = current.findIndex((block) => block.id === blockId);
+
+        if (index === -1) {
+          return current;
+        }
+
+        const nextBlock = cloneBlock(current[index]);
+        return [...current.slice(0, index + 1), nextBlock, ...current.slice(index + 1)];
+      });
+    });
+  }
+
+  function moveColumn(blockId: string, columnId: string, direction: "left" | "right") {
+    updateBlock(blockId, (current) => {
+      if (current.type !== "columns") {
+        return current;
+      }
+
+      const fromIndex = current.columns.findIndex((column) => column.id === columnId);
+      const toIndex = direction === "left" ? fromIndex - 1 : fromIndex + 1;
+
+      if (fromIndex === -1 || toIndex < 0 || toIndex >= current.columns.length) {
+        return current;
+      }
+
+      return {
+        ...current,
+        columns: reorderItems(current.columns, fromIndex, toIndex),
+      };
+    });
+  }
+
+  function duplicateColumn(blockId: string, columnId: string) {
+    updateBlock(blockId, (current) => {
+      if (current.type !== "columns" || current.columns.length >= 4) {
+        return current;
+      }
+
+      const index = current.columns.findIndex((column) => column.id === columnId);
+
+      if (index === -1) {
+        return current;
+      }
+
+      const source = current.columns[index];
+      const nextColumn = {
+        ...source,
+        id: createId("col"),
+      };
+
+      return {
+        ...current,
+        columns: [...current.columns.slice(0, index + 1), nextColumn, ...current.columns.slice(index + 1)],
+      };
+    });
   }
 
   async function onUploadLogo(file: File) {
@@ -620,7 +763,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
       return;
     }
 
-    setHeroLayout(target === "content" ? "image-left" : "content-left");
+    commitChange(() => {
+      setHeroLayout(target === "content" ? "image-left" : "content-left");
+    });
     setDraggedHeroPart(null);
   }
 
@@ -631,12 +776,38 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
       return;
     }
 
-    setPrimaryColor(template.primaryColor);
-    setSecondaryColor(template.secondaryColor);
-    setHeroLayout(template.heroLayout);
-    setHeroImageUrl(template.heroImageUrl);
-    setSiteBlocks(template.siteBlocks);
-    setSelectedTarget({ kind: "hero", field: "title" });
+    commitChange(() => {
+      setPrimaryColor(template.primaryColor);
+      setSecondaryColor(template.secondaryColor);
+      setHeroLayout(template.heroLayout);
+      setHeroImageUrl(template.heroImageUrl);
+      setSiteBlocks(template.siteBlocks);
+      setSelectedTarget({ kind: "hero", field: "title" });
+    });
+  }
+
+  function undoChange() {
+    if (historyPast.length === 0) {
+      return;
+    }
+
+    const previous = historyPast[historyPast.length - 1];
+    const current = currentSnapshot();
+    setHistoryPast((items) => items.slice(0, -1));
+    setHistoryFuture((items) => [...items, current]);
+    applySnapshot(previous);
+  }
+
+  function redoChange() {
+    if (historyFuture.length === 0) {
+      return;
+    }
+
+    const next = historyFuture[historyFuture.length - 1];
+    const current = currentSnapshot();
+    setHistoryFuture((items) => items.slice(0, -1));
+    setHistoryPast((items) => [...items, current]);
+    applySnapshot(next);
   }
 
   function renderInspector() {
@@ -679,9 +850,11 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             <button
               className="button secondary"
               onClick={() =>
-                setHeroLayout((current) =>
-                  current === "content-left" ? "image-left" : "content-left",
-                )
+                commitChange(() => {
+                  setHeroLayout((current) =>
+                    current === "content-left" ? "image-left" : "content-left",
+                  );
+                })
               }
               type="button"
             >
@@ -1086,11 +1259,22 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <div className="site-column-editor-card" key={column.id}>
                 <div className="site-column-editor-head">
                   <strong>Columna {index + 1}</strong>
-                  {selectedBlock.columns.length > 2 ? (
-                    <button onClick={() => removeColumn(selectedBlock.id, column.id)} type="button">
-                      Quitar
+                  <div className="site-column-editor-actions">
+                    <button onClick={() => moveColumn(selectedBlock.id, column.id, "left")} type="button">
+                      ←
                     </button>
-                  ) : null}
+                    <button onClick={() => moveColumn(selectedBlock.id, column.id, "right")} type="button">
+                      →
+                    </button>
+                    <button onClick={() => duplicateColumn(selectedBlock.id, column.id)} type="button">
+                      Duplicar
+                    </button>
+                    {selectedBlock.columns.length > 2 ? (
+                      <button onClick={() => removeColumn(selectedBlock.id, column.id)} type="button">
+                        Quitar
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
                 <label className="field">
                   <span>Titulo</span>
@@ -1132,7 +1316,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               </div>
             ))}
           </div>
-          {selectedBlock.columns.length < 3 ? (
+          {selectedBlock.columns.length < 4 ? (
             <button className="button secondary" onClick={() => addColumn(selectedBlock.id)} type="button">
               Agregar columna
             </button>
@@ -1328,9 +1512,17 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               Selecciona un elemento sobre la pagina y editalo en tiempo real.
             </p>
           </div>
-          <button className="button primary" disabled={isSaving} onClick={onSubmit} type="button">
-            {isSaving ? "Guardando..." : "Guardar sitio"}
-          </button>
+          <div className="site-live-head-actions">
+            <button className="button secondary" disabled={historyPast.length === 0} onClick={undoChange} type="button">
+              Deshacer
+            </button>
+            <button className="button secondary" disabled={historyFuture.length === 0} onClick={redoChange} type="button">
+              Rehacer
+            </button>
+            <button className="button primary" disabled={isSaving} onClick={onSubmit} type="button">
+              {isSaving ? "Guardando..." : "Guardar sitio"}
+            </button>
+          </div>
         </div>
 
         <section className="site-live-sidebar-section">
@@ -1371,8 +1563,10 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 key={template}
                 onClick={() => {
                   const nextBlock = createBlock(template);
-                  setSiteBlocks((current) => [...current, nextBlock]);
-                  setSelectedTarget({ kind: "block", blockId: nextBlock.id });
+                  commitChange(() => {
+                    setSiteBlocks((current) => [...current, nextBlock]);
+                    setSelectedTarget({ kind: "block", blockId: nextBlock.id });
+                  });
                 }}
                 type="button"
               >
@@ -1533,6 +1727,15 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 <div className="site-live-block-toolbar">
                   <span>{blockTypeLabel[block.type]}</span>
                   <div>
+                    <button
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        duplicateBlock(block.id);
+                      }}
+                      type="button"
+                    >
+                      Duplicar
+                    </button>
                     <button
                       onClick={(event) => {
                         event.stopPropagation();

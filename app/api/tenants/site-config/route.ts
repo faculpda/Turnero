@@ -48,7 +48,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
         }),
       )
       .min(2)
-      .max(3),
+      .max(4),
   }),
   z.object({
     id: z.string().min(1),
