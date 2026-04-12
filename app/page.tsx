@@ -18,9 +18,9 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="shell landing-page">
-      <section className="hero hero-sales">
-        <div className="hero-topbar">
+    <main className="shell landing-page landing-page-editorial">
+      <section className="landing-hero">
+        <div className="hero-topbar landing-topbar">
           <div className="brand-lockup">
             <span className="brand-dot" />
             <strong>Turnero</strong>
@@ -35,151 +35,198 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="hero-grid">
-          <div className="hero-sales-copy">
-            <span className="eyebrow">Mas reservas. Menos desorden.</span>
-            <h1>La agenda online que hace ver tu negocio mas profesional desde el primer clic.</h1>
-            <p className="muted hero-copy">
-              Convierte visitas en turnos confirmados con una experiencia clara, moderna y lista
-              para vender. Turnero unifica pagina publica, reservas online, agenda y gestion diaria
-              en un solo sistema.
+        <div className="landing-hero-grid">
+          <div className="landing-hero-copy">
+            <span className="eyebrow">Software de turnos para negocios que quieren verse mejor</span>
+            <h1>Convierte tu agenda en una experiencia que transmite orden, confianza y valor.</h1>
+            <p className="muted landing-lead">
+              Turnero combina una pagina de reservas mucho mas clara con un panel interno pensado
+              para trabajar rapido. Menos caos operativo. Mas imagen profesional. Mas turnos
+              concretados.
             </p>
-            <div className="actions hero-sales-actions">
+
+            <div className="actions landing-hero-actions">
               <Link className="button primary" href="/dentista">
-                Quiero ver como se reserva
+                Ver experiencia completa
               </Link>
               <Link className="button secondary" href="/app?tenant=dentista">
-                Ver panel del negocio
+                Explorar panel
               </Link>
             </div>
-            <div className="hero-proof-row">
-              <span>Reserva online 24/7</span>
-              <span>Imagen profesional</span>
-              <span>Agenda simple de operar</span>
+
+            <div className="landing-proof-list">
+              <span>Reservas online 24/7</span>
+              <span>Marca propia por tenant</span>
+              <span>Agenda clara para operar</span>
             </div>
           </div>
 
-          <aside className="hero-showcase">
-            <div className="showcase-window">
-              <div className="window-bar">
-                <span />
-                <span />
-                <span />
-              </div>
-              <div className="showcase-stat-row">
-                <div className="showcase-stat">
-                  <span className="showcase-label">Turnos tomados</span>
-                  <strong>124</strong>
+          <aside className="landing-hero-visual" aria-label="Vista previa del producto">
+            <div className="product-stage">
+              <div className="product-stage-panel">
+                <div className="product-stage-bar">
+                  <span />
+                  <span />
+                  <span />
                 </div>
-                <div className="showcase-stat">
-                  <span className="showcase-label">Confirmados</span>
-                  <strong>87%</strong>
+
+                <div className="product-stage-heading">
+                  <div>
+                    <span className="showcase-label">Agenda central</span>
+                    <strong>Semana activa</strong>
+                  </div>
+                  <div className="product-stage-badge">87% confirmados</div>
+                </div>
+
+                <div className="product-stage-columns">
+                  <div className="product-day-column">
+                    <span className="product-day-label">Lun</span>
+                    <div className="product-slot product-slot-strong">
+                      <strong>09:00</strong>
+                      <span>Limpieza dental</span>
+                    </div>
+                    <div className="product-slot">
+                      <strong>11:30</strong>
+                      <span>Consulta inicial</span>
+                    </div>
+                  </div>
+
+                  <div className="product-day-column product-day-column-accent">
+                    <span className="product-day-label">Mar</span>
+                    <div className="product-slot product-slot-accent">
+                      <strong>10:00</strong>
+                      <span>Blanqueamiento</span>
+                    </div>
+                    <div className="product-slot">
+                      <strong>15:30</strong>
+                      <span>Control anual</span>
+                    </div>
+                  </div>
+
+                  <div className="product-day-column">
+                    <span className="product-day-label">Mie</span>
+                    <div className="product-slot">
+                      <strong>08:30</strong>
+                      <span>Ortodoncia</span>
+                    </div>
+                    <div className="product-slot product-slot-soft">
+                      <strong>13:00</strong>
+                      <span>Horario bloqueado</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="showcase-list">
-                <div className="showcase-focus-card">
-                  <span className="showcase-label">Hoy</span>
-                  <strong>12 reservas activas</strong>
-                  <p>Todo visible en una agenda clara, lista para atender.</p>
-                </div>
-                <div className="showcase-calendar">
-                  <span className="calendar-block active" />
-                  <span className="calendar-block" />
-                  <span className="calendar-block" />
-                  <span className="calendar-block active" />
-                  <span className="calendar-block" />
-                  <span className="calendar-block" />
-                </div>
+
+              <div className="product-floating-card product-floating-booking">
+                <span className="showcase-label">Reserva publica</span>
+                <strong>Lista para convertir visitas en turnos</strong>
+                <p>Servicios, horarios y accion clara en una sola vista.</p>
               </div>
-            </div>
-            <div className="showcase-mini-grid">
-              <div className="showcase-card compact">
-                <span className="showcase-label">Captacion</span>
-                <strong>Tu pagina lista para reservar</strong>
-              </div>
-              <div className="showcase-card compact">
-                <span className="showcase-label">Gestion</span>
-                <strong>Tu agenda siempre ordenada</strong>
+
+              <div className="product-floating-card product-floating-kpi">
+                <span className="showcase-label">Hoy</span>
+                <strong>12 turnos activos</strong>
+                <p>Todo visible para atender sin perder contexto.</p>
               </div>
             </div>
           </aside>
         </div>
       </section>
 
-      <section className="panel marketing-band">
-        <div className="marketing-band-copy">
-          <span className="eyebrow">Pensado para vender mejor</span>
-          <h2>Menos explicaciones. Mas turnos concretados.</h2>
-          <p className="muted">
-            La propuesta comercial es simple: una presencia online prolija para tus clientes y una
-            agenda mucho mas clara para tu equipo.
-          </p>
+      <section className="landing-sectors">
+        <span>Consultorios</span>
+        <span>Centros de salud</span>
+        <span>Estudios profesionales</span>
+        <span>Servicios con agenda</span>
+      </section>
+
+      <section className="landing-editorial-grid">
+        <div className="landing-editorial-intro">
+          <span className="eyebrow">Una propuesta comercial clara</span>
+          <h2>No hace falta decir mucho cuando el producto se entiende rapido.</h2>
         </div>
-        <div className="marketing-band-points">
-          <strong>Mas confianza</strong>
-          <strong>Mas conversion</strong>
-          <strong>Mas orden diario</strong>
+
+        <div className="landing-editorial-points">
+          <article className="editorial-point">
+            <span className="editorial-point-number">01</span>
+            <div>
+              <h3>Mas confianza desde la primera visita</h3>
+              <p className="muted">
+                Una presencia online prolija mejora la percepcion del negocio y ayuda a que el
+                cliente avance con mas seguridad.
+              </p>
+            </div>
+          </article>
+
+          <article className="editorial-point">
+            <span className="editorial-point-number">02</span>
+            <div>
+              <h3>Mas conversion sin friccion</h3>
+              <p className="muted">
+                La reserva publica muestra solo lo necesario para que elegir servicio y horario sea
+                rapido y natural.
+              </p>
+            </div>
+          </article>
+
+          <article className="editorial-point">
+            <span className="editorial-point-number">03</span>
+            <div>
+              <h3>Mas control en la operacion diaria</h3>
+              <p className="muted">
+                El profesional ve sus turnos, sus bloqueos y sus acciones principales en un entorno
+                ordenado y facil de usar.
+              </p>
+            </div>
+          </article>
         </div>
       </section>
 
-      <section className="marketing-grid">
-        <article className="metric marketing-card marketing-card-primary">
-          <span className="eyebrow">Reservas</span>
-          <h2>Una pagina que invita a reservar, no a dudar.</h2>
-          <p className="muted">
-            Servicios claros, horarios visibles y una accion concreta para convertir visitas en
-            turnos.
-          </p>
+      <section className="landing-value-strip">
+        <article className="value-strip-card value-strip-card-dark">
+          <span className="eyebrow">Captacion</span>
+          <h2>Una web de reservas que se siente parte de la marca, no una plantilla generica.</h2>
         </article>
-        <article className="metric marketing-card">
+
+        <article className="value-strip-card">
           <span className="eyebrow">Operacion</span>
-          <h2>Un panel simple para atender, confirmar y reprogramar.</h2>
-          <p className="muted">
-            Todo pensado para que el profesional vea rapido su dia y tome decisiones sin perder
-            tiempo.
-          </p>
-        </article>
-        <article className="metric marketing-card">
-          <span className="eyebrow">Escala</span>
-          <h2>Una base profesional lista para crecer con tu negocio.</h2>
-          <p className="muted">
-            Multi-tenant, cobros online, prestadores y marca propia dentro de una sola plataforma.
-          </p>
+          <h2>Un panel donde las decisiones importantes aparecen primero y se entienden mejor.</h2>
         </article>
       </section>
 
-      <section className="panel narrative-band narrative-band-sales">
-        <div className="section-heading">
-          <span className="eyebrow">Por que se entiende rapido</span>
-          <h2>Lo justo y necesario para que un negocio diga: esto me sirve.</h2>
-          <p className="muted">
-            Sin exceso de informacion, sin ruido visual y con una promesa concreta: ayudarte a
-            vender mejor y organizar mejor los turnos.
-          </p>
+      <section className="landing-outcomes">
+        <div className="section-heading landing-outcomes-heading">
+          <span className="eyebrow">Lo que vende</span>
+          <h2>Beneficios concretos, mostrados con una estetica mas solida.</h2>
         </div>
-        <div className="steps-grid">
-          <div className="step-item">
-            <strong>1. Mostras una imagen profesional</strong>
-            <p className="muted">Tu negocio se presenta mejor y transmite mas confianza.</p>
-          </div>
-          <div className="step-item">
-            <strong>2. El cliente reserva mas facil</strong>
-            <p className="muted">Encuentra rapido lo que necesita y concreta el turno online.</p>
-          </div>
-          <div className="step-item">
-            <strong>3. Vos operas con mas claridad</strong>
-            <p className="muted">La agenda diaria queda centralizada y lista para trabajar.</p>
-          </div>
+
+        <div className="landing-outcomes-grid">
+          <article className="outcome-card outcome-card-accent">
+            <strong>Imagen profesional</strong>
+            <p className="muted">
+              Marca, servicios y reservas dentro de una experiencia mucho mas cuidada.
+            </p>
+          </article>
+          <article className="outcome-card">
+            <strong>Agenda centralizada</strong>
+            <p className="muted">Turnos, estados, bloqueos y prestadores visibles en un mismo lugar.</p>
+          </article>
+          <article className="outcome-card">
+            <strong>Crecimiento ordenado</strong>
+            <p className="muted">
+              Base lista para cobrar online, sumar prestadores y escalar sin rehacer el sistema.
+            </p>
+          </article>
         </div>
       </section>
 
-      <section className="panel closing-cta">
+      <section className="closing-cta closing-cta-editorial">
         <div className="closing-cta-copy">
-          <span className="eyebrow">Listo para mostrar</span>
-          <h2>Una demo clara hoy. Un sistema vendible mañana.</h2>
+          <span className="eyebrow">Demo lista para mostrar</span>
+          <h2>Una presentacion mas atractiva para vender el producto con mas autoridad.</h2>
           <p className="muted">
-            Explora la experiencia completa y revisa como se ve tanto la reserva publica como el
-            panel interno del negocio.
+            Revisa la web publica y el panel interno para ver el recorrido completo desde la
+            captacion hasta la gestion diaria.
           </p>
         </div>
         <div className="actions">
