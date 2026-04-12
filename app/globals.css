@@ -2232,6 +2232,36 @@ th:last-child {
   cursor: pointer;
 }
 
+.site-live-resize-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: -2px;
+}
+
+.site-live-resize-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #dfe7f2;
+  color: #5d6880;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.site-live-resize-group button {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid #d5deed;
+  background: #f6f9ff;
+  color: #2a3650;
+  cursor: pointer;
+}
+
 .site-live-panel-empty {
   display: grid;
   gap: 8px;
@@ -2528,8 +2558,16 @@ th:last-child {
   width: 100%;
 }
 
+.site-width-compact {
+  max-width: 520px;
+}
+
 .site-width-normal {
   max-width: 860px;
+}
+
+.site-width-full {
+  max-width: 100%;
 }
 
 .site-block-image {
@@ -2559,6 +2597,10 @@ th:last-child {
 
 .site-image-height-medium img {
   min-height: 280px;
+}
+
+.site-image-height-small img {
+  min-height: 220px;
 }
 
 .site-image-height-large img {

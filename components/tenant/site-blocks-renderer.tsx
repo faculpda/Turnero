@@ -120,7 +120,7 @@ export function SiteBlocksRenderer({
         }
 
         return (
-          <article className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"}`} key={block.id}>
+          <article className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"} site-width-${block.width ?? "normal"}`} key={block.id}>
             <div>
               <h2>{block.title}</h2>
               <p className="muted">{block.body}</p>

@@ -252,7 +252,10 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
           item.tone === "brand" || item.tone === "muted" || item.tone === "dark"
             ? item.tone
             : "dark",
-        width: item.width === "wide" ? "wide" : "normal",
+        width:
+          item.width === "compact" || item.width === "wide" || item.width === "full"
+            ? item.width
+            : "normal",
       });
       return blocks;
     }
@@ -265,7 +268,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         altText: typeof item.altText === "string" ? item.altText : undefined,
         caption: typeof item.caption === "string" ? item.caption : undefined,
         layout: item.layout === "wide" ? "wide" : "contained",
-        height: item.height === "large" ? "large" : "medium",
+        height: item.height === "small" || item.height === "large" ? item.height : "medium",
       });
       return blocks;
     }
@@ -277,7 +280,10 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         title: typeof item.title === "string" ? item.title : undefined,
         videoUrl: item.videoUrl,
         caption: typeof item.caption === "string" ? item.caption : undefined,
-        width: item.width === "wide" ? "wide" : "normal",
+        width:
+          item.width === "compact" || item.width === "wide" || item.width === "full"
+            ? item.width
+            : "normal",
       });
       return blocks;
     }
@@ -339,6 +345,10 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
             ? item.bodySize
             : "md",
         theme: item.theme === "solid" ? "solid" : "soft",
+        width:
+          item.width === "compact" || item.width === "wide" || item.width === "full"
+            ? item.width
+            : "normal",
       });
     }
 

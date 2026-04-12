@@ -16,7 +16,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     titleSize: z.enum(["md", "lg", "xl"]).optional(),
     bodySize: z.enum(["sm", "md", "lg"]).optional(),
     tone: z.enum(["dark", "brand", "muted"]).optional(),
-    width: z.enum(["normal", "wide"]).optional(),
+    width: z.enum(["compact", "normal", "wide", "full"]).optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -25,7 +25,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     altText: z.string().max(180).optional(),
     caption: z.string().max(300).optional(),
     layout: z.enum(["contained", "wide"]).optional(),
-    height: z.enum(["medium", "large"]).optional(),
+    height: z.enum(["small", "medium", "large"]).optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -33,7 +33,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     title: z.string().max(140).optional(),
     videoUrl: z.string().url(),
     caption: z.string().max(300).optional(),
-    width: z.enum(["normal", "wide"]).optional(),
+    width: z.enum(["compact", "normal", "wide", "full"]).optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -60,6 +60,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     titleSize: z.enum(["md", "lg", "xl"]).optional(),
     bodySize: z.enum(["sm", "md", "lg"]).optional(),
     theme: z.enum(["soft", "solid"]).optional(),
+    width: z.enum(["compact", "normal", "wide", "full"]).optional(),
   }),
 ]);
 

@@ -115,6 +115,7 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         titleSize: "lg",
         bodySize: "md",
         theme: "soft",
+        width: "normal",
       };
   }
 }
@@ -177,6 +178,67 @@ function buildPreviewStyle(primaryColor: string, secondaryColor: string): CSSPro
 
 function textToneClass(tone?: "dark" | "brand" | "muted") {
   return `site-tone-${tone ?? "dark"}`;
+}
+
+const widthScale = ["compact", "normal", "wide", "full"] as const;
+const heightScale = ["small", "medium", "large"] as const;
+
+function stepWidth(
+  current: "compact" | "normal" | "wide" | "full" | undefined,
+  direction: "down" | "up",
+) {
+  const index = widthScale.indexOf(current ?? "normal");
+  const nextIndex = direction === "up" ? Math.min(index + 1, widthScale.length - 1) : Math.max(index - 1, 0);
+  return widthScale[nextIndex];
+}
+
+function stepHeight(
+  current: "small" | "medium" | "large" | undefined,
+  direction: "down" | "up",
+) {
+  const index = heightScale.indexOf(current ?? "medium");
+  const nextIndex = direction === "up" ? Math.min(index + 1, heightScale.length - 1) : Math.max(index - 1, 0);
+  return heightScale[nextIndex];
+}
+
+function renderResizeControls(
+  options: {
+    onWidthDown?: () => void;
+    onWidthUp?: () => void;
+    onHeightDown?: () => void;
+    onHeightUp?: () => void;
+  },
+) {
+  if (!options.onWidthDown && !options.onHeightDown) {
+    return null;
+  }
+
+  return (
+    <div className="site-live-resize-controls">
+      {options.onWidthDown || options.onWidthUp ? (
+        <div className="site-live-resize-group">
+          <span>Ancho</span>
+          <button onClick={options.onWidthDown} type="button">
+            -
+          </button>
+          <button onClick={options.onWidthUp} type="button">
+            +
+          </button>
+        </div>
+      ) : null}
+      {options.onHeightDown || options.onHeightUp ? (
+        <div className="site-live-resize-group">
+          <span>Alto</span>
+          <button onClick={options.onHeightDown} type="button">
+            -
+          </button>
+          <button onClick={options.onHeightUp} type="button">
+            +
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function buildTemplatePresets(copy: {
@@ -792,14 +854,24 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "text"
-                    ? { ...current, width: e.target.value === "wide" ? "wide" : "normal" }
+                    ? {
+                        ...current,
+                        width:
+                          e.target.value === "compact" ||
+                          e.target.value === "wide" ||
+                          e.target.value === "full"
+                            ? e.target.value
+                            : "normal",
+                      }
                     : current,
                 )
               }
               value={selectedBlock.width ?? "normal"}
             >
+              <option value="compact">Compacto</option>
               <option value="normal">Normal</option>
               <option value="wide">Amplio</option>
+              <option value="full">Completo</option>
             </select>
           </label>
           <label className="field">
@@ -893,12 +965,19 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "image"
-                    ? { ...current, height: e.target.value === "large" ? "large" : "medium" }
+                    ? {
+                        ...current,
+                        height:
+                          e.target.value === "small" || e.target.value === "large"
+                            ? e.target.value
+                            : "medium",
+                      }
                     : current,
                 )
               }
               value={selectedBlock.height ?? "medium"}
             >
+              <option value="small">Baja</option>
               <option value="medium">Media</option>
               <option value="large">Grande</option>
             </select>
@@ -951,14 +1030,24 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "video"
-                    ? { ...current, width: e.target.value === "wide" ? "wide" : "normal" }
+                    ? {
+                        ...current,
+                        width:
+                          e.target.value === "compact" ||
+                          e.target.value === "wide" ||
+                          e.target.value === "full"
+                            ? e.target.value
+                            : "normal",
+                      }
                     : current,
                 )
               }
               value={selectedBlock.width ?? "normal"}
             >
+              <option value="compact">Compacto</option>
               <option value="normal">Normal</option>
               <option value="wide">Amplio</option>
+              <option value="full">Completo</option>
             </select>
           </label>
         </div>
@@ -1157,6 +1246,32 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
           >
             <option value="soft">Suave</option>
             <option value="solid">Solido</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Ancho del bloque</span>
+          <select
+            onChange={(e) =>
+              updateBlock(selectedBlock.id, (current) =>
+                current.type === "cta"
+                  ? {
+                      ...current,
+                      width:
+                        e.target.value === "compact" ||
+                        e.target.value === "wide" ||
+                        e.target.value === "full"
+                          ? e.target.value
+                          : "normal",
+                    }
+                  : current,
+              )
+            }
+            value={selectedBlock.width ?? "normal"}
+          >
+            <option value="compact">Compacto</option>
+            <option value="normal">Normal</option>
+            <option value="wide">Amplio</option>
+            <option value="full">Completo</option>
           </select>
         </label>
       </div>
@@ -1430,6 +1545,51 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                   </div>
                 </div>
 
+                {selectedTarget.kind === "block" && selectedTarget.blockId === block.id
+                  ? renderResizeControls({
+                      onWidthDown:
+                        block.type === "text" || block.type === "video" || block.type === "cta"
+                          ? () =>
+                              updateBlock(block.id, (current) => {
+                                if (current.type === "text" || current.type === "video" || current.type === "cta") {
+                                  return { ...current, width: stepWidth(current.width, "down") };
+                                }
+
+                                return current;
+                              })
+                          : undefined,
+                      onWidthUp:
+                        block.type === "text" || block.type === "video" || block.type === "cta"
+                          ? () =>
+                              updateBlock(block.id, (current) => {
+                                if (current.type === "text" || current.type === "video" || current.type === "cta") {
+                                  return { ...current, width: stepWidth(current.width, "up") };
+                                }
+
+                                return current;
+                              })
+                          : undefined,
+                      onHeightDown:
+                        block.type === "image"
+                          ? () =>
+                              updateBlock(block.id, (current) =>
+                                current.type === "image"
+                                  ? { ...current, height: stepHeight(current.height, "down") }
+                                  : current,
+                              )
+                          : undefined,
+                      onHeightUp:
+                        block.type === "image"
+                          ? () =>
+                              updateBlock(block.id, (current) =>
+                                current.type === "image"
+                                  ? { ...current, height: stepHeight(current.height, "up") }
+                                  : current,
+                              )
+                          : undefined,
+                    })
+                  : null}
+
                 {block.type === "text" ? (
                   <div
                     className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""} site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} ${textToneClass(block.tone)} site-width-${block.width ?? "normal"}`}
@@ -1575,7 +1735,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 ) : null}
 
                 {block.type === "cta" ? (
-                  <div className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"}`}>
+                  <div className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"} site-width-${block.width ?? "normal"}`}>
                     <div>
                       <h2
                         contentEditable

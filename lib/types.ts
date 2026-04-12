@@ -108,7 +108,7 @@ export type HeroLayout = "content-left" | "image-left";
 export type SiteTitleScale = "md" | "lg" | "xl";
 export type SiteBodyScale = "sm" | "md" | "lg";
 export type SiteTextTone = "dark" | "brand" | "muted";
-export type SiteSectionWidth = "normal" | "wide";
+export type SiteSectionWidth = "compact" | "normal" | "wide" | "full";
 export type SiteColumnsLayout = "equal" | "feature-left" | "feature-right";
 export type SiteCtaTheme = "soft" | "solid";
 
@@ -132,7 +132,7 @@ export type SiteImageBlock = {
   altText?: string;
   caption?: string;
   layout?: "contained" | "wide";
-  height?: "medium" | "large";
+  height?: "small" | "medium" | "large";
 };
 
 export type SiteVideoBlock = {
@@ -165,6 +165,7 @@ export type SiteCallToActionBlock = {
   titleSize?: SiteTitleScale;
   bodySize?: SiteBodyScale;
   theme?: SiteCtaTheme;
+  width?: SiteSectionWidth;
 };
 
 export type SiteBuilderBlock =
