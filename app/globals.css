@@ -2038,10 +2038,174 @@ th:last-child {
   gap: 18px;
 }
 
+.site-builder-shell-advanced {
+  align-items: start;
+}
+
 .site-builder-shell {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: 20px;
+}
+
+.site-builder-section {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid #e6edf7;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 32px rgba(18, 31, 53, 0.04);
+}
+
+.site-builder-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.site-builder-section h3 {
+  margin: 0 0 6px;
+  font-size: 1.08rem;
+}
+
+.site-block-library {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.site-block-library-item {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 18px;
+  border: 1px solid #dfe7f2;
+  border-radius: 20px;
+  background: #f9fbff;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.site-block-library-item:hover {
+  transform: translateY(-2px);
+  border-color: #c9d8ff;
+  box-shadow: 0 18px 30px rgba(58, 99, 255, 0.08);
+}
+
+.site-block-library-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #3558dd;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--font-accent);
+}
+
+.site-block-library-link {
+  color: #3558dd;
+  font-weight: 700;
+}
+
+.site-block-editor-list {
+  display: grid;
+  gap: 16px;
+}
+
+.site-block-editor-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #e1e9f4;
+  border-radius: 22px;
+  background: #fbfcfe;
+}
+
+.site-block-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.site-block-editor-head strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.05rem;
+}
+
+.site-block-type {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #edf3ff;
+  color: #3558dd;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-family: var(--font-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.site-block-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.site-block-editor-actions button,
+.site-column-add,
+.site-column-remove {
+  border: 1px solid #dce5f2;
+  background: #ffffff;
+  color: #445067;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.site-block-editor-actions button:hover,
+.site-column-add:hover,
+.site-column-remove:hover {
+  border-color: #bfcff7;
+  color: #26324a;
+}
+
+.site-block-editor-actions .danger,
+.site-column-remove {
+  color: #be4b4b;
+}
+
+.site-columns-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.site-column-editor-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #dee7f4;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.site-column-editor-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
 }
 
 .service-form {
@@ -2066,6 +2230,125 @@ th:last-child {
 .tenant-public {
   --tenant-primary: #2d62d9;
   --tenant-secondary: #eaf4ff;
+}
+
+.site-blocks-stack {
+  display: grid;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.site-blocks-stack.is-preview {
+  margin-top: 18px;
+}
+
+.site-block {
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 10%, #dfe7f2);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 16px 36px rgba(18, 31, 53, 0.04);
+}
+
+.site-block-text,
+.site-block-video {
+  display: grid;
+  gap: 12px;
+  padding: 28px;
+}
+
+.site-block-text.align-center {
+  text-align: center;
+  justify-items: center;
+}
+
+.site-block-text h2,
+.site-block-video h2,
+.site-block-cta h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 2vw, 2.4rem);
+  line-height: 1.05;
+  font-family: var(--font-display);
+}
+
+.site-block-image {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 18px;
+}
+
+.site-block-image.is-wide {
+  padding: 0;
+  overflow: hidden;
+}
+
+.site-block-image img {
+  width: 100%;
+  min-height: 280px;
+  object-fit: cover;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--tenant-secondary) 44%, white 56%);
+}
+
+.site-block-image.is-wide img {
+  border-radius: 24px;
+  min-height: 360px;
+}
+
+.site-video-frame {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #0f1728;
+}
+
+.site-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.site-block-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 18px;
+}
+
+.site-column-card {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--tenant-secondary) 42%, white 58%);
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 10%, #dfe7f2);
+}
+
+.site-column-card h3 {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.site-block-cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 26px 28px;
+  background: color-mix(in srgb, var(--tenant-secondary) 36%, white 64%);
+}
+
+.site-block-cta p,
+.site-block-video p,
+.site-block-text p,
+.site-column-card p,
+.site-block-image figcaption {
+  margin: 0;
 }
 
 .tenant-hero {
@@ -2157,6 +2440,8 @@ th:last-child {
   --tenant-primary: #205fc0;
   --tenant-secondary: #dff1ff;
   align-content: start;
+  position: sticky;
+  top: 18px;
 }
 
 .site-preview-hero {
@@ -2293,8 +2578,14 @@ th:last-child {
   .landing-hero-grid,
   .landing-editorial-grid,
   .landing-value-strip,
-  .landing-outcomes-grid {
+  .landing-outcomes-grid,
+  .site-block-library,
+  .site-block-columns {
     grid-template-columns: 1fr;
+  }
+
+  .site-preview-panel {
+    position: static;
   }
 
   .product-stage {

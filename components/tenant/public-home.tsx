@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { SiteBlocksRenderer } from "@/components/tenant/site-blocks-renderer";
 import type { TenantPublicProfile } from "@/lib/types";
 
 type TenantPublicHomeProps = {
@@ -71,6 +72,8 @@ export function TenantPublicHome({
           </aside>
         </div>
       </section>
+
+      <SiteBlocksRenderer blocks={tenant.siteBlocks} tenant={tenant} useSlugRoutes={useSlugRoutes} />
 
       <section className="grid cols-2">
         <article className="panel">

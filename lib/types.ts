@@ -104,6 +104,58 @@ export type TenantPaymentSettingsSummary = {
   hasMercadoPagoWebhookSecret: boolean;
 };
 
+export type SiteTextBlock = {
+  id: string;
+  type: "text";
+  eyebrow?: string;
+  title: string;
+  body: string;
+  align?: "left" | "center";
+};
+
+export type SiteImageBlock = {
+  id: string;
+  type: "image";
+  imageUrl: string;
+  altText?: string;
+  caption?: string;
+  layout?: "contained" | "wide";
+};
+
+export type SiteVideoBlock = {
+  id: string;
+  type: "video";
+  title?: string;
+  videoUrl: string;
+  caption?: string;
+};
+
+export type SiteColumnsBlock = {
+  id: string;
+  type: "columns";
+  columns: Array<{
+    id: string;
+    title: string;
+    body: string;
+  }>;
+};
+
+export type SiteCallToActionBlock = {
+  id: string;
+  type: "cta";
+  title: string;
+  body: string;
+  buttonLabel: string;
+  buttonHref: string;
+};
+
+export type SiteBuilderBlock =
+  | SiteTextBlock
+  | SiteImageBlock
+  | SiteVideoBlock
+  | SiteColumnsBlock
+  | SiteCallToActionBlock;
+
 export type TenantPublicProfile = {
   id: string;
   name: string;
@@ -116,6 +168,7 @@ export type TenantPublicProfile = {
   primaryColor?: string;
   secondaryColor?: string;
   ctaLabel?: string;
+  siteBlocks?: SiteBuilderBlock[];
   paymentSettings?: TenantPaymentSettingsSummary;
   services: ServiceSummary[];
   nextSlots: string[];

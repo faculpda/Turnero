@@ -5,6 +5,54 @@ import { prisma } from "@/lib/prisma";
 
 const colorRegex = /^#([A-Fa-f0-9]{6})$/;
 
+const siteBlockSchema = z.discriminatedUnion("type", [
+  z.object({
+    id: z.string().min(1),
+    type: z.literal("text"),
+    eyebrow: z.string().max(60).optional(),
+    title: z.string().min(2).max(140),
+    body: z.string().min(2).max(1200),
+    align: z.enum(["left", "center"]).optional(),
+  }),
+  z.object({
+    id: z.string().min(1),
+    type: z.literal("image"),
+    imageUrl: z.string().url(),
+    altText: z.string().max(180).optional(),
+    caption: z.string().max(300).optional(),
+    layout: z.enum(["contained", "wide"]).optional(),
+  }),
+  z.object({
+    id: z.string().min(1),
+    type: z.literal("video"),
+    title: z.string().max(140).optional(),
+    videoUrl: z.string().url(),
+    caption: z.string().max(300).optional(),
+  }),
+  z.object({
+    id: z.string().min(1),
+    type: z.literal("columns"),
+    columns: z
+      .array(
+        z.object({
+          id: z.string().min(1),
+          title: z.string().min(2).max(100),
+          body: z.string().min(2).max(500),
+        }),
+      )
+      .min(2)
+      .max(3),
+  }),
+  z.object({
+    id: z.string().min(1),
+    type: z.literal("cta"),
+    title: z.string().min(2).max(140),
+    body: z.string().min(2).max(500),
+    buttonLabel: z.string().min(2).max(40),
+    buttonHref: z.string().min(1).max(200),
+  }),
+]);
+
 const siteConfigSchema = z.object({
   tenantSlug: z.string().min(1),
   siteTitle: z.string().min(2).max(120),
@@ -16,6 +64,7 @@ const siteConfigSchema = z.object({
   heroImageUrl: z.string().url().or(z.literal("")).optional(),
   primaryColor: z.string().regex(colorRegex),
   secondaryColor: z.string().regex(colorRegex),
+  siteBlocks: z.array(siteBlockSchema).max(20).optional(),
 });
 
 export async function POST(request: Request) {
@@ -49,6 +98,7 @@ export async function POST(request: Request) {
         heroImageUrl: payload.heroImageUrl?.trim() || null,
         primaryColor: payload.primaryColor,
         secondaryColor: payload.secondaryColor,
+        siteBlocks: payload.siteBlocks ?? [],
       },
     });
 

@@ -29,6 +29,45 @@ async function main() {
         "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
       publicDescription:
         "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+      siteBlocks: [
+        {
+          id: "seed_text_intro",
+          type: "text",
+          eyebrow: "Clinica moderna",
+          title: "Cuidamos tu sonrisa con una experiencia clara y profesional",
+          body: "Personaliza este espacio con tus diferenciales, tratamientos o informacion importante para que cada negocio tenga una web realmente propia.",
+          align: "left",
+        },
+        {
+          id: "seed_columns_features",
+          type: "columns",
+          columns: [
+            {
+              id: "seed_col_1",
+              title: "Reserva online",
+              body: "Tus clientes pueden elegir servicio, horario y confirmar en pocos pasos.",
+            },
+            {
+              id: "seed_col_2",
+              title: "Imagen profesional",
+              body: "Logo, portada, colores y secciones editables para mostrar tu marca.",
+            },
+            {
+              id: "seed_col_3",
+              title: "Mas conversion",
+              body: "Un sitio mas claro y propio ayuda a generar confianza y recibir mas turnos.",
+            },
+          ],
+        },
+        {
+          id: "seed_cta_final",
+          type: "cta",
+          title: "Empieza a recibir reservas con tu propia identidad",
+          body: "Combina agenda, web publica y personalizacion visual en un mismo lugar.",
+          buttonLabel: "Reservar ahora",
+          buttonHref: "/reservar",
+        },
+      ],
       timezone: "America/Argentina/Buenos_Aires",
     },
     create: {
@@ -47,6 +86,45 @@ async function main() {
         "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1200&q=80",
       publicDescription:
         "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+      siteBlocks: [
+        {
+          id: "seed_text_intro",
+          type: "text",
+          eyebrow: "Clinica moderna",
+          title: "Cuidamos tu sonrisa con una experiencia clara y profesional",
+          body: "Personaliza este espacio con tus diferenciales, tratamientos o informacion importante para que cada negocio tenga una web realmente propia.",
+          align: "left",
+        },
+        {
+          id: "seed_columns_features",
+          type: "columns",
+          columns: [
+            {
+              id: "seed_col_1",
+              title: "Reserva online",
+              body: "Tus clientes pueden elegir servicio, horario y confirmar en pocos pasos.",
+            },
+            {
+              id: "seed_col_2",
+              title: "Imagen profesional",
+              body: "Logo, portada, colores y secciones editables para mostrar tu marca.",
+            },
+            {
+              id: "seed_col_3",
+              title: "Mas conversion",
+              body: "Un sitio mas claro y propio ayuda a generar confianza y recibir mas turnos.",
+            },
+          ],
+        },
+        {
+          id: "seed_cta_final",
+          type: "cta",
+          title: "Empieza a recibir reservas con tu propia identidad",
+          body: "Combina agenda, web publica y personalizacion visual en un mismo lugar.",
+          buttonLabel: "Reservar ahora",
+          buttonHref: "/reservar",
+        },
+      ],
       timezone: "America/Argentina/Buenos_Aires",
       domains: {
         create: {

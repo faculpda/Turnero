@@ -80,6 +80,7 @@ model Tenant {
   heroDescription  String?
   ctaLabel         String?
   publicDescription String?
+  siteBlocks       Json?
   mercadoPagoEnabled Boolean          @default(false)
   mercadoPagoPublicKey String?
   mercadoPagoAccessToken String?

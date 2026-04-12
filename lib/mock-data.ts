@@ -115,6 +115,45 @@ export const tenantPublicProfile: TenantPublicProfile = {
   headline: "Reserva tu turno en pocos pasos",
   description:
     "Selecciona el servicio, elige una fecha disponible y confirma tu turno online.",
+  siteBlocks: [
+    {
+      id: "block_text_intro",
+      type: "text",
+      eyebrow: "Atencion profesional",
+      title: "Una experiencia simple para reservar con confianza",
+      body: "Muestra tus principales beneficios, responde dudas frecuentes y ayuda a que cada visita avance naturalmente hacia la reserva.",
+      align: "left",
+    },
+    {
+      id: "block_columns_highlights",
+      type: "columns",
+      columns: [
+        {
+          id: "col_1",
+          title: "Horarios claros",
+          body: "Los clientes encuentran disponibilidad real y reservan en pocos pasos.",
+        },
+        {
+          id: "col_2",
+          title: "Imagen cuidada",
+          body: "Tu negocio se presenta con una identidad mucho mas profesional.",
+        },
+        {
+          id: "col_3",
+          title: "Gestion ordenada",
+          body: "La agenda y los turnos quedan organizados desde una sola plataforma.",
+        },
+      ],
+    },
+    {
+      id: "block_cta_main",
+      type: "cta",
+      title: "Reserva tu proximo turno online",
+      body: "Elige el servicio, la fecha y el horario disponible que mejor te quede.",
+      buttonLabel: "Ver disponibilidad",
+      buttonHref: "/reservar",
+    },
+  ],
   paymentSettings: {
     mercadoPagoEnabled: false,
     hasMercadoPagoAccessToken: false,

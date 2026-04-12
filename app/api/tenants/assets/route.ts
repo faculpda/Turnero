@@ -19,7 +19,11 @@ export async function POST(request: Request) {
     const assetType = String(formData.get("assetType") ?? "");
     const file = formData.get("file");
 
-    if (!tenantSlug || (assetType !== "logo" && assetType !== "hero") || !(file instanceof File)) {
+    if (
+      !tenantSlug ||
+      !["logo", "hero", "content"].includes(assetType) ||
+      !(file instanceof File)
+    ) {
       return NextResponse.json({ error: "Datos de carga invalidos." }, { status: 400 });
     }
 

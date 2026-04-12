@@ -14,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 import type {
   AppointmentSummary,
   CustomerAppointmentSummary,
+  SiteBuilderBlock,
   TenantBookingData,
   TenantDashboardData,
   TenantPublicProfile,
@@ -191,6 +192,7 @@ type TenantProfileRecord = {
   primaryColor: string | null;
   secondaryColor: string | null;
   ctaLabel: string | null;
+  siteBlocks: Prisma.JsonValue | null;
   mercadoPagoEnabled?: boolean | null;
   mercadoPagoPublicKey?: string | null;
   mercadoPagoAccessToken?: string | null;
@@ -215,6 +217,106 @@ type TenantProfileRecord = {
   }>;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilderBlock[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input.reduce<SiteBuilderBlock[]>((blocks, item) => {
+    if (!isRecord(item) || typeof item.id !== "string" || typeof item.type !== "string") {
+      return blocks;
+    }
+
+    if (item.type === "text" && typeof item.title === "string" && typeof item.body === "string") {
+      blocks.push({
+        id: item.id,
+        type: "text",
+        eyebrow: typeof item.eyebrow === "string" ? item.eyebrow : undefined,
+        title: item.title,
+        body: item.body,
+        align: item.align === "center" ? "center" : "left",
+      });
+      return blocks;
+    }
+
+    if (item.type === "image" && typeof item.imageUrl === "string") {
+      blocks.push({
+        id: item.id,
+        type: "image",
+        imageUrl: item.imageUrl,
+        altText: typeof item.altText === "string" ? item.altText : undefined,
+        caption: typeof item.caption === "string" ? item.caption : undefined,
+        layout: item.layout === "wide" ? "wide" : "contained",
+      });
+      return blocks;
+    }
+
+    if (item.type === "video" && typeof item.videoUrl === "string") {
+      blocks.push({
+        id: item.id,
+        type: "video",
+        title: typeof item.title === "string" ? item.title : undefined,
+        videoUrl: item.videoUrl,
+        caption: typeof item.caption === "string" ? item.caption : undefined,
+      });
+      return blocks;
+    }
+
+    if (item.type === "columns" && Array.isArray(item.columns)) {
+      const columns = item.columns.flatMap((column) => {
+        if (!isRecord(column) || typeof column.id !== "string") {
+          return [];
+        }
+
+        if (typeof column.title !== "string" || typeof column.body !== "string") {
+          return [];
+        }
+
+        return [
+          {
+            id: column.id,
+            title: column.title,
+            body: column.body,
+          },
+        ];
+      });
+
+      if (columns.length > 0) {
+        blocks.push({
+          id: item.id,
+          type: "columns",
+          columns,
+        });
+      }
+
+      return blocks;
+    }
+
+    if (
+      item.type === "cta" &&
+      typeof item.title === "string" &&
+      typeof item.body === "string" &&
+      typeof item.buttonLabel === "string" &&
+      typeof item.buttonHref === "string"
+    ) {
+      blocks.push({
+        id: item.id,
+        type: "cta",
+        title: item.title,
+        body: item.body,
+        buttonLabel: item.buttonLabel,
+        buttonHref: item.buttonHref,
+      });
+    }
+
+    return blocks;
+  }, []);
+}
+
 function mapPublicTenant(tenant: TenantProfileRecord): TenantPublicProfile {
   return {
     id: tenant.id,
@@ -231,6 +333,7 @@ function mapPublicTenant(tenant: TenantProfileRecord): TenantPublicProfile {
     primaryColor: tenant.primaryColor ?? undefined,
     secondaryColor: tenant.secondaryColor ?? undefined,
     ctaLabel: tenant.ctaLabel ?? "Reservar turno",
+    siteBlocks: parseSiteBlocks(tenant.siteBlocks),
     paymentSettings: "mercadoPagoEnabled" in tenant
       ? {
           mercadoPagoEnabled: tenant.mercadoPagoEnabled ?? false,
