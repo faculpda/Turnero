@@ -141,6 +141,7 @@ a {
   font-weight: 600;
   cursor: pointer;
   flex: 0 0 auto;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .dashboard-sidebar-item:hover {
@@ -153,17 +154,26 @@ a {
   color: #2747c7;
   border-left: 2px solid #2747c7;
   padding-left: 8px;
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px rgba(39, 71, 199, 0.04);
 }
 
 .dashboard-sidebar-icon {
-  width: 16px;
-  height: 16px;
-  border-radius: 5px;
-  border: 1.5px solid currentColor;
-  background: transparent;
-  opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid #dfe7f2;
+  color: currentColor;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(18, 31, 53, 0.03);
+}
+
+.dashboard-sidebar-icon svg {
+  width: 15px;
+  height: 15px;
 }
 
 .dashboard-sidebar-footer {
@@ -274,6 +284,23 @@ a {
   background: #ffffff;
   border: 1px solid #e5ebf4;
   box-shadow: var(--shadow);
+}
+
+.dashboard-overview-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: currentColor;
+}
+
+.dashboard-overview-chip-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .dashboard-overview-chip strong,
@@ -632,6 +659,45 @@ p {
   gap: 14px;
 }
 
+.product-stage-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.product-metric-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #e3ebf4;
+  background: #ffffff;
+}
+
+.product-metric-card strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.product-metric-card small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.product-metric-card-blue {
+  background: #eef5ff;
+  border-color: #d7e5fb;
+}
+
+.product-metric-card-green {
+  background: #eefaf3;
+  border-color: #d7eadf;
+}
+
+.product-metric-card-amber {
+  background: #fff8ea;
+  border-color: #f6e1b9;
+}
+
 .product-day-column {
   display: grid;
   gap: 10px;
@@ -712,6 +778,60 @@ p {
   bottom: 28px;
   width: 220px;
 }
+
+.product-stage-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 16px;
+  align-items: end;
+}
+
+.product-mini-chart,
+.product-status-list {
+  display: grid;
+  gap: 10px;
+}
+
+.product-mini-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 86px;
+  padding: 12px 0 4px;
+}
+
+.product-mini-chart-bars .bar {
+  flex: 1 1 0;
+  border-radius: 999px 999px 4px 4px;
+  background: linear-gradient(180deg, #76a8ff 0%, #3a63ff 100%);
+}
+
+.product-mini-chart-bars .bar-1 { height: 38px; }
+.product-mini-chart-bars .bar-2 { height: 56px; }
+.product-mini-chart-bars .bar-3 { height: 48px; }
+.product-mini-chart-bars .bar-4 { height: 68px; }
+.product-mini-chart-bars .bar-5 { height: 58px; }
+.product-mini-chart-bars .bar-6 { height: 76px; }
+
+.product-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #546276;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.status-dot-green { background: #2aa76e; }
+.status-dot-blue { background: #3a63ff; }
+.status-dot-amber { background: #f0a127; }
 
 .landing-sectors {
   display: flex;
@@ -816,6 +936,16 @@ p {
 .outcome-card-accent {
   border-top-width: 3px;
   border-top-color: #3a63ff;
+}
+
+.outcome-card-success {
+  border-top-width: 3px;
+  border-top-color: #2aa76e;
+}
+
+.outcome-card-warning {
+  border-top-width: 3px;
+  border-top-color: #f0a127;
 }
 
 .closing-cta-editorial {
@@ -2088,7 +2218,7 @@ th:last-child {
     width: auto;
     min-width: max-content;
     padding: 10px 12px;
-    border: 1px solid #e8e1f4;
+    border: 1px solid #dde6f3;
     border-radius: 999px;
     background: #ffffff;
     flex-shrink: 0;
@@ -2098,8 +2228,8 @@ th:last-child {
   .dashboard-sidebar-item.active {
     border-left: 0;
     padding-left: 12px;
-    background: rgba(93, 63, 211, 0.1);
-    border-color: #d7c8fb;
+    background: #eaf1ff;
+    border-color: #d2defc;
   }
 
   .dashboard-sidebar-footer {
@@ -2171,6 +2301,11 @@ th:last-child {
     min-height: auto;
     padding-top: 80px;
     padding-bottom: 120px;
+  }
+
+  .product-stage-metrics,
+  .product-stage-footer {
+    grid-template-columns: 1fr;
   }
 
   .product-floating-booking {
@@ -2292,6 +2427,11 @@ th:last-child {
   .dashboard-sidebar-item {
     padding: 9px 11px;
     font-size: 0.92rem;
+  }
+
+  .dashboard-sidebar-icon {
+    width: 26px;
+    height: 26px;
   }
 
   .dashboard-topbar-actions {

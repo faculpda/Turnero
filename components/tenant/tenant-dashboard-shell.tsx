@@ -55,6 +55,78 @@ const sectionTitles: Record<DashboardSection, string> = {
   personalizar: "Personalizar pagina",
 };
 
+const navigationItems: DashboardSection[] = [
+  "turnos",
+  "agenda",
+  "prestadores",
+  "servicios",
+  "cobros",
+  "personalizar",
+];
+
+function SidebarIcon({ section }: { section: DashboardSection }) {
+  const commonProps = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.9,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+
+  switch (section) {
+    case "turnos":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <rect x="4" y="5" width="16" height="15" rx="3" />
+          <path d="M8 3v4M16 3v4M4 10h16" />
+          <path d="M8.5 14h3M8.5 17h6" />
+        </svg>
+      );
+    case "agenda":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <path d="M5 12h14" />
+          <path d="M12 5v14" />
+          <rect x="4" y="4" width="16" height="16" rx="4" />
+        </svg>
+      );
+    case "prestadores":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <path d="M16 19v-1a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v1" />
+          <circle cx="10" cy="7" r="3" />
+          <path d="M20 19v-1a3 3 0 0 0-2-2.8" />
+          <path d="M15 4.5a3 3 0 0 1 0 5.8" />
+        </svg>
+      );
+    case "servicios":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <path d="M6 7h12" />
+          <path d="M6 12h12" />
+          <path d="M6 17h8" />
+          <circle cx="17" cy="17" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      );
+    case "cobros":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <rect x="3" y="6" width="18" height="12" rx="3" />
+          <path d="M3 10h18" />
+          <path d="M7 15h4" />
+        </svg>
+      );
+    case "personalizar":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <path d="m12 3 2.1 2.1 3-.5.9 2.8 2.8.9-.5 3L22 12l-2.1 2.1.5 3-2.8.9-.9 2.8-3-.5L12 22l-2.1-2.1-3 .5-.9-2.8-2.8-.9.5-3L2 12l2.1-2.1-.5-3 2.8-.9.9-2.8 3 .5Z" />
+          <circle cx="12" cy="12" r="3.2" />
+        </svg>
+      );
+  }
+}
+
 export function TenantDashboardShell({
   tenantSlug,
   profile,
@@ -94,21 +166,19 @@ export function TenantDashboardShell({
         <nav className="dashboard-sidebar-nav" aria-label="Secciones del panel">
           <div className="dashboard-sidebar-group">
             <span className="dashboard-sidebar-label">Navegacion</span>
-            {(
-              ["turnos", "agenda", "prestadores", "servicios", "cobros", "personalizar"] as DashboardSection[]
-            ).map(
-              (section) => (
-                <button
-                  key={section}
-                  className={`dashboard-sidebar-item ${activeSection === section ? "active" : ""}`}
-                  onClick={() => setActiveSection(section)}
-                  type="button"
-                >
-                  <span className="dashboard-sidebar-icon" />
-                  <span>{sectionTitles[section]}</span>
-                </button>
-              ),
-            )}
+            {navigationItems.map((section) => (
+              <button
+                key={section}
+                className={`dashboard-sidebar-item ${activeSection === section ? "active" : ""}`}
+                onClick={() => setActiveSection(section)}
+                type="button"
+              >
+                <span className="dashboard-sidebar-icon" aria-hidden="true">
+                  <SidebarIcon section={section} />
+                </span>
+                <span>{sectionTitles[section]}</span>
+              </button>
+            ))}
           </div>
         </nav>
 
@@ -153,14 +223,23 @@ export function TenantDashboardShell({
 
             <div className="dashboard-overview-actions">
               <div className="dashboard-overview-chip dashboard-overview-chip-violet">
+                <span className="dashboard-overview-chip-icon" aria-hidden="true">
+                  <SidebarIcon section="turnos" />
+                </span>
                 <span className="dashboard-overview-chip-label">Turnos activos</span>
                 <strong>{reservasActivas}</strong>
               </div>
               <div className="dashboard-overview-chip dashboard-overview-chip-blue">
+                <span className="dashboard-overview-chip-icon" aria-hidden="true">
+                  <SidebarIcon section="servicios" />
+                </span>
                 <span className="dashboard-overview-chip-label">Servicios visibles</span>
                 <strong>{profile.services.length}</strong>
               </div>
               <div className="dashboard-overview-chip dashboard-overview-chip-amber">
+                <span className="dashboard-overview-chip-icon" aria-hidden="true">
+                  <SidebarIcon section="cobros" />
+                </span>
                 <span className="dashboard-overview-chip-label">Pagos pendientes</span>
                 <strong>{pagosPendientes}</strong>
               </div>

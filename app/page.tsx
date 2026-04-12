@@ -78,6 +78,24 @@ export default async function HomePage() {
                   <div className="product-stage-badge">87% confirmados</div>
                 </div>
 
+                <div className="product-stage-metrics">
+                  <div className="product-metric-card product-metric-card-blue">
+                    <span className="showcase-label">Reservas</span>
+                    <strong>124</strong>
+                    <small>+18 esta semana</small>
+                  </div>
+                  <div className="product-metric-card product-metric-card-green">
+                    <span className="showcase-label">Ocupacion</span>
+                    <strong>76%</strong>
+                    <small>Agenda saludable</small>
+                  </div>
+                  <div className="product-metric-card product-metric-card-amber">
+                    <span className="showcase-label">Cobros</span>
+                    <strong>9</strong>
+                    <small>Pendientes de revisar</small>
+                  </div>
+                </div>
+
                 <div className="product-stage-columns">
                   <div className="product-day-column">
                     <span className="product-day-label">Lun</span>
@@ -112,6 +130,34 @@ export default async function HomePage() {
                     <div className="product-slot product-slot-soft">
                       <strong>13:00</strong>
                       <span>Horario bloqueado</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="product-stage-footer">
+                  <div className="product-mini-chart">
+                    <span className="showcase-label">Actividad semanal</span>
+                    <div className="product-mini-chart-bars" aria-hidden="true">
+                      <span className="bar bar-1" />
+                      <span className="bar bar-2" />
+                      <span className="bar bar-3" />
+                      <span className="bar bar-4" />
+                      <span className="bar bar-5" />
+                      <span className="bar bar-6" />
+                    </div>
+                  </div>
+                  <div className="product-status-list">
+                    <div className="product-status-row">
+                      <span className="status-dot status-dot-green" />
+                      <span>Recordatorios enviados</span>
+                    </div>
+                    <div className="product-status-row">
+                      <span className="status-dot status-dot-blue" />
+                      <span>Turnos confirmados</span>
+                    </div>
+                    <div className="product-status-row">
+                      <span className="status-dot status-dot-amber" />
+                      <span>Bloqueos aplicados</span>
                     </div>
                   </div>
                 </div>
@@ -207,11 +253,11 @@ export default async function HomePage() {
               Marca, servicios y reservas dentro de una experiencia mucho mas cuidada.
             </p>
           </article>
-          <article className="outcome-card">
+          <article className="outcome-card outcome-card-success">
             <strong>Agenda centralizada</strong>
             <p className="muted">Turnos, estados, bloqueos y prestadores visibles en un mismo lugar.</p>
           </article>
-          <article className="outcome-card">
+          <article className="outcome-card outcome-card-warning">
             <strong>Crecimiento ordenado</strong>
             <p className="muted">
               Base lista para cobrar online, sumar prestadores y escalar sin rehacer el sistema.
