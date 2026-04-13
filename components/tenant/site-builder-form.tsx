@@ -471,6 +471,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [historyPast, setHistoryPast] = useState<BuilderSnapshot[]>([]);
   const [historyFuture, setHistoryFuture] = useState<BuilderSnapshot[]>([]);
+  const [activeSidebarTab, setActiveSidebarTab] = useState<
+    "elementos" | "plantillas" | "propiedades"
+  >("elementos");
 
   const selectedBlock =
     selectedTarget.kind === "block"
@@ -627,6 +630,11 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
         columns: reorderItems(current.columns, fromIndex, toIndex),
       };
     });
+  }
+
+  function selectTarget(nextTarget: SelectedTarget) {
+    setSelectedTarget(nextTarget);
+    setActiveSidebarTab("propiedades");
   }
 
   function duplicateColumn(blockId: string, columnId: string) {
@@ -1463,7 +1471,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   }
 
   return (
-    <section className="site-live-builder" style={previewStyle}>
+    <section className="site-live-builder site-live-builder-elementor" style={previewStyle}>
       <input
         accept=".png,.jpg,.jpeg,.webp,.svg"
         hidden
@@ -1504,117 +1512,77 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
         type="file"
       />
 
-      <aside className="panel site-live-sidebar">
-        <div className="site-live-sidebar-head">
+      <aside className="panel site-live-structure-panel">
+        <div className="site-live-structure-head">
           <div>
-            <h2>Constructor visual</h2>
-            <p className="muted">
-              Selecciona un elemento sobre la pagina y editalo en tiempo real.
-            </p>
+            <h2>Estructura</h2>
+            <p className="muted">Recorre los contenedores y selecciona lo que quieres editar.</p>
           </div>
-          <div className="site-live-head-actions">
-            <button className="button secondary" disabled={historyPast.length === 0} onClick={undoChange} type="button">
+        </div>
+
+        <div className="site-live-layer-list">
+          <button
+            className={`site-live-layer-item ${selectedTarget.kind === "hero" ? "active" : ""}`}
+            onClick={() => selectTarget({ kind: "hero", field: "title" })}
+            type="button"
+          >
+            <span className="site-live-layer-kicker">Hero</span>
+            <strong>Cabecera principal</strong>
+          </button>
+          {siteBlocks.map((block, index) => (
+            <button
+              className={`site-live-layer-item ${
+                selectedTarget.kind === "block" && selectedTarget.blockId === block.id ? "active" : ""
+              }`}
+              key={block.id}
+              onClick={() => selectTarget({ kind: "block", blockId: block.id })}
+              type="button"
+            >
+              <span className="site-live-layer-kicker">Contenedor {index + 1}</span>
+              <strong>{blockTypeLabel[block.type]}</strong>
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      <div className="site-live-stage-shell">
+        <div className="site-live-editor-topbar">
+          <div className="site-live-editor-topbar-title">
+            <strong>Editor visual</strong>
+            <span>Haz click en textos, imagenes o bloques para editarlos en tiempo real.</span>
+          </div>
+
+          <div className="site-live-editor-topbar-actions">
+            <button
+              className="button secondary"
+              disabled={historyPast.length === 0}
+              onClick={undoChange}
+              type="button"
+            >
               Deshacer
             </button>
-            <button className="button secondary" disabled={historyFuture.length === 0} onClick={redoChange} type="button">
+            <button
+              className="button secondary"
+              disabled={historyFuture.length === 0}
+              onClick={redoChange}
+              type="button"
+            >
               Rehacer
             </button>
-            <button className="button primary" disabled={isSaving} onClick={onSubmit} type="button">
+            <span className="site-live-hint">Arrastra bloques para cambiar el orden</span>
+            <button
+              className="button primary"
+              disabled={isSaving}
+              onClick={onSubmit}
+              type="button"
+            >
               {isSaving ? "Guardando..." : "Guardar sitio"}
             </button>
           </div>
         </div>
 
-        <section className="site-live-sidebar-section">
-          <h3>Plantillas iniciales</h3>
-          <div className="site-template-list">
-            {templatePresets.map((template) => (
-              <article className="site-template-card" key={template.id}>
-                <div className="site-template-swatch-row">
-                  <span
-                    className="site-template-swatch"
-                    style={{ backgroundColor: template.primaryColor }}
-                  />
-                  <span
-                    className="site-template-swatch"
-                    style={{ backgroundColor: template.secondaryColor }}
-                  />
-                </div>
-                <strong>{template.name}</strong>
-                <p className="muted">{template.description}</p>
-                <button
-                  className="button secondary"
-                  onClick={() => applyTemplatePreset(template.id)}
-                  type="button"
-                >
-                  Usar plantilla
-                </button>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="site-live-sidebar-section">
-          <h3>Agregar bloques</h3>
-          <div className="site-block-library site-block-library-compact">
-            {(["text", "image", "video", "columns", "cta"] as BlockTemplate[]).map((template) => (
-              <button
-                className="site-block-library-item"
-                key={template}
-                onClick={() => {
-                  const nextBlock = createBlock(template);
-                  commitChange(() => {
-                    setSiteBlocks((current) => [...current, nextBlock]);
-                    setSelectedTarget({ kind: "block", blockId: nextBlock.id });
-                  });
-                }}
-                type="button"
-              >
-                <strong>{blockTypeLabel[template]}</strong>
-                <span className="muted">{blockTypeDescription[template]}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="site-live-sidebar-section">
-          <h3>Estructura de la pagina</h3>
-          <div className="site-live-layer-list">
-            <button
-              className={`site-live-layer-item ${selectedTarget.kind === "hero" ? "active" : ""}`}
-              onClick={() => setSelectedTarget({ kind: "hero", field: "title" })}
-              type="button"
-            >
-              Cabecera principal
-            </button>
-            {siteBlocks.map((block, index) => (
-              <button
-                className={`site-live-layer-item ${
-                  selectedTarget.kind === "block" && selectedTarget.blockId === block.id ? "active" : ""
-                }`}
-                key={block.id}
-                onClick={() => setSelectedTarget({ kind: "block", blockId: block.id })}
-                type="button"
-              >
-                {index + 1}. {blockTypeLabel[block.type]}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {error ? <p className="form-error">{error}</p> : null}
-      </aside>
-
-      <div className="site-live-canvas-shell">
-        <div className="site-live-canvas-topbar">
-          <div>
-            <strong>Vista en vivo</strong>
-            <span className="muted">Haz click en textos, imagenes o bloques para editarlos.</span>
-          </div>
-          <span className="site-live-hint">Arrastra un bloque para cambiar el orden</span>
-        </div>
-
-        <div className="site-live-canvas">
+        <div className="site-live-canvas-shell">
+          <div className="site-live-canvas">
           <section className="hero tenant-hero">
             <div
               className={`tenant-hero-grid ${
@@ -1630,7 +1598,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               >
                 <button
                   className={`site-live-selectable ${selectedTarget.kind === "hero" && selectedTarget.field === "brand" ? "is-selected" : ""}`}
-                  onClick={() => setSelectedTarget({ kind: "hero", field: "brand" })}
+                  onClick={() => selectTarget({ kind: "hero", field: "brand" })}
                   type="button"
                 >
                   <div className="tenant-brand-row">
@@ -1648,13 +1616,13 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
                 <button
                   className={`site-live-selectable site-live-text-button ${selectedTarget.kind === "hero" && selectedTarget.field === "title" ? "is-selected" : ""}`}
-                  onClick={() => setSelectedTarget({ kind: "hero", field: "title" })}
+                  onClick={() => selectTarget({ kind: "hero", field: "title" })}
                   type="button"
                 >
                   <h1
                     contentEditable
                     onBlur={(event) => setHeroTitle(event.currentTarget.textContent ?? heroTitle)}
-                    onClick={() => setSelectedTarget({ kind: "hero", field: "title" })}
+                    onClick={() => selectTarget({ kind: "hero", field: "title" })}
                     suppressContentEditableWarning
                   >
                     {heroTitle}
@@ -1663,7 +1631,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
                 <button
                   className={`site-live-selectable site-live-text-button ${selectedTarget.kind === "hero" && selectedTarget.field === "description" ? "is-selected" : ""}`}
-                  onClick={() => setSelectedTarget({ kind: "hero", field: "description" })}
+                  onClick={() => selectTarget({ kind: "hero", field: "description" })}
                   type="button"
                 >
                   <p
@@ -1672,7 +1640,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                     onBlur={(event) =>
                       setHeroDescription(event.currentTarget.textContent ?? heroDescription)
                     }
-                    onClick={() => setSelectedTarget({ kind: "hero", field: "description" })}
+                    onClick={() => selectTarget({ kind: "hero", field: "description" })}
                     suppressContentEditableWarning
                   >
                     {heroDescription}
@@ -1696,7 +1664,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 onDragStart={() => setDraggedHeroPart("image")}
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={() => onHeroDrop("image")}
-                onClick={() => setSelectedTarget({ kind: "hero", field: "image" })}
+                onClick={() => selectTarget({ kind: "hero", field: "image" })}
                 type="button"
               >
                 {heroImageUrl ? (
@@ -1719,7 +1687,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 }`}
                 draggable
                 key={block.id}
-                onClick={() => setSelectedTarget({ kind: "block", blockId: block.id })}
+                onClick={() => selectTarget({ kind: "block", blockId: block.id })}
                 onDragOver={(event) => event.preventDefault()}
                 onDragStart={(event) => onBlockDragStart(event, block.id)}
                 onDrop={() => onBlockDrop(block.id)}
@@ -1978,16 +1946,102 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
           </section>
         </div>
       </div>
+      </div>
 
-      <aside className="panel site-live-inspector">
-        <div className="site-live-inspector-head">
-          <div>
-            <h2>Propiedades</h2>
-            <p className="muted">Edita el elemento seleccionado y ve el cambio al instante.</p>
-          </div>
+      <aside className="panel site-live-tools-panel">
+        <div className="site-live-tools-tabs" role="tablist" aria-label="Paneles del editor">
+          <button
+            className={`site-live-tools-tab ${activeSidebarTab === "elementos" ? "active" : ""}`}
+            onClick={() => setActiveSidebarTab("elementos")}
+            type="button"
+          >
+            Elementos
+          </button>
+          <button
+            className={`site-live-tools-tab ${activeSidebarTab === "plantillas" ? "active" : ""}`}
+            onClick={() => setActiveSidebarTab("plantillas")}
+            type="button"
+          >
+            Plantillas
+          </button>
+          <button
+            className={`site-live-tools-tab ${activeSidebarTab === "propiedades" ? "active" : ""}`}
+            onClick={() => setActiveSidebarTab("propiedades")}
+            type="button"
+          >
+            Propiedades
+          </button>
         </div>
 
-        {renderInspector()}
+        {activeSidebarTab === "elementos" ? (
+          <section className="site-live-sidebar-section">
+            <h3>Agregar widgets</h3>
+            <div className="site-block-library site-block-library-compact">
+              {(["text", "image", "video", "columns", "cta"] as BlockTemplate[]).map((template) => (
+                <button
+                  className="site-block-library-item"
+                  key={template}
+                  onClick={() => {
+                    const nextBlock = createBlock(template);
+                    commitChange(() => {
+                      setSiteBlocks((current) => [...current, nextBlock]);
+                      selectTarget({ kind: "block", blockId: nextBlock.id });
+                    });
+                  }}
+                  type="button"
+                >
+                  <strong>{blockTypeLabel[template]}</strong>
+                  <span className="muted">{blockTypeDescription[template]}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {activeSidebarTab === "plantillas" ? (
+          <section className="site-live-sidebar-section">
+            <h3>Plantillas iniciales</h3>
+            <div className="site-template-list">
+              {templatePresets.map((template) => (
+                <article className="site-template-card" key={template.id}>
+                  <div className="site-template-swatch-row">
+                    <span
+                      className="site-template-swatch"
+                      style={{ backgroundColor: template.primaryColor }}
+                    />
+                    <span
+                      className="site-template-swatch"
+                      style={{ backgroundColor: template.secondaryColor }}
+                    />
+                  </div>
+                  <strong>{template.name}</strong>
+                  <p className="muted">{template.description}</p>
+                  <button
+                    className="button secondary"
+                    onClick={() => applyTemplatePreset(template.id)}
+                    type="button"
+                  >
+                    Usar plantilla
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {activeSidebarTab === "propiedades" ? (
+          <>
+            <div className="site-live-inspector-head">
+              <div>
+                <h2>Propiedades</h2>
+                <p className="muted">Edita el elemento seleccionado y ve el cambio al instante.</p>
+              </div>
+            </div>
+            {renderInspector()}
+          </>
+        ) : null}
+
+        {error ? <p className="form-error">{error}</p> : null}
       </aside>
     </section>
   );

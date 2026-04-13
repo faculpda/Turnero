@@ -11,8 +11,9 @@ type DashboardSection =
   | "agenda"
   | "prestadores"
   | "servicios"
-  | "cobros"
-  | "personalizar";
+  | "cobros";
+
+type NavigationSection = DashboardSection | "personalizar";
 
 type TenantDashboardShellProps = {
   tenantSlug: string;
@@ -43,10 +44,9 @@ type TenantDashboardShellProps = {
   prestadores: React.ReactNode;
   servicios: React.ReactNode;
   cobros: React.ReactNode;
-  personalizar: React.ReactNode;
 };
 
-const sectionTitles: Record<DashboardSection, string> = {
+const sectionTitles: Record<NavigationSection, string> = {
   turnos: "Turnos",
   agenda: "Agenda",
   prestadores: "Prestadores",
@@ -61,10 +61,9 @@ const navigationItems: DashboardSection[] = [
   "prestadores",
   "servicios",
   "cobros",
-  "personalizar",
 ];
 
-function SidebarIcon({ section }: { section: DashboardSection }) {
+function SidebarIcon({ section }: { section: NavigationSection }) {
   const commonProps = {
     viewBox: "0 0 24 24",
     fill: "none",
@@ -140,7 +139,6 @@ export function TenantDashboardShell({
   prestadores,
   servicios,
   cobros,
-  personalizar,
 }: TenantDashboardShellProps) {
   const [activeSection, setActiveSection] = useState<DashboardSection>("turnos");
 
@@ -179,6 +177,15 @@ export function TenantDashboardShell({
                 <span>{sectionTitles[section]}</span>
               </button>
             ))}
+            <Link
+              className="dashboard-sidebar-item"
+              href={`/app/personalizar?tenant=${tenantSlug}`}
+            >
+              <span className="dashboard-sidebar-icon" aria-hidden="true">
+                <SidebarIcon section="personalizar" />
+              </span>
+              <span>{sectionTitles.personalizar}</span>
+            </Link>
           </div>
         </nav>
 
@@ -259,7 +266,6 @@ export function TenantDashboardShell({
           {activeSection === "prestadores" ? prestadores : null}
           {activeSection === "servicios" ? servicios : null}
           {activeSection === "cobros" ? cobros : null}
-          {activeSection === "personalizar" ? personalizar : null}
         </div>
       </div>
     </main>

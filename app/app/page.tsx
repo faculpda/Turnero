@@ -4,7 +4,6 @@ import { PaymentSettingsForm } from "@/components/tenant/payment-settings-form";
 import { ProvidersPanel } from "@/components/tenant/providers-panel";
 import { ServiceEditorCard } from "@/components/tenant/service-editor-card";
 import { TenantAgendaPanel } from "@/components/tenant/tenant-agenda-panel";
-import { SiteBuilderForm } from "@/components/tenant/site-builder-form";
 import { TenantDashboardShell } from "@/components/tenant/tenant-dashboard-shell";
 import { getCurrentSession, hasTenantAccess } from "@/lib/auth/session";
 import { getTenantDashboardData } from "@/lib/data/tenants";
@@ -63,7 +62,6 @@ export default async function TenantDashboardPage({
       providers={providers}
       cobros={<PaymentSettingsForm tenant={profile} />}
       pagosPendientes={pagosPendientes}
-      personalizar={<SiteBuilderForm tenant={profile} />}
       prestadores={<ProvidersPanel providers={providers} tenantSlug={tenantSlug} />}
       profile={profile}
       reservasActivas={reservasActivas}
