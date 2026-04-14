@@ -1926,7 +1926,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
           <section className="site-live-block-stack">
             {siteBlocks.map((block) => (
               <article
-                className={`site-live-block-wrapper ${
+                className={`site-live-block-wrapper site-live-block-wrapper-${block.type} ${
                   selectedTarget.kind === "block" && selectedTarget.blockId === block.id ? "is-selected" : ""
                 } ${draggedBlockId === block.id ? "is-dragging" : ""} ${
                   dragOverBlockId === block.id && draggedBlockId !== block.id ? "is-drag-over" : ""
@@ -2271,7 +2271,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             <h3>Plantillas iniciales</h3>
             <div className="site-template-list">
               {templatePresets.map((template) => (
-                <article className="site-template-card" key={template.id}>
+                <article className={`site-template-card site-template-card-${template.id}`} key={template.id}>
                   <div className="site-template-swatch-row">
                     <span
                       className="site-template-swatch"
