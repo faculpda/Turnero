@@ -2233,10 +2233,49 @@ th:last-child {
   gap: 10px;
 }
 
+.site-live-viewport-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.site-live-viewport-button {
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(248, 251, 255, 0.72);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.site-live-viewport-button.active {
+  background: #ffffff;
+  color: #1e2a42;
+}
+
 .site-live-canvas-shell {
   min-width: 0;
   display: grid;
   gap: 14px;
+}
+
+.site-live-viewport-stage {
+  display: grid;
+  justify-items: center;
+  padding: 18px;
+  border-radius: 28px;
+  border: 1px solid #e1e8f2;
+  background: #f4f7fb;
+}
+
+.site-live-viewport-desktop {
+  justify-items: stretch;
 }
 
 .site-live-hint {
@@ -2257,6 +2296,19 @@ th:last-child {
   border: 1px solid #dfe7f2;
   background: #ffffff;
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+}
+
+.site-live-canvas-desktop {
+  width: 100%;
+  max-width: none;
+}
+
+.site-live-canvas-tablet {
+  width: min(100%, 860px);
+}
+
+.site-live-canvas-mobile {
+  width: min(100%, 430px);
 }
 
 .site-live-tools-tabs {

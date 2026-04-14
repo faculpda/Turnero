@@ -474,6 +474,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const [activeSidebarTab, setActiveSidebarTab] = useState<
     "elementos" | "plantillas" | "propiedades"
   >("elementos");
+  const [activeViewport, setActiveViewport] = useState<"desktop" | "tablet" | "mobile">(
+    "desktop",
+  );
 
   const selectedBlock =
     selectedTarget.kind === "block"
@@ -1553,6 +1556,35 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
           </div>
 
           <div className="site-live-editor-topbar-actions">
+            <div className="site-live-viewport-switcher" aria-label="Cambiar vista del editor">
+              <button
+                className={`site-live-viewport-button ${
+                  activeViewport === "desktop" ? "active" : ""
+                }`}
+                onClick={() => setActiveViewport("desktop")}
+                type="button"
+              >
+                Escritorio
+              </button>
+              <button
+                className={`site-live-viewport-button ${
+                  activeViewport === "tablet" ? "active" : ""
+                }`}
+                onClick={() => setActiveViewport("tablet")}
+                type="button"
+              >
+                Tablet
+              </button>
+              <button
+                className={`site-live-viewport-button ${
+                  activeViewport === "mobile" ? "active" : ""
+                }`}
+                onClick={() => setActiveViewport("mobile")}
+                type="button"
+              >
+                Celular
+              </button>
+            </div>
             <button
               className="button secondary"
               disabled={historyPast.length === 0}
@@ -1582,7 +1614,8 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
         </div>
 
         <div className="site-live-canvas-shell">
-          <div className="site-live-canvas">
+          <div className={`site-live-viewport-stage site-live-viewport-${activeViewport}`}>
+          <div className={`site-live-canvas site-live-canvas-${activeViewport}`}>
           <section className="hero tenant-hero">
             <div
               className={`tenant-hero-grid ${
@@ -1945,6 +1978,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             ))}
           </section>
         </div>
+      </div>
       </div>
       </div>
 
