@@ -111,8 +111,14 @@ export type SiteTextTone = "dark" | "brand" | "muted";
 export type SiteSectionWidth = "compact" | "normal" | "wide" | "full";
 export type SiteColumnsLayout = "equal" | "feature-left" | "feature-right";
 export type SiteCtaTheme = "soft" | "solid";
+export type SiteViewport = "desktop" | "tablet" | "mobile";
+export type SiteBlockVisibility = Record<SiteViewport, boolean>;
 
-export type SiteTextBlock = {
+type SiteBlockBase = {
+  visibility?: SiteBlockVisibility;
+};
+
+export type SiteTextBlock = SiteBlockBase & {
   id: string;
   type: "text";
   eyebrow?: string;
@@ -125,7 +131,7 @@ export type SiteTextBlock = {
   width?: SiteSectionWidth;
 };
 
-export type SiteImageBlock = {
+export type SiteImageBlock = SiteBlockBase & {
   id: string;
   type: "image";
   imageUrl: string;
@@ -135,7 +141,7 @@ export type SiteImageBlock = {
   height?: "small" | "medium" | "large";
 };
 
-export type SiteVideoBlock = {
+export type SiteVideoBlock = SiteBlockBase & {
   id: string;
   type: "video";
   title?: string;
@@ -144,7 +150,7 @@ export type SiteVideoBlock = {
   width?: SiteSectionWidth;
 };
 
-export type SiteColumnsBlock = {
+export type SiteColumnsBlock = SiteBlockBase & {
   id: string;
   type: "columns";
   layout?: SiteColumnsLayout;
@@ -155,7 +161,7 @@ export type SiteColumnsBlock = {
   }>;
 };
 
-export type SiteCallToActionBlock = {
+export type SiteCallToActionBlock = SiteBlockBase & {
   id: string;
   type: "cta";
   title: string;

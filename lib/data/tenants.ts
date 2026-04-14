@@ -222,6 +222,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function parseVisibility(
+  input: unknown,
+): { desktop: boolean; tablet: boolean; mobile: boolean } | undefined {
+  if (!isRecord(input)) {
+    return undefined;
+  }
+
+  const desktop = typeof input.desktop === "boolean" ? input.desktop : true;
+  const tablet = typeof input.tablet === "boolean" ? input.tablet : true;
+  const mobile = typeof input.mobile === "boolean" ? input.mobile : true;
+
+  return { desktop, tablet, mobile };
+}
+
 function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilderBlock[] {
   if (!Array.isArray(input)) {
     return [];
@@ -256,6 +270,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
           item.width === "compact" || item.width === "wide" || item.width === "full"
             ? item.width
             : "normal",
+        visibility: parseVisibility(item.visibility),
       });
       return blocks;
     }
@@ -269,6 +284,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
         caption: typeof item.caption === "string" ? item.caption : undefined,
         layout: item.layout === "wide" ? "wide" : "contained",
         height: item.height === "small" || item.height === "large" ? item.height : "medium",
+        visibility: parseVisibility(item.visibility),
       });
       return blocks;
     }
@@ -284,6 +300,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
           item.width === "compact" || item.width === "wide" || item.width === "full"
             ? item.width
             : "normal",
+        visibility: parseVisibility(item.visibility),
       });
       return blocks;
     }
@@ -316,6 +333,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
               ? item.layout
               : "equal",
           columns,
+          visibility: parseVisibility(item.visibility),
         });
       }
 
@@ -349,6 +367,7 @@ function parseSiteBlocks(input: Prisma.JsonValue | null | undefined): SiteBuilde
           item.width === "compact" || item.width === "wide" || item.width === "full"
             ? item.width
             : "normal",
+        visibility: parseVisibility(item.visibility),
       });
     }
 

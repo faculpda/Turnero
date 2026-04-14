@@ -3,7 +3,12 @@
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CSSProperties, DragEvent } from "react";
-import type { SiteBuilderBlock, TenantPublicProfile } from "@/lib/types";
+import type {
+  SiteBlockVisibility,
+  SiteBuilderBlock,
+  SiteViewport,
+  TenantPublicProfile,
+} from "@/lib/types";
 
 type SiteBuilderFormProps = {
   tenant: TenantPublicProfile;
@@ -39,6 +44,12 @@ type BuilderSnapshot = {
   primaryColor: string;
   secondaryColor: string;
   siteBlocks: SiteBuilderBlock[];
+};
+
+const defaultVisibility: SiteBlockVisibility = {
+  desktop: true,
+  tablet: true,
+  mobile: true,
 };
 
 const blockTypeLabel: Record<BlockTemplate, string> = {
@@ -93,6 +104,7 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         bodySize: "md",
         tone: "dark",
         width: "normal",
+        visibility: defaultVisibility,
       };
     case "image":
       return {
@@ -103,6 +115,7 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         caption: "Agrega una imagen que apoye la propuesta del negocio.",
         layout: "contained",
         height: "medium",
+        visibility: defaultVisibility,
       };
     case "video":
       return {
@@ -112,12 +125,14 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         caption: "Pega un link de YouTube o Vimeo.",
         width: "normal",
+        visibility: defaultVisibility,
       };
     case "columns":
       return {
         id: createId("columns"),
         type: "columns",
         layout: "equal",
+        visibility: defaultVisibility,
         columns: [
           {
             id: createId("col"),
@@ -148,6 +163,7 @@ function createBlock(template: BlockTemplate): SiteBuilderBlock {
         bodySize: "md",
         theme: "soft",
         width: "normal",
+        visibility: defaultVisibility,
       };
   }
 }
@@ -210,6 +226,43 @@ function buildPreviewStyle(primaryColor: string, secondaryColor: string): CSSPro
 
 function textToneClass(tone?: "dark" | "brand" | "muted") {
   return `site-tone-${tone ?? "dark"}`;
+}
+
+function withVisibility<T extends SiteBuilderBlock>(block: T): T {
+  return {
+    ...block,
+    visibility: {
+      ...defaultVisibility,
+      ...(block.visibility ?? {}),
+    },
+  };
+}
+
+function visibilityClassName(
+  visibility: SiteBlockVisibility | undefined,
+  activeViewport: SiteViewport,
+) {
+  const safeVisibility = visibility ?? defaultVisibility;
+
+  return [
+    !safeVisibility.desktop ? "site-hidden-desktop" : "",
+    !safeVisibility.tablet ? "site-hidden-tablet" : "",
+    !safeVisibility.mobile ? "site-hidden-mobile" : "",
+    !safeVisibility[activeViewport] ? "site-live-block-hidden-on-viewport" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function visibilitySummary(visibility?: SiteBlockVisibility) {
+  const safeVisibility = visibility ?? defaultVisibility;
+  const hiddenOn = Object.entries(safeVisibility)
+    .filter(([, isVisible]) => !isVisible)
+    .map(([viewport]) =>
+      viewport === "desktop" ? "Escritorio" : viewport === "tablet" ? "Tablet" : "Celular",
+    );
+
+  return hiddenOn.length > 0 ? `Oculto en ${hiddenOn.join(", ")}` : "Visible en todos";
 }
 
 const widthScale = ["compact", "normal", "wide", "full"] as const;
@@ -462,10 +515,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const [heroLayout, setHeroLayout] = useState(tenant.heroLayout ?? "content-left");
   const [primaryColor, setPrimaryColor] = useState(tenant.primaryColor ?? "#205fc0");
   const [secondaryColor, setSecondaryColor] = useState(tenant.secondaryColor ?? "#dff1ff");
-  const [siteBlocks, setSiteBlocks] = useState<SiteBuilderBlock[]>(tenant.siteBlocks ?? []);
+  const [siteBlocks, setSiteBlocks] = useState<SiteBuilderBlock[]>(
+    (tenant.siteBlocks ?? []).map((block) => withVisibility(block)),
+  );
   const [selectedTarget, setSelectedTarget] = useState<SelectedTarget>({ kind: "hero", field: "title" });
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
   const [draggedHeroPart, setDraggedHeroPart] = useState<"content" | "image" | null>(null);
+  const [dragOverBlockId, setDragOverBlockId] = useState<string | null>(null);
+  const [heroDropTarget, setHeroDropTarget] = useState<"content" | "image" | null>(null);
   const [pendingImageBlockId, setPendingImageBlockId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -525,7 +582,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
     setHeroLayout(snapshot.heroLayout);
     setPrimaryColor(snapshot.primaryColor);
     setSecondaryColor(snapshot.secondaryColor);
-    setSiteBlocks(snapshot.siteBlocks);
+    setSiteBlocks(snapshot.siteBlocks.map((block) => withVisibility(block)));
   }
 
   function commitChange(mutator: () => void) {
@@ -537,7 +594,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   function updateBlock(blockId: string, updater: (current: SiteBuilderBlock) => SiteBuilderBlock) {
     commitChange(() => {
       setSiteBlocks((current) =>
-        current.map((block) => (block.id === blockId ? updater(block) : block)),
+        current.map((block) =>
+          block.id === blockId ? withVisibility(updater(withVisibility(block))) : block,
+        ),
       );
     });
   }
@@ -638,6 +697,54 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   function selectTarget(nextTarget: SelectedTarget) {
     setSelectedTarget(nextTarget);
     setActiveSidebarTab("propiedades");
+  }
+
+  function updateBlockVisibility(
+    blockId: string,
+    viewport: SiteViewport,
+    isVisible: boolean,
+  ) {
+    updateBlock(blockId, (current) => ({
+      ...current,
+      visibility: {
+        ...defaultVisibility,
+        ...(current.visibility ?? {}),
+        [viewport]: isVisible,
+      },
+    }));
+  }
+
+  function renderVisibilityControls(block: SiteBuilderBlock) {
+    const visibility = {
+      ...defaultVisibility,
+      ...(block.visibility ?? {}),
+    };
+
+    return (
+      <div className="site-live-panel-section">
+        <h3>Visibilidad por dispositivo</h3>
+        <div className="site-visibility-control-list">
+          {(["desktop", "tablet", "mobile"] as SiteViewport[]).map((viewport) => (
+            <label className="site-visibility-control" key={viewport}>
+              <span>
+                {viewport === "desktop"
+                  ? "Escritorio"
+                  : viewport === "tablet"
+                    ? "Tablet"
+                    : "Celular"}
+              </span>
+              <input
+                checked={visibility[viewport]}
+                onChange={(event) =>
+                  updateBlockVisibility(block.id, viewport, event.target.checked)
+                }
+                type="checkbox"
+              />
+            </label>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   function duplicateColumn(blockId: string, columnId: string) {
@@ -756,6 +863,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
   function onBlockDragStart(event: DragEvent<HTMLElement>, blockId: string) {
     setDraggedBlockId(blockId);
+    setDragOverBlockId(blockId);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", blockId);
   }
@@ -767,6 +875,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
     moveBlock(draggedBlockId, blockId);
     setDraggedBlockId(null);
+    setDragOverBlockId(null);
   }
 
   function onHeroDrop(target: "content" | "image") {
@@ -778,6 +887,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
       setHeroLayout(target === "content" ? "image-left" : "content-left");
     });
     setDraggedHeroPart(null);
+    setHeroDropTarget(null);
   }
 
   function applyTemplatePreset(templateId: string) {
@@ -792,7 +902,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
       setSecondaryColor(template.secondaryColor);
       setHeroLayout(template.heroLayout);
       setHeroImageUrl(template.heroImageUrl);
-      setSiteBlocks(template.siteBlocks);
+      setSiteBlocks(template.siteBlocks.map((block) => withVisibility(block)));
       setSelectedTarget({ kind: "hero", field: "title" });
     });
   }
@@ -930,11 +1040,12 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
     if (selectedBlock.type === "text") {
       return (
-        <div className="site-live-panel-section">
-          <h3>Bloque de texto</h3>
-          <label className="field">
-            <span>Eyebrow</span>
-            <input
+        <>
+          <div className="site-live-panel-section">
+            <h3>Bloque de texto</h3>
+            <label className="field">
+              <span>Eyebrow</span>
+              <input
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "text" ? { ...current, eyebrow: e.target.value } : current,
@@ -1058,9 +1169,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <option value="full">Completo</option>
             </select>
           </label>
-          <label className="field">
-            <span>Alineacion</span>
-            <select
+            <label className="field">
+              <span>Alineacion</span>
+              <select
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "text"
@@ -1073,17 +1184,20 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <option value="left">Izquierda</option>
               <option value="center">Centro</option>
             </select>
-          </label>
-        </div>
+            </label>
+          </div>
+          {renderVisibilityControls(selectedBlock)}
+        </>
       );
     }
 
     if (selectedBlock.type === "image") {
       return (
-        <div className="site-live-panel-section">
-          <h3>Bloque de imagen</h3>
-          <label className="field">
-            <span>URL de imagen</span>
+        <>
+          <div className="site-live-panel-section">
+            <h3>Bloque de imagen</h3>
+            <label className="field">
+              <span>URL de imagen</span>
             <input
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
@@ -1143,9 +1257,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <option value="wide">Ancho completo</option>
             </select>
           </label>
-          <label className="field">
-            <span>Altura visual</span>
-            <select
+            <label className="field">
+              <span>Altura visual</span>
+              <select
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "image"
@@ -1165,17 +1279,20 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <option value="medium">Media</option>
               <option value="large">Grande</option>
             </select>
-          </label>
-        </div>
+            </label>
+          </div>
+          {renderVisibilityControls(selectedBlock)}
+        </>
       );
     }
 
     if (selectedBlock.type === "video") {
       return (
-        <div className="site-live-panel-section">
-          <h3>Bloque de video</h3>
-          <label className="field">
-            <span>Titulo</span>
+        <>
+          <div className="site-live-panel-section">
+            <h3>Bloque de video</h3>
+            <label className="field">
+              <span>Titulo</span>
             <input
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
@@ -1208,9 +1325,9 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               value={selectedBlock.caption ?? ""}
             />
           </label>
-          <label className="field">
-            <span>Ancho del bloque</span>
-            <select
+            <label className="field">
+              <span>Ancho del bloque</span>
+              <select
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
                   current.type === "video"
@@ -1233,17 +1350,20 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <option value="wide">Amplio</option>
               <option value="full">Completo</option>
             </select>
-          </label>
-        </div>
+            </label>
+          </div>
+          {renderVisibilityControls(selectedBlock)}
+        </>
       );
     }
 
     if (selectedBlock.type === "columns") {
       return (
-        <div className="site-live-panel-section">
-          <h3>Bloque de columnas</h3>
-          <label className="field">
-            <span>Distribucion</span>
+        <>
+          <div className="site-live-panel-section">
+            <h3>Bloque de columnas</h3>
+            <label className="field">
+              <span>Distribucion</span>
             <select
               onChange={(e) =>
                 updateBlock(selectedBlock.id, (current) =>
@@ -1327,19 +1447,22 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               </div>
             ))}
           </div>
-          {selectedBlock.columns.length < 4 ? (
-            <button className="button secondary" onClick={() => addColumn(selectedBlock.id)} type="button">
-              Agregar columna
-            </button>
-          ) : null}
-        </div>
+            {selectedBlock.columns.length < 4 ? (
+              <button className="button secondary" onClick={() => addColumn(selectedBlock.id)} type="button">
+                Agregar columna
+              </button>
+            ) : null}
+          </div>
+          {renderVisibilityControls(selectedBlock)}
+        </>
       );
     }
 
     return (
-      <div className="site-live-panel-section">
-        <h3>Llamado a la accion</h3>
-        <label className="field">
+      <>
+        <div className="site-live-panel-section">
+          <h3>Llamado a la accion</h3>
+          <label className="field">
           <span>Titulo</span>
           <textarea
             onChange={(e) =>
@@ -1443,7 +1566,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             <option value="solid">Solido</option>
           </select>
         </label>
-        <label className="field">
+          <label className="field">
           <span>Ancho del bloque</span>
           <select
             onChange={(e) =>
@@ -1468,8 +1591,10 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             <option value="wide">Amplio</option>
             <option value="full">Completo</option>
           </select>
-        </label>
-      </div>
+          </label>
+        </div>
+        {renderVisibilityControls(selectedBlock)}
+      </>
     );
   }
 
@@ -1524,26 +1649,47 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
         </div>
 
         <div className="site-live-layer-list">
-          <button
-            className={`site-live-layer-item ${selectedTarget.kind === "hero" ? "active" : ""}`}
-            onClick={() => selectTarget({ kind: "hero", field: "title" })}
-            type="button"
-          >
-            <span className="site-live-layer-kicker">Hero</span>
-            <strong>Cabecera principal</strong>
-          </button>
-          {siteBlocks.map((block, index) => (
+          <div className="site-live-layer-node">
             <button
-              className={`site-live-layer-item ${
-                selectedTarget.kind === "block" && selectedTarget.blockId === block.id ? "active" : ""
-              }`}
-              key={block.id}
-              onClick={() => selectTarget({ kind: "block", blockId: block.id })}
+              className={`site-live-layer-item ${selectedTarget.kind === "hero" ? "active" : ""}`}
+              onClick={() => selectTarget({ kind: "hero", field: "title" })}
               type="button"
             >
-              <span className="site-live-layer-kicker">Contenedor {index + 1}</span>
-              <strong>{blockTypeLabel[block.type]}</strong>
+              <span className="site-live-layer-kicker">Hero</span>
+              <strong>Cabecera principal</strong>
             </button>
+          </div>
+          {siteBlocks.map((block, index) => (
+            <div className="site-live-layer-node" key={block.id}>
+              <button
+                className={`site-live-layer-item ${
+                  selectedTarget.kind === "block" && selectedTarget.blockId === block.id ? "active" : ""
+                }`}
+                onClick={() => selectTarget({ kind: "block", blockId: block.id })}
+                type="button"
+              >
+                <span className="site-live-layer-kicker">Contenedor {index + 1}</span>
+                <strong>{blockTypeLabel[block.type]}</strong>
+                <span className="site-live-layer-summary">
+                  {visibilitySummary(block.visibility)}
+                </span>
+              </button>
+              {block.type === "columns" ? (
+                <div className="site-live-layer-children">
+                  {block.columns.map((column, columnIndex) => (
+                    <button
+                      className="site-live-layer-child"
+                      key={column.id}
+                      onClick={() => selectTarget({ kind: "block", blockId: block.id })}
+                      type="button"
+                    >
+                      <span>Columna {columnIndex + 1}</span>
+                      <strong>{column.title}</strong>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ))}
         </div>
       </aside>
@@ -1623,9 +1769,22 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               }`}
             >
               <div
+                className={`site-live-hero-column ${
+                  heroDropTarget === "content" && draggedHeroPart ? "is-drop-target" : ""
+                } ${
+                  draggedHeroPart === "image" && heroDropTarget === "content"
+                    ? "is-shifting-down"
+                    : ""
+                }`}
                 draggable
-                onDragEnd={() => setDraggedHeroPart(null)}
-                onDragOver={(event) => event.preventDefault()}
+                onDragEnd={() => {
+                  setDraggedHeroPart(null);
+                  setHeroDropTarget(null);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setHeroDropTarget("content");
+                }}
                 onDragStart={() => setDraggedHeroPart("content")}
                 onDrop={() => onHeroDrop("content")}
               >
@@ -1691,11 +1850,23 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               </div>
 
               <button
-                className={`tenant-hero-media site-live-media-button ${selectedTarget.kind === "hero" && selectedTarget.field === "image" ? "is-selected" : ""}`}
+                className={`tenant-hero-media site-live-media-button ${selectedTarget.kind === "hero" && selectedTarget.field === "image" ? "is-selected" : ""} ${
+                  heroDropTarget === "image" && draggedHeroPart ? "is-drop-target" : ""
+                } ${
+                  draggedHeroPart === "content" && heroDropTarget === "image"
+                    ? "is-shifting-down"
+                    : ""
+                }`}
                 draggable
-                onDragEnd={() => setDraggedHeroPart(null)}
+                onDragEnd={() => {
+                  setDraggedHeroPart(null);
+                  setHeroDropTarget(null);
+                }}
                 onDragStart={() => setDraggedHeroPart("image")}
-                onDragOver={(event) => event.preventDefault()}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setHeroDropTarget("image");
+                }}
                 onDrop={() => onHeroDrop("image")}
                 onClick={() => selectTarget({ kind: "hero", field: "image" })}
                 type="button"
@@ -1717,11 +1888,26 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <article
                 className={`site-live-block-wrapper ${
                   selectedTarget.kind === "block" && selectedTarget.blockId === block.id ? "is-selected" : ""
+                } ${draggedBlockId === block.id ? "is-dragging" : ""} ${
+                  dragOverBlockId === block.id && draggedBlockId !== block.id ? "is-drag-over" : ""
+                } ${
+                  !((block.visibility ?? defaultVisibility)[activeViewport] ?? true)
+                    ? "site-live-block-hidden-on-viewport"
+                    : ""
                 }`}
                 draggable
                 key={block.id}
                 onClick={() => selectTarget({ kind: "block", blockId: block.id })}
-                onDragOver={(event) => event.preventDefault()}
+                onDragEnd={() => {
+                  setDraggedBlockId(null);
+                  setDragOverBlockId(null);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  if (draggedBlockId && draggedBlockId !== block.id) {
+                    setDragOverBlockId(block.id);
+                  }
+                }}
                 onDragStart={(event) => onBlockDragStart(event, block.id)}
                 onDrop={() => onBlockDrop(block.id)}
               >
@@ -1796,7 +1982,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
                 {block.type === "text" ? (
                   <div
-                    className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""} site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} ${textToneClass(block.tone)} site-width-${block.width ?? "normal"}`}
+                    className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""} site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} ${textToneClass(block.tone)} site-width-${block.width ?? "normal"} ${visibilityClassName(block.visibility, activeViewport)}`}
                   >
                     {block.eyebrow ? <span className="eyebrow">{block.eyebrow}</span> : null}
                     <h2
@@ -1830,7 +2016,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 ) : null}
 
                 {block.type === "image" ? (
-                  <figure className={`site-block site-block-image ${block.layout === "wide" ? "is-wide" : ""} site-image-height-${block.height ?? "medium"}`}>
+                  <figure className={`site-block site-block-image ${block.layout === "wide" ? "is-wide" : ""} site-image-height-${block.height ?? "medium"} ${visibilityClassName(block.visibility, activeViewport)}`}>
                     {block.imageUrl ? (
                       <img alt={block.altText ?? "Imagen del sitio"} src={block.imageUrl} />
                     ) : (
@@ -1844,7 +2030,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 ) : null}
 
                 {block.type === "video" ? (
-                  <div className={`site-block site-block-video site-width-${block.width ?? "normal"}`}>
+                  <div className={`site-block site-block-video site-width-${block.width ?? "normal"} ${visibilityClassName(block.visibility, activeViewport)}`}>
                     {block.title ? (
                       <h2
                         contentEditable
@@ -1889,7 +2075,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 ) : null}
 
                 {block.type === "columns" ? (
-                  <div className={`site-block site-block-columns site-columns-layout-${block.layout ?? "equal"}`}>
+                  <div className={`site-block site-block-columns site-columns-layout-${block.layout ?? "equal"} ${visibilityClassName(block.visibility, activeViewport)}`}>
                     {block.columns.map((column) => (
                       <article className="site-column-card" key={column.id}>
                         <h3
@@ -1939,7 +2125,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 ) : null}
 
                 {block.type === "cta" ? (
-                  <div className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"} site-width-${block.width ?? "normal"}`}>
+                  <div className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"} site-width-${block.width ?? "normal"} ${visibilityClassName(block.visibility, activeViewport)}`}>
                     <div>
                       <h2
                         contentEditable

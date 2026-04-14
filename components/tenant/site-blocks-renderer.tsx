@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { SiteBuilderBlock, TenantPublicProfile } from "@/lib/types";
+import type { SiteBlockVisibility, SiteBuilderBlock, TenantPublicProfile } from "@/lib/types";
 
 type SiteBlocksRendererProps = {
   blocks?: SiteBuilderBlock[];
@@ -41,6 +41,22 @@ function getVideoEmbedUrl(input: string) {
   }
 }
 
+function visibilityClassName(visibility?: SiteBlockVisibility) {
+  const safeVisibility = visibility ?? {
+    desktop: true,
+    tablet: true,
+    mobile: true,
+  };
+
+  return [
+    !safeVisibility.desktop ? "site-hidden-desktop" : "",
+    !safeVisibility.tablet ? "site-hidden-tablet" : "",
+    !safeVisibility.mobile ? "site-hidden-mobile" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function SiteBlocksRenderer({
   blocks = [],
   tenant,
@@ -57,7 +73,7 @@ export function SiteBlocksRenderer({
         if (block.type === "text") {
           return (
             <article
-              className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""} site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-tone-${block.tone ?? "dark"} site-width-${block.width ?? "normal"}`}
+              className={`site-block site-block-text ${block.align === "center" ? "align-center" : ""} site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-tone-${block.tone ?? "dark"} site-width-${block.width ?? "normal"} ${visibilityClassName(block.visibility)}`}
               key={block.id}
             >
               {block.eyebrow ? <span className="eyebrow">{block.eyebrow}</span> : null}
@@ -70,7 +86,7 @@ export function SiteBlocksRenderer({
         if (block.type === "image") {
           return (
             <figure
-              className={`site-block site-block-image ${block.layout === "wide" ? "is-wide" : ""} site-image-height-${block.height ?? "medium"}`}
+              className={`site-block site-block-image ${block.layout === "wide" ? "is-wide" : ""} site-image-height-${block.height ?? "medium"} ${visibilityClassName(block.visibility)}`}
               key={block.id}
             >
               {block.imageUrl ? (
@@ -90,7 +106,7 @@ export function SiteBlocksRenderer({
 
         if (block.type === "video") {
           return (
-            <article className={`site-block site-block-video site-width-${block.width ?? "normal"}`} key={block.id}>
+            <article className={`site-block site-block-video site-width-${block.width ?? "normal"} ${visibilityClassName(block.visibility)}`} key={block.id}>
               {block.title ? <h2>{block.title}</h2> : null}
               <div className="site-video-frame">
                 <iframe
@@ -108,7 +124,7 @@ export function SiteBlocksRenderer({
 
         if (block.type === "columns") {
           return (
-            <section className={`site-block site-block-columns site-columns-layout-${block.layout ?? "equal"}`} key={block.id}>
+            <section className={`site-block site-block-columns site-columns-layout-${block.layout ?? "equal"} ${visibilityClassName(block.visibility)}`} key={block.id}>
               {block.columns.map((column) => (
                 <article className="site-column-card" key={column.id}>
                   <h3>{column.title}</h3>
@@ -120,7 +136,7 @@ export function SiteBlocksRenderer({
         }
 
         return (
-          <article className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"} site-width-${block.width ?? "normal"}`} key={block.id}>
+          <article className={`site-block site-block-cta site-text-scale-${block.titleSize ?? "lg"} site-body-scale-${block.bodySize ?? "md"} site-cta-theme-${block.theme ?? "soft"} site-width-${block.width ?? "normal"} ${visibilityClassName(block.visibility)}`} key={block.id}>
             <div>
               <h2>{block.title}</h2>
               <p className="muted">{block.body}</p>

@@ -4,6 +4,11 @@ import { canManageTenant, getCurrentSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 const colorRegex = /^#([A-Fa-f0-9]{6})$/;
+const visibilitySchema = z.object({
+  desktop: z.boolean(),
+  tablet: z.boolean(),
+  mobile: z.boolean(),
+});
 
 const siteBlockSchema = z.discriminatedUnion("type", [
   z.object({
@@ -17,6 +22,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     bodySize: z.enum(["sm", "md", "lg"]).optional(),
     tone: z.enum(["dark", "brand", "muted"]).optional(),
     width: z.enum(["compact", "normal", "wide", "full"]).optional(),
+    visibility: visibilitySchema.optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -26,6 +32,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     caption: z.string().max(300).optional(),
     layout: z.enum(["contained", "wide"]).optional(),
     height: z.enum(["small", "medium", "large"]).optional(),
+    visibility: visibilitySchema.optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -34,6 +41,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     videoUrl: z.string().url(),
     caption: z.string().max(300).optional(),
     width: z.enum(["compact", "normal", "wide", "full"]).optional(),
+    visibility: visibilitySchema.optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -49,6 +57,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
       )
       .min(2)
       .max(4),
+    visibility: visibilitySchema.optional(),
   }),
   z.object({
     id: z.string().min(1),
@@ -61,6 +70,7 @@ const siteBlockSchema = z.discriminatedUnion("type", [
     bodySize: z.enum(["sm", "md", "lg"]).optional(),
     theme: z.enum(["soft", "solid"]).optional(),
     width: z.enum(["compact", "normal", "wide", "full"]).optional(),
+    visibility: visibilitySchema.optional(),
   }),
 ]);
 
