@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CSSProperties, DragEvent } from "react";
+import type { CSSProperties, DragEvent, FocusEvent } from "react";
 import type {
   SiteBlockVisibility,
   SiteBuilderBlock,
@@ -263,6 +263,14 @@ function visibilitySummary(visibility?: SiteBlockVisibility) {
     );
 
   return hiddenOn.length > 0 ? `Oculto en ${hiddenOn.join(", ")}` : "Visible en todos";
+}
+
+function readEditableValue(
+  event: FocusEvent<HTMLElement>,
+  fallback: string,
+) {
+  const nextValue = event.currentTarget.textContent?.trim();
+  return nextValue && nextValue.length > 0 ? nextValue : fallback;
 }
 
 const widthScale = ["compact", "normal", "wide", "full"] as const;
@@ -1813,7 +1821,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 >
                   <h1
                     contentEditable
-                    onBlur={(event) => setHeroTitle(event.currentTarget.textContent ?? heroTitle)}
+                    onBlur={(event) => setHeroTitle(readEditableValue(event, heroTitle))}
                     onClick={() => selectTarget({ kind: "hero", field: "title" })}
                     suppressContentEditableWarning
                   >
@@ -1829,9 +1837,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                   <p
                     className="muted hero-copy"
                     contentEditable
-                    onBlur={(event) =>
-                      setHeroDescription(event.currentTarget.textContent ?? heroDescription)
-                    }
+                    onBlur={(event) => setHeroDescription(readEditableValue(event, heroDescription))}
                     onClick={() => selectTarget({ kind: "hero", field: "description" })}
                     suppressContentEditableWarning
                   >
@@ -1987,13 +1993,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                     {block.eyebrow ? <span className="eyebrow">{block.eyebrow}</span> : null}
                     <h2
                       contentEditable
-                      onBlur={(event) =>
+                      onBlur={(event) => {
+                        const nextTitle = readEditableValue(event, block.title);
                         updateBlock(block.id, (current) =>
                           current.type === "text"
-                            ? { ...current, title: event.currentTarget.textContent ?? current.title }
+                            ? { ...current, title: nextTitle }
                             : current,
-                        )
-                      }
+                        );
+                      }}
                       suppressContentEditableWarning
                     >
                       {block.title}
@@ -2001,13 +2008,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                     <p
                       className="muted"
                       contentEditable
-                      onBlur={(event) =>
+                      onBlur={(event) => {
+                        const nextBody = readEditableValue(event, block.body);
                         updateBlock(block.id, (current) =>
                           current.type === "text"
-                            ? { ...current, body: event.currentTarget.textContent ?? current.body }
+                            ? { ...current, body: nextBody }
                             : current,
-                        )
-                      }
+                        );
+                      }}
                       suppressContentEditableWarning
                     >
                       {block.body}
@@ -2034,13 +2042,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                     {block.title ? (
                       <h2
                         contentEditable
-                        onBlur={(event) =>
+                        onBlur={(event) => {
+                          const nextTitle = readEditableValue(event, block.title ?? "");
                           updateBlock(block.id, (current) =>
                             current.type === "video"
-                              ? { ...current, title: event.currentTarget.textContent ?? current.title }
+                              ? { ...current, title: nextTitle }
                               : current,
-                          )
-                        }
+                          );
+                        }}
                         suppressContentEditableWarning
                       >
                         {block.title}
@@ -2059,13 +2068,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                       <p
                         className="muted"
                         contentEditable
-                        onBlur={(event) =>
+                        onBlur={(event) => {
+                          const nextCaption = readEditableValue(event, block.caption ?? "");
                           updateBlock(block.id, (current) =>
                             current.type === "video"
-                              ? { ...current, caption: event.currentTarget.textContent ?? current.caption }
+                              ? { ...current, caption: nextCaption }
                               : current,
-                          )
-                        }
+                          );
+                        }}
                         suppressContentEditableWarning
                       >
                         {block.caption}
@@ -2080,20 +2090,21 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                       <article className="site-column-card" key={column.id}>
                         <h3
                           contentEditable
-                          onBlur={(event) =>
+                          onBlur={(event) => {
+                            const nextTitle = readEditableValue(event, column.title);
                             updateBlock(block.id, (current) =>
                               current.type === "columns"
                                 ? {
                                     ...current,
                                     columns: current.columns.map((item) =>
                                       item.id === column.id
-                                        ? { ...item, title: event.currentTarget.textContent ?? item.title }
+                                        ? { ...item, title: nextTitle }
                                         : item,
                                     ),
                                   }
                                 : current,
-                            )
-                          }
+                            );
+                          }}
                           suppressContentEditableWarning
                         >
                           {column.title}
@@ -2101,20 +2112,21 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                         <p
                           className="muted"
                           contentEditable
-                          onBlur={(event) =>
+                          onBlur={(event) => {
+                            const nextBody = readEditableValue(event, column.body);
                             updateBlock(block.id, (current) =>
                               current.type === "columns"
                                 ? {
                                     ...current,
                                     columns: current.columns.map((item) =>
                                       item.id === column.id
-                                        ? { ...item, body: event.currentTarget.textContent ?? item.body }
+                                        ? { ...item, body: nextBody }
                                         : item,
                                     ),
                                   }
                                 : current,
-                            )
-                          }
+                            );
+                          }}
                           suppressContentEditableWarning
                         >
                           {column.body}
@@ -2129,13 +2141,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                     <div>
                       <h2
                         contentEditable
-                        onBlur={(event) =>
+                        onBlur={(event) => {
+                          const nextTitle = readEditableValue(event, block.title);
                           updateBlock(block.id, (current) =>
                             current.type === "cta"
-                              ? { ...current, title: event.currentTarget.textContent ?? current.title }
+                              ? { ...current, title: nextTitle }
                               : current,
-                          )
-                        }
+                          );
+                        }}
                         suppressContentEditableWarning
                       >
                         {block.title}
@@ -2143,13 +2156,14 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                       <p
                         className="muted"
                         contentEditable
-                        onBlur={(event) =>
+                        onBlur={(event) => {
+                          const nextBody = readEditableValue(event, block.body);
                           updateBlock(block.id, (current) =>
                             current.type === "cta"
-                              ? { ...current, body: event.currentTarget.textContent ?? current.body }
+                              ? { ...current, body: nextBody }
                               : current,
-                          )
-                        }
+                          );
+                        }}
                         suppressContentEditableWarning
                       >
                         {block.body}
