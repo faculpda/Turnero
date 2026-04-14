@@ -2417,6 +2417,13 @@ th:last-child {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--tenant-secondary) 64%, white 36%);
 }
 
+.site-live-selectable:focus-visible,
+.site-live-media-button:focus-visible,
+.site-live-text-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--tenant-primary) 68%, #7ea1ff);
+  outline-offset: 3px;
+}
+
 .site-live-text-button h1,
 .site-live-text-button p {
   margin: 0;

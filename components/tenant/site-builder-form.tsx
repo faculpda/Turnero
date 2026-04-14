@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CSSProperties, DragEvent, FocusEvent } from "react";
+import type { CSSProperties, DragEvent, FocusEvent, KeyboardEvent } from "react";
 import type {
   SiteBlockVisibility,
   SiteBuilderBlock,
@@ -271,6 +271,16 @@ function readEditableValue(
 ) {
   const nextValue = event.currentTarget.textContent?.trim();
   return nextValue && nextValue.length > 0 ? nextValue : fallback;
+}
+
+function activateSelectionOnKeyDown(
+  event: KeyboardEvent<HTMLElement>,
+  onSelect: () => void,
+) {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    onSelect();
+  }
 }
 
 const widthScale = ["compact", "normal", "wide", "full"] as const;
@@ -1796,10 +1806,16 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 onDragStart={() => setDraggedHeroPart("content")}
                 onDrop={() => onHeroDrop("content")}
               >
-                <button
+                <div
                   className={`site-live-selectable ${selectedTarget.kind === "hero" && selectedTarget.field === "brand" ? "is-selected" : ""}`}
                   onClick={() => selectTarget({ kind: "hero", field: "brand" })}
-                  type="button"
+                  onKeyDown={(event) =>
+                    activateSelectionOnKeyDown(event, () =>
+                      selectTarget({ kind: "hero", field: "brand" }),
+                    )
+                  }
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className="tenant-brand-row">
                     {logoUrl ? (
@@ -1812,12 +1828,18 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                       <strong>{siteTitle}</strong>
                     </div>
                   </div>
-                </button>
+                </div>
 
-                <button
+                <div
                   className={`site-live-selectable site-live-text-button ${selectedTarget.kind === "hero" && selectedTarget.field === "title" ? "is-selected" : ""}`}
                   onClick={() => selectTarget({ kind: "hero", field: "title" })}
-                  type="button"
+                  onKeyDown={(event) =>
+                    activateSelectionOnKeyDown(event, () =>
+                      selectTarget({ kind: "hero", field: "title" }),
+                    )
+                  }
+                  role="button"
+                  tabIndex={0}
                 >
                   <h1
                     contentEditable
@@ -1827,12 +1849,18 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                   >
                     {heroTitle}
                   </h1>
-                </button>
+                </div>
 
-                <button
+                <div
                   className={`site-live-selectable site-live-text-button ${selectedTarget.kind === "hero" && selectedTarget.field === "description" ? "is-selected" : ""}`}
                   onClick={() => selectTarget({ kind: "hero", field: "description" })}
-                  type="button"
+                  onKeyDown={(event) =>
+                    activateSelectionOnKeyDown(event, () =>
+                      selectTarget({ kind: "hero", field: "description" }),
+                    )
+                  }
+                  role="button"
+                  tabIndex={0}
                 >
                   <p
                     className="muted hero-copy"
@@ -1843,7 +1871,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                   >
                     {heroDescription}
                   </p>
-                </button>
+                </div>
 
                 <div className="actions">
                   <button className="button primary tenant-primary-button" type="button">
@@ -1855,7 +1883,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 </div>
               </div>
 
-              <button
+              <div
                 className={`tenant-hero-media site-live-media-button ${selectedTarget.kind === "hero" && selectedTarget.field === "image" ? "is-selected" : ""} ${
                   heroDropTarget === "image" && draggedHeroPart ? "is-drop-target" : ""
                 } ${
@@ -1875,7 +1903,13 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                 }}
                 onDrop={() => onHeroDrop("image")}
                 onClick={() => selectTarget({ kind: "hero", field: "image" })}
-                type="button"
+                onKeyDown={(event) =>
+                  activateSelectionOnKeyDown(event, () =>
+                    selectTarget({ kind: "hero", field: "image" }),
+                  )
+                }
+                role="button"
+                tabIndex={0}
               >
                 {heroImageUrl ? (
                   <img alt={siteTitle} className="tenant-cover" src={heroImageUrl} />
@@ -1885,7 +1919,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
                     <p className="muted">Selecciona este bloque para cargar una imagen.</p>
                   </div>
                 )}
-              </button>
+              </div>
             </div>
           </section>
 
