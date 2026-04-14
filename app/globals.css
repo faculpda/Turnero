@@ -2347,6 +2347,130 @@ th:last-child {
   width: min(100%, 430px);
 }
 
+.site-live-canvas-tablet .tenant-hero-grid,
+.site-live-canvas-mobile .tenant-hero-grid {
+  grid-template-columns: 1fr;
+}
+
+.site-live-canvas-tablet .tenant-hero-grid-image-left > :first-child,
+.site-live-canvas-mobile .tenant-hero-grid-image-left > :first-child,
+.site-live-canvas-tablet .tenant-hero-grid-image-left > :last-child,
+.site-live-canvas-mobile .tenant-hero-grid-image-left > :last-child {
+  order: initial;
+}
+
+.site-live-canvas-tablet .site-block-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.site-live-canvas-mobile .site-block-columns,
+.site-live-canvas-mobile .site-columns-layout-feature-left,
+.site-live-canvas-mobile .site-columns-layout-feature-right {
+  grid-template-columns: 1fr;
+}
+
+.site-live-canvas-tablet .site-columns-layout-feature-left,
+.site-live-canvas-tablet .site-columns-layout-feature-right {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.site-live-canvas-tablet .site-block-cta,
+.site-live-canvas-mobile .site-block-cta {
+  display: grid;
+  justify-content: stretch;
+}
+
+.site-live-canvas-tablet .actions,
+.site-live-canvas-mobile .actions {
+  align-items: stretch;
+}
+
+.site-live-canvas-tablet .actions .button,
+.site-live-canvas-mobile .actions .button,
+.site-live-canvas-tablet .site-block-cta .button,
+.site-live-canvas-mobile .site-block-cta .button {
+  width: 100%;
+  justify-content: center;
+}
+
+.site-live-canvas-tablet .site-block-text,
+.site-live-canvas-tablet .site-block-video,
+.site-live-canvas-tablet .site-block-cta,
+.site-live-canvas-tablet .site-column-card,
+.site-live-canvas-tablet .tenant-hero,
+.site-live-canvas-mobile .site-block-text,
+.site-live-canvas-mobile .site-block-video,
+.site-live-canvas-mobile .site-block-cta,
+.site-live-canvas-mobile .site-column-card,
+.site-live-canvas-mobile .tenant-hero {
+  padding: 22px;
+}
+
+.site-live-canvas-mobile {
+  padding: 18px;
+  border-radius: 24px;
+}
+
+.site-live-canvas-mobile .tenant-brand-row {
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.site-live-canvas-mobile .tenant-logo,
+.site-live-canvas-mobile .tenant-logo-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+}
+
+.site-live-canvas-mobile .tenant-cover,
+.site-live-canvas-mobile .tenant-cover-placeholder,
+.site-live-canvas-mobile .site-block-image img,
+.site-live-canvas-mobile .site-block-image.is-wide img {
+  min-height: 220px;
+}
+
+.site-live-canvas-mobile .site-image-height-small img {
+  min-height: 180px;
+}
+
+.site-live-canvas-mobile .site-image-height-large img {
+  min-height: 280px;
+}
+
+.site-live-canvas-mobile .site-block-text h2,
+.site-live-canvas-mobile .site-block-video h2,
+.site-live-canvas-mobile .site-block-cta h2,
+.site-live-canvas-mobile .site-text-scale-xl h2,
+.site-live-canvas-mobile .site-text-scale-xl.site-block-cta h2 {
+  font-size: clamp(1.7rem, 7vw, 2.2rem);
+}
+
+.site-live-canvas-mobile .site-text-scale-lg h2,
+.site-live-canvas-mobile .site-text-scale-lg.site-block-cta h2 {
+  font-size: 1.8rem;
+}
+
+.site-live-canvas-mobile .site-text-scale-md h2,
+.site-live-canvas-mobile .site-text-scale-md.site-block-cta h2 {
+  font-size: 1.45rem;
+}
+
+.site-live-canvas-mobile .site-body-scale-lg p {
+  font-size: 1.03rem;
+}
+
+.site-live-canvas-mobile .site-width-compact,
+.site-live-canvas-mobile .site-width-normal,
+.site-live-canvas-mobile .site-width-wide,
+.site-live-canvas-mobile .site-width-full,
+.site-live-canvas-tablet .site-width-compact,
+.site-live-canvas-tablet .site-width-normal,
+.site-live-canvas-tablet .site-width-wide,
+.site-live-canvas-tablet .site-width-full {
+  max-width: 100%;
+}
+
 .site-live-tools-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
