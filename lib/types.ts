@@ -93,8 +93,11 @@ export type CustomerAppointmentSummary = {
   id: string;
   serviceName: string;
   startsAt: string;
+  startsAtIso: string;
   status: AppointmentStatus;
   paymentStatus: PaymentStatus;
+  providerName?: string;
+  priceLabel: string;
 };
 
 export type TenantPaymentSettingsSummary = {

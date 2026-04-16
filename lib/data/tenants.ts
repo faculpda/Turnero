@@ -694,6 +694,11 @@ export async function listCustomerAppointments(
       },
       include: {
         service: true,
+        provider: {
+          select: {
+            name: true,
+          },
+        },
       },
       orderBy: {
         startsAt: "asc",
@@ -704,8 +709,11 @@ export async function listCustomerAppointments(
       id: appointment.id,
       serviceName: appointment.service.name,
       startsAt: formatAppointmentDate(appointment.startsAt),
+      startsAtIso: appointment.startsAt.toISOString(),
       status: appointment.status,
       paymentStatus: appointment.paymentStatus,
+      providerName: appointment.provider?.name ?? undefined,
+      priceLabel: formatPrice(appointment.paymentAmountCents ?? appointment.service.priceCents),
     }));
   } catch {
     return [
@@ -713,8 +721,11 @@ export async function listCustomerAppointments(
         id: "fallback-customer-1",
         serviceName: "Limpieza dental",
         startsAt: "Mar 7 abr, 09:00",
+        startsAtIso: new Date("2026-04-07T09:00:00.000Z").toISOString(),
         status: "CONFIRMED",
         paymentStatus: "APPROVED",
+        providerName: "Dra. Paula Gomez",
+        priceLabel: formatPrice(2500000),
       },
     ];
   }

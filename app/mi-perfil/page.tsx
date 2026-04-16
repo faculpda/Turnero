@@ -68,6 +68,7 @@ export default async function RootCustomerProfilePage({
       paymentMessage={paymentMessage}
       session={session}
       tenant={tenant}
+      useSlugRoutes={false}
     />
   );
 }
