@@ -1,20 +1,26 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TenantPublicHome } from "@/components/tenant/public-home";
-import { getPublicTenantProfileByHost } from "@/lib/data/tenants";
+import { getTenantBookingDataByHost } from "@/lib/data/tenants";
 import { getRequestHost, isPlatformHost } from "@/lib/tenant-context";
 
 export default async function HomePage() {
   const host = await getRequestHost();
 
   if (host && !isPlatformHost(host)) {
-    const tenant = await getPublicTenantProfileByHost(host);
+    const bookingData = await getTenantBookingDataByHost(host);
 
-    if (!tenant) {
+    if (!bookingData) {
       notFound();
     }
 
-    return <TenantPublicHome tenant={tenant} useSlugRoutes={false} />;
+    return (
+      <TenantPublicHome
+        availabilityByService={bookingData.availabilityByService}
+        tenant={bookingData.profile}
+        useSlugRoutes={false}
+      />
+    );
   }
 
   return (

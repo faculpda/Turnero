@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { TenantPublicHome } from "@/components/tenant/public-home";
-import { getPublicTenantProfile } from "@/lib/data/tenants";
+import { getTenantBookingData } from "@/lib/data/tenants";
 
 type TenantPublicPageProps = {
   params: Promise<{
@@ -10,11 +10,16 @@ type TenantPublicPageProps = {
 
 export default async function TenantPublicPage({ params }: TenantPublicPageProps) {
   const { slug } = await params;
-  const tenant = await getPublicTenantProfile(slug);
+  const bookingData = await getTenantBookingData(slug);
 
-  if (!tenant) {
+  if (!bookingData) {
     notFound();
   }
 
-  return <TenantPublicHome tenant={tenant} />;
+  return (
+    <TenantPublicHome
+      availabilityByService={bookingData.availabilityByService}
+      tenant={bookingData.profile}
+    />
+  );
 }

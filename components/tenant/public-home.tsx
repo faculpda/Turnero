@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import type { TenantPublicProfile } from "@/lib/types";
+import { TenantBookingForm } from "@/components/tenant/booking-form";
+import type { ServiceAvailability, TenantPublicProfile } from "@/lib/types";
 
 type TenantPublicHomeProps = {
   tenant: TenantPublicProfile;
+  availabilityByService: ServiceAvailability[];
   useSlugRoutes?: boolean;
 };
 
@@ -24,6 +26,7 @@ function buildTenantStyle(tenant: TenantPublicProfile): CSSProperties {
 
 export function TenantPublicHome({
   tenant,
+  availabilityByService,
   useSlugRoutes = true,
 }: TenantPublicHomeProps) {
   const bookingHref = tenantHref(tenant, "/reservar", useSlugRoutes);
@@ -140,9 +143,11 @@ export function TenantPublicHome({
         </div>
 
         <div className="tenant-public-booking-preview">
-          <div className="tenant-public-form-placeholder">
-            <strong>Formulario para solicitar un turno</strong>
-          </div>
+          <TenantBookingForm
+            availabilityByService={availabilityByService}
+            redirectTo={profileLink}
+            tenantSlug={tenant.slug}
+          />
         </div>
       </section>
 
