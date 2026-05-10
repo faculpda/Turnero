@@ -52,7 +52,7 @@ export function TenantPublicHome({
           )}
           <div>
             <strong>{tenant.siteTitle ?? tenant.name}</strong>
-            <p className="muted">Reserva online simple y clara</p>
+            <p className="muted">Pide tu turno online en minutos</p>
           </div>
         </div>
         <div className="tenant-public-nav">
@@ -67,12 +67,12 @@ export function TenantPublicHome({
 
       <section className="hero tenant-hero tenant-public-banner">
         <div className="tenant-public-banner-copy">
-          <span className="eyebrow">Reserva online clara</span>
+          <span className="eyebrow">Turnos online</span>
           <h1>{tenant.headline}</h1>
           <p className="muted hero-copy">{tenant.description}</p>
           <div className="actions">
             <Link className="button primary tenant-primary-button" href="#solicitar-turno">
-              {tenant.ctaLabel ?? "Quiero pedir mi turno"}
+              {tenant.ctaLabel ?? "Reservar ahora"}
             </Link>
             <Link className="button secondary" href={profileLink}>
               Mi cuenta
@@ -85,10 +85,8 @@ export function TenantPublicHome({
             <img alt={tenant.siteTitle ?? tenant.name} className="tenant-cover" src={tenant.heroImageUrl} />
           ) : (
             <div className="tenant-cover-placeholder">
-              <strong>Tu turno, paso a paso</strong>
-              <p className="muted">
-                Un recorrido pensado para que cualquier persona entienda rapido como reservar.
-              </p>
+              <strong>Tu proximo turno empieza aqui</strong>
+              <p className="muted">Elige el servicio, selecciona el horario y confirma tu reserva online.</p>
             </div>
           )}
         </aside>
@@ -108,7 +106,7 @@ export function TenantPublicHome({
             </svg>
           </div>
           <strong>Rapidez real</strong>
-          <p className="muted">Un recorrido claro para pedir turno sin confundirte.</p>
+          <p className="muted">Reserva en pocos pasos y asegura tu lugar sin llamadas ni esperas.</p>
         </article>
         <article className="tenant-public-info-card tenant-public-info-card-trust">
           <div className="tenant-public-info-icon" aria-hidden="true">
@@ -130,7 +128,7 @@ export function TenantPublicHome({
             </svg>
           </div>
           <strong>Seguridad y claridad</strong>
-          <p className="muted">Solo vas a ver horarios realmente disponibles.</p>
+          <p className="muted">Elige entre horarios disponibles de verdad y confirma con total confianza.</p>
         </article>
         <article className="tenant-public-info-card tenant-public-info-card-simple">
           <div className="tenant-public-info-icon" aria-hidden="true">
@@ -145,7 +143,7 @@ export function TenantPublicHome({
             </svg>
           </div>
           <strong>Confirmacion simple</strong>
-          <p className="muted">Revisas tu seleccion y confirmas con tranquilidad.</p>
+          <p className="muted">Revisa tu eleccion, confirma tu turno y sigue con tu dia.</p>
         </article>
       </section>
 

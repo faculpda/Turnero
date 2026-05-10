@@ -200,7 +200,7 @@ export function TenantBookingForm({
       <div className="booking-wizard-header">
         <span className="eyebrow">Solicitud guiada</span>
         <h2>Solicitar un turno</h2>
-        <p className="muted">Te hacemos una pregunta por vez para que reservar sea claro y facil.</p>
+        <p className="muted">Elige tu servicio, selecciona horario y confirma tu reserva online.</p>
       </div>
 
       <div className="booking-progress-grid" aria-label="Progreso de la reserva">
