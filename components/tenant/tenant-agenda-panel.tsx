@@ -14,6 +14,7 @@ type BlockedTimeSlotSummary = {
 
 type AvailabilityRuleSummary = {
   id?: string;
+  clientId?: string;
   dayOfWeek: number;
   startTime: string;
   endTime: string;
@@ -52,6 +53,7 @@ const slotStepOptions = [
 
 function emptyRule(): AvailabilityRuleSummary {
   return {
+    clientId: crypto.randomUUID(),
     dayOfWeek: 1,
     startTime: "09:00",
     endTime: "18:00",
@@ -64,6 +66,17 @@ function getDayLabel(dayOfWeek: number) {
   return dayOptions.find((option) => option.value === dayOfWeek)?.label ?? "Dia";
 }
 
+function toLocalRule(rule: AvailabilityRuleSummary, index: number): AvailabilityRuleSummary {
+  return {
+    ...rule,
+    clientId: rule.id ?? rule.clientId ?? `local-${index}-${rule.dayOfWeek}`,
+  };
+}
+
+function getRuleKey(rule: AvailabilityRuleSummary) {
+  return rule.id ?? rule.clientId ?? `${rule.dayOfWeek}-${rule.startTime}-${rule.endTime}`;
+}
+
 export function TenantAgendaPanel({
   tenantSlug,
   availabilityRules,
@@ -74,16 +87,35 @@ export function TenantAgendaPanel({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [generalSchedule, setGeneralSchedule] = useState({
+    startTime: "09:00",
+    endTime: "18:00",
+    slotStepMin: 30,
+  });
   const [title, setTitle] = useState("Bloqueo interno");
   const [reason, setReason] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [rules, setRules] = useState<AvailabilityRuleSummary[]>(
-    availabilityRules.length > 0 ? availabilityRules : [emptyRule()],
+    availabilityRules.length > 0 ? availabilityRules.map(toLocalRule) : dayOptions.map((option) => ({ ...emptyRule(), dayOfWeek: option.value })),
   );
 
   useEffect(() => {
-    setRules(availabilityRules.length > 0 ? availabilityRules : [emptyRule()]);
+    const nextRules =
+      availabilityRules.length > 0
+        ? availabilityRules.map(toLocalRule)
+        : dayOptions.map((option) => ({ ...emptyRule(), dayOfWeek: option.value }));
+
+    setRules(nextRules);
+
+    const sourceRule = nextRules.find((rule) => rule.isActive) ?? nextRules[0];
+    if (sourceRule) {
+      setGeneralSchedule({
+        startTime: sourceRule.startTime,
+        endTime: sourceRule.endTime,
+        slotStepMin: sourceRule.slotStepMin,
+      });
+    }
   }, [availabilityRules]);
 
   const activeRules = rules.filter((rule) => rule.isActive);
@@ -95,8 +127,19 @@ export function TenantAgendaPanel({
     () =>
       [...activeRules]
         .sort((left, right) => left.dayOfWeek - right.dayOfWeek || left.startTime.localeCompare(right.startTime))
-        .slice(0, 4),
+        .slice(0, 7),
     [activeRules],
+  );
+
+  const rulesByDay = useMemo(
+    () =>
+      dayOptions.map((day) => ({
+        ...day,
+        rules: rules
+          .filter((rule) => rule.dayOfWeek === day.value)
+          .sort((left, right) => left.startTime.localeCompare(right.startTime)),
+      })),
+    [rules],
   );
 
   async function saveAvailabilityRules() {
@@ -110,7 +153,14 @@ export function TenantAgendaPanel({
         },
         body: JSON.stringify({
           tenantSlug,
-          rules,
+          rules: rules.map((rule) => ({
+            id: rule.id,
+            dayOfWeek: rule.dayOfWeek,
+            startTime: rule.startTime,
+            endTime: rule.endTime,
+            slotStepMin: rule.slotStepMin,
+            isActive: rule.isActive,
+          })),
         }),
       });
 
@@ -195,14 +245,49 @@ export function TenantAgendaPanel({
     }
   }
 
-  function updateRule(index: number, patch: Partial<AvailabilityRuleSummary>) {
+  function updateRule(ruleKey: string, patch: Partial<AvailabilityRuleSummary>) {
     setRules((current) =>
-      current.map((rule, ruleIndex) => (ruleIndex === index ? { ...rule, ...patch } : rule)),
+      current.map((rule) => (getRuleKey(rule) === ruleKey ? { ...rule, ...patch } : rule)),
     );
   }
 
-  function removeRule(index: number) {
-    setRules((current) => (current.length === 1 ? [emptyRule()] : current.filter((_, ruleIndex) => ruleIndex !== index)));
+  function removeRule(ruleKey: string) {
+    setRules((current) => {
+      const nextRules = current.filter((rule) => getRuleKey(rule) !== ruleKey);
+      return nextRules.length > 0 ? nextRules : dayOptions.map((option) => ({ ...emptyRule(), dayOfWeek: option.value }));
+    });
+  }
+
+  function addRuleForDay(dayOfWeek: number) {
+    setRules((current) => [
+      ...current,
+      {
+        clientId: crypto.randomUUID(),
+        dayOfWeek,
+        startTime: generalSchedule.startTime,
+        endTime: generalSchedule.endTime,
+        slotStepMin: generalSchedule.slotStepMin,
+        isActive: true,
+      },
+    ]);
+  }
+
+  function applyGeneralSchedule() {
+    setRules(() =>
+      dayOptions.map((day) => {
+        const existingRule = rules.find((rule) => rule.dayOfWeek === day.value);
+
+        return {
+          id: existingRule?.id,
+          clientId: existingRule?.clientId ?? crypto.randomUUID(),
+          dayOfWeek: day.value,
+          startTime: generalSchedule.startTime,
+          endTime: generalSchedule.endTime,
+          slotStepMin: generalSchedule.slotStepMin,
+          isActive: true,
+        };
+      }),
+    );
   }
 
   return (
@@ -277,104 +362,184 @@ export function TenantAgendaPanel({
             <div>
               <h2>Modificar horario</h2>
               <p className="muted">
-                Ajusta dias, rangos y frecuencia de slots para definir exactamente cuando se puede reservar.
+                Define un horario general para toda la semana y luego ajusta cada dia solo si hace falta.
               </p>
             </div>
-            <button
-              className="button secondary"
-              onClick={() => setRules((current) => [...current, emptyRule()])}
-              type="button"
-            >
-              Agregar franja
-            </button>
           </div>
 
-          <div className="dashboard-schedule-list">
-            {rules.map((rule, index) => (
-              <div className="dashboard-schedule-item" key={rule.id ?? `new-${index}`}>
-                <div className="dashboard-schedule-row">
-                  <label className="dashboard-field">
-                    <span className="dashboard-detail-label">Dia</span>
-                    <select
-                      className="dashboard-modal-input"
-                      onChange={(event) =>
-                        updateRule(index, { dayOfWeek: Number(event.target.value) })
-                      }
-                      value={rule.dayOfWeek}
-                    >
-                      {dayOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+          <div className="dashboard-schedule-general-card">
+            <div className="dashboard-section-header">
+              <div>
+                <h2>Horario general</h2>
+                <p className="muted">Aplica una base comun a toda la semana y luego personaliza dias puntuales.</p>
+              </div>
+              <button className="button secondary" onClick={applyGeneralSchedule} type="button">
+                Aplicar a toda la semana
+              </button>
+            </div>
 
-                  <label className="dashboard-field">
-                    <span className="dashboard-detail-label">Desde</span>
-                    <input
-                      className="dashboard-modal-input"
-                      onChange={(event) => updateRule(index, { startTime: event.target.value })}
-                      type="time"
-                      value={rule.startTime}
-                    />
-                  </label>
+            <div className="dashboard-schedule-row">
+              <label className="dashboard-field">
+                <span className="dashboard-detail-label">Desde</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) =>
+                    setGeneralSchedule((current) => ({ ...current, startTime: event.target.value }))
+                  }
+                  type="time"
+                  value={generalSchedule.startTime}
+                />
+              </label>
 
-                  <label className="dashboard-field">
-                    <span className="dashboard-detail-label">Hasta</span>
-                    <input
-                      className="dashboard-modal-input"
-                      onChange={(event) => updateRule(index, { endTime: event.target.value })}
-                      type="time"
-                      value={rule.endTime}
-                    />
-                  </label>
+              <label className="dashboard-field">
+                <span className="dashboard-detail-label">Hasta</span>
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) =>
+                    setGeneralSchedule((current) => ({ ...current, endTime: event.target.value }))
+                  }
+                  type="time"
+                  value={generalSchedule.endTime}
+                />
+              </label>
 
-                  <label className="dashboard-field">
-                    <span className="dashboard-detail-label">Intervalo</span>
-                    <select
-                      className="dashboard-modal-input"
-                      onChange={(event) =>
-                        updateRule(index, { slotStepMin: Number(event.target.value) })
-                      }
-                      value={rule.slotStepMin}
-                    >
-                      {slotStepOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
+              <label className="dashboard-field">
+                <span className="dashboard-detail-label">Intervalo</span>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) =>
+                    setGeneralSchedule((current) => ({
+                      ...current,
+                      slotStepMin: Number(event.target.value),
+                    }))
+                  }
+                  value={generalSchedule.slotStepMin}
+                >
+                  {slotStepOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
 
-                <div className="dashboard-schedule-actions">
-                  <label className="dashboard-toggle">
-                    <input
-                      checked={rule.isActive}
-                      onChange={(event) => updateRule(index, { isActive: event.target.checked })}
-                      type="checkbox"
-                    />
-                    <span>{rule.isActive ? "Visible para reservar" : "Pausado"}</span>
-                  </label>
-
+          <div className="dashboard-schedule-week-grid">
+            {rulesByDay.map((day) => (
+              <div className="dashboard-schedule-day-card" key={day.value}>
+                <div className="dashboard-schedule-day-header">
+                  <div>
+                    <span className="dashboard-detail-label">Semana completa</span>
+                    <strong>{day.label}</strong>
+                  </div>
                   <button
                     className="button secondary"
-                    onClick={() => removeRule(index)}
+                    onClick={() => addRuleForDay(day.value)}
                     type="button"
                   >
-                    Quitar
+                    Agregar franja
                   </button>
+                </div>
+
+                <div className="dashboard-schedule-day-list">
+                  {day.rules.length > 0 ? (
+                    day.rules.map((rule) => {
+                      const ruleKey = getRuleKey(rule);
+
+                      return (
+                        <div className="dashboard-schedule-item" key={ruleKey}>
+                          <div className="dashboard-schedule-row dashboard-schedule-row-compact">
+                            <label className="dashboard-field">
+                              <span className="dashboard-detail-label">Desde</span>
+                              <input
+                                className="dashboard-modal-input"
+                                onChange={(event) =>
+                                  updateRule(ruleKey, { startTime: event.target.value })
+                                }
+                                type="time"
+                                value={rule.startTime}
+                              />
+                            </label>
+
+                            <label className="dashboard-field">
+                              <span className="dashboard-detail-label">Hasta</span>
+                              <input
+                                className="dashboard-modal-input"
+                                onChange={(event) =>
+                                  updateRule(ruleKey, { endTime: event.target.value })
+                                }
+                                type="time"
+                                value={rule.endTime}
+                              />
+                            </label>
+
+                            <label className="dashboard-field">
+                              <span className="dashboard-detail-label">Intervalo</span>
+                              <select
+                                className="dashboard-modal-input"
+                                onChange={(event) =>
+                                  updateRule(ruleKey, {
+                                    slotStepMin: Number(event.target.value),
+                                  })
+                                }
+                                value={rule.slotStepMin}
+                              >
+                                {slotStepOptions.map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+
+                          <div className="dashboard-schedule-actions">
+                            <label className="dashboard-toggle">
+                              <input
+                                checked={rule.isActive}
+                                onChange={(event) =>
+                                  updateRule(ruleKey, { isActive: event.target.checked })
+                                }
+                                type="checkbox"
+                              />
+                              <span>{rule.isActive ? "Visible para reservar" : "Pausado"}</span>
+                            </label>
+
+                            <button
+                              className="button secondary"
+                              onClick={() => removeRule(ruleKey)}
+                              type="button"
+                            >
+                              Quitar
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="dashboard-calendar-empty">Sin horario cargado para este dia.</div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
           {scheduleError ? <p className="form-error">{scheduleError}</p> : null}
-          <div className="dashboard-modal-actions">
-            <button className="button primary" disabled={isPending || rules.length === 0} onClick={saveAvailabilityRules} type="button">
-              Guardar horario
-            </button>
+          <div className="dashboard-schedule-footer">
+            <div className="muted">
+              Guarda cuando termines de ajustar el horario general o las excepciones por dia.
+            </div>
+            <div className="dashboard-modal-actions">
+              <button
+                className="button primary"
+                disabled={isPending || rules.length === 0}
+                onClick={saveAvailabilityRules}
+                type="button"
+              >
+                Guardar horario
+              </button>
+            </div>
           </div>
         </article>
 
