@@ -2256,15 +2256,15 @@ th:last-child {
 
 .booking-progress-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
   gap: 10px;
 }
 
 .booking-progress-step {
   display: grid;
-  gap: 8px;
-  padding: 14px 12px;
-  border-radius: 22px;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 18px;
   border: 1px solid #e8edf4;
   background: #f7f9fc;
   justify-items: center;
@@ -2272,7 +2272,7 @@ th:last-child {
 }
 
 .booking-progress-step strong {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .booking-progress-step.is-active {
@@ -2290,13 +2290,14 @@ th:last-child {
 
 .booking-progress-number {
   display: inline-flex;
-  width: 34px;
-  height: 34px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   align-items: center;
   justify-content: center;
   background: #ffffff;
   color: #0f66ff;
+  font-size: 0.82rem;
   font-weight: 800;
 }
 
@@ -2339,8 +2340,8 @@ th:last-child {
   align-items: center;
   gap: 14px;
   width: 100%;
-  min-height: 84px;
-  padding: 18px 20px;
+  min-height: 96px;
+  padding: 16px 18px;
   border-radius: 22px;
   border: 1px solid #dbe4f0;
   background: linear-gradient(135deg, #f9fbff 0%, #ffffff 100%);
@@ -2371,11 +2372,32 @@ th:last-child {
 .booking-large-option-copy {
   display: grid;
   gap: 6px;
+  min-width: 0;
 }
 
 .booking-large-option-copy strong,
 .booking-large-option-copy span {
   margin: 0;
+}
+
+.booking-option-image {
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid #dbe4f0;
+  background: #f3f6fb;
+  flex-shrink: 0;
+}
+
+.booking-option-image-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  color: #205fc0;
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.82rem;
 }
 
 .booking-large-option-meta,
@@ -4377,8 +4399,11 @@ th:last-child {
   }
 
   .booking-progress-step {
-    text-align: left;
+    grid-template-columns: auto 1fr;
+    align-items: center;
     justify-items: start;
+    text-align: left;
+    padding: 10px 12px;
   }
 
   .booking-question-header,
@@ -4402,7 +4427,12 @@ th:last-child {
   }
 
   .booking-progress-step strong {
-    font-size: 0.98rem;
+    font-size: 0.82rem;
+  }
+
+  .booking-option-image {
+    width: 68px;
+    height: 68px;
   }
 }
 

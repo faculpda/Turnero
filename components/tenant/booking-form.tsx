@@ -147,6 +147,7 @@ export function TenantBookingForm({
     if (hasMultipleProviders) {
       setProviderId("");
     }
+
     setSelectedDay("");
     setStartsAt("");
     setError(null);
@@ -219,19 +220,30 @@ export function TenantBookingForm({
           <div className="booking-question-header">
             <div>
               <span className="eyebrow">Paso 1</span>
-              <h3>¿Qué servicio te interesa?</h3>
-              <p className="muted">Toca una opción para continuar.</p>
+              <h3>Que servicio te interesa?</h3>
+              <p className="muted">Toca una opcion para continuar.</p>
             </div>
           </div>
 
           <div className="booking-service-choice-list">
             {availabilityByService.map((entry) => (
               <button
-                className="booking-large-option"
+                className={`booking-large-option ${serviceId === entry.service.id ? "is-selected" : ""}`}
                 key={entry.service.id}
                 onClick={() => applyServiceSelection(entry.service.id)}
                 type="button"
               >
+                {entry.service.images && entry.service.images.length > 0 ? (
+                  <img
+                    alt={entry.service.images[0]?.altText ?? entry.service.name}
+                    className="booking-option-image"
+                    src={entry.service.images[0]?.url}
+                  />
+                ) : (
+                  <div className="booking-option-image booking-option-image-placeholder">
+                    {entry.service.name}
+                  </div>
+                )}
                 <div className="booking-large-option-copy">
                   <strong>{entry.service.name}</strong>
                   {entry.service.description ? <span className="muted">{entry.service.description}</span> : null}
@@ -250,8 +262,8 @@ export function TenantBookingForm({
           <div className="booking-question-header">
             <div>
               <span className="eyebrow">Paso 2</span>
-              <h3>¿Con qué profesional te gustaría tomarlo?</h3>
-              <p className="muted">Elige quién te va a atender.</p>
+              <h3>Con que profesional te gustaria tomarlo?</h3>
+              <p className="muted">Elige quien te va a atender.</p>
             </div>
             <button className="button tertiary" onClick={goBackToService} type="button">
               Volver
@@ -269,7 +281,7 @@ export function TenantBookingForm({
           <div className="booking-provider-choice-list">
             {(selectedAvailability?.providerAvailabilities ?? []).map((availability) => (
               <button
-                className="booking-large-option booking-provider-option"
+                className={`booking-large-option booking-provider-option ${providerId === (availability.providerId ?? "") ? "is-selected" : ""}`}
                 key={availability.providerId ?? availability.providerName}
                 onClick={() => applyProviderSelection(availability.providerId ?? "")}
                 type="button"
@@ -298,7 +310,7 @@ export function TenantBookingForm({
             <div>
               <span className="eyebrow">Paso {hasMultipleProviders ? 3 : 2}</span>
               <h3>Selecciona un horario</h3>
-              <p className="muted">Primero toca un día y después elige uno de sus horarios disponibles.</p>
+              <p className="muted">Primero toca un dia y despues elige uno de sus horarios disponibles.</p>
             </div>
             <button className="button tertiary" onClick={goBackToProvider} type="button">
               Volver
@@ -331,7 +343,7 @@ export function TenantBookingForm({
           {selectedDayGroup ? (
             <div className="booking-time-layout">
               <div className="booking-time-day-panel">
-                <span className="booking-summary-label">Día elegido</span>
+                <span className="booking-summary-label">Dia elegido</span>
                 <strong>{selectedDayGroup.label}</strong>
                 <p className="muted">Ahora toca el horario que te quede mejor.</p>
               </div>
@@ -352,7 +364,7 @@ export function TenantBookingForm({
           ) : null}
 
           <div className="booking-tip-box">
-            <strong>Tip:</strong> confirma tu turno solo cuando estés seguro del horario elegido.
+            <strong>Tip:</strong> confirma tu turno solo cuando estes seguro del horario elegido.
           </div>
         </section>
       ) : null}
@@ -382,7 +394,7 @@ export function TenantBookingForm({
               </div>
             ) : null}
             <div className="booking-confirmation-item">
-              <span className="booking-summary-label">Día</span>
+              <span className="booking-summary-label">Dia</span>
               <strong>{selectedDayGroup?.label}</strong>
             </div>
             <div className="booking-confirmation-item">
@@ -402,7 +414,7 @@ export function TenantBookingForm({
       ) : null}
 
       {!availabilityByService.length ? (
-        <p className="form-helper">Todavía no hay servicios disponibles para reservar.</p>
+        <p className="form-helper">Todavia no hay servicios disponibles para reservar.</p>
       ) : null}
     </form>
   );
