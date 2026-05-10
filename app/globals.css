@@ -4327,16 +4327,61 @@ th:last-child {
 
 .tenant-public-info-card {
   display: grid;
-  gap: 10px;
-  padding: 20px;
-  border: 1px solid color-mix(in srgb, var(--tenant-primary) 8%, #dfe7f2);
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid #dbe5f1;
   border-radius: 22px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow: 0 18px 38px rgba(31, 52, 89, 0.06);
 }
 
 .tenant-public-info-card p,
 .tenant-public-info-card strong {
   margin: 0;
+}
+
+.tenant-public-info-card strong {
+  color: #1d2736;
+  font-size: 1.08rem;
+}
+
+.tenant-public-info-card p {
+  line-height: 1.55;
+}
+
+.tenant-public-info-icon {
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  border: 1px solid #d9e4f0;
+  color: #1d2736;
+  background: #ffffff;
+}
+
+.tenant-public-info-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.tenant-public-info-card-speed .tenant-public-info-icon {
+  background: #eff5ff;
+  border-color: #d4e1fb;
+  color: #205fc0;
+}
+
+.tenant-public-info-card-trust .tenant-public-info-icon {
+  background: #eef8f3;
+  border-color: #d4ebdd;
+  color: #2f7d4a;
+}
+
+.tenant-public-info-card-simple .tenant-public-info-icon {
+  background: #fff5e9;
+  border-color: #f0dec0;
+  color: #996515;
 }
 
 .tenant-public-booking-showcase {

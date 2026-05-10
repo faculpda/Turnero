@@ -95,15 +95,55 @@ export function TenantPublicHome({
       </section>
 
       <section className="tenant-public-info-grid" id="contacto">
-        <article className="tenant-public-info-card">
-          <strong>Reserva facil</strong>
+        <article className="tenant-public-info-card tenant-public-info-card-speed">
+          <div className="tenant-public-info-icon" aria-hidden="true">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path
+                d="M12 6V12L16 14M20 12A8 8 0 1 1 4 12A8 8 0 0 1 20 12Z"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
+          </div>
+          <strong>Rapidez real</strong>
           <p className="muted">Un recorrido claro para pedir turno sin confundirte.</p>
         </article>
-        <article className="tenant-public-info-card">
-          <strong>Horarios reales</strong>
+        <article className="tenant-public-info-card tenant-public-info-card-trust">
+          <div className="tenant-public-info-icon" aria-hidden="true">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path
+                d="M12 3L18.5 5.5V10.5C18.5 14.6 15.85 18.42 12 19.5C8.15 18.42 5.5 14.6 5.5 10.5V5.5L12 3Z"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M9.5 11.8L11.2 13.5L14.8 9.9"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
+          </div>
+          <strong>Seguridad y claridad</strong>
           <p className="muted">Solo vas a ver horarios realmente disponibles.</p>
         </article>
-        <article className="tenant-public-info-card">
+        <article className="tenant-public-info-card tenant-public-info-card-simple">
+          <div className="tenant-public-info-icon" aria-hidden="true">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path
+                d="M6.5 6.5H17.5M6.5 12H17.5M6.5 17.5H12.5M5 3.5H19C19.83 3.5 20.5 4.17 20.5 5V19C20.5 19.83 19.83 20.5 19 20.5H5C4.17 20.5 3.5 19.83 3.5 19V5C3.5 4.17 4.17 3.5 5 3.5Z"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
+          </div>
           <strong>Confirmacion simple</strong>
           <p className="muted">Revisas tu seleccion y confirmas con tranquilidad.</p>
         </article>
