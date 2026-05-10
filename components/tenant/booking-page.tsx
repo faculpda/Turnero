@@ -107,14 +107,40 @@ export function TenantBookingPage({
                   </div>
                 ) : null}
                 <div className="slot-list">
-                  {entry.slots.slice(0, 4).map((slot) => (
-                    <div className="slot" key={slot.startsAt}>
-                      {slot.label}
+                  {entry.providerAvailabilities.map((providerAvailability) => (
+                    <div
+                      className="service-provider-availability"
+                      key={providerAvailability.providerId ?? providerAvailability.providerName}
+                    >
+                      <div className="service-provider-header">
+                        <strong>{providerAvailability.providerName}</strong>
+                        <span
+                          className="badge pending"
+                          style={
+                            providerAvailability.providerColor
+                              ? {
+                                  borderColor: `${providerAvailability.providerColor}33`,
+                                  backgroundColor: `${providerAvailability.providerColor}12`,
+                                  color: providerAvailability.providerColor,
+                                }
+                              : undefined
+                          }
+                        >
+                          {providerAvailability.slots.length} slots
+                        </span>
+                      </div>
+                      <div className="slot-list">
+                        {providerAvailability.slots.slice(0, 4).map((slot) => (
+                          <div className="slot" key={slot.startsAt}>
+                            {slot.label}
+                          </div>
+                        ))}
+                        {providerAvailability.slots.length === 0 ? (
+                          <div className="slot muted">Sin horarios disponibles</div>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
-                  {entry.slots.length === 0 ? (
-                    <div className="slot muted">Sin horarios disponibles</div>
-                  ) : null}
                 </div>
               </div>
             ))}

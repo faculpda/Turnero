@@ -128,6 +128,19 @@ const dashboardTenantInclude = {
 
 const bookingTenantInclude = {
   ...publicTenantInclude,
+  providers: {
+    where: {
+      isActive: true,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      color: true,
+    },
+  },
   blockedTimeSlots: {
     select: {
       startsAt: true,
@@ -137,6 +150,7 @@ const bookingTenantInclude = {
   appointments: {
     where: buildAppointmentActiveFilter(),
     select: {
+      providerId: true,
       startsAt: true,
       endsAt: true,
       status: true,
@@ -621,16 +635,22 @@ export async function getTenantBookingData(
         profile: fallbackPublicProfile,
         availabilityByService: fallbackPublicProfile.services.map((service) => ({
           service,
-          slots: fallbackPublicProfile.nextSlots.map((slot, index) => ({
-            startsAt: `mock-${service.id}-${index}`,
-            endsAt: `mock-${service.id}-${index + 1}`,
-            label: slot,
+          providerAvailabilities: fallbackProviders.map((provider) => ({
+            providerId: provider.id,
+            providerName: provider.name,
+            providerColor: provider.color,
+            slots: fallbackPublicProfile.nextSlots.map((slot, index) => ({
+              startsAt: `mock-${service.id}-${provider.id}-${index}`,
+              endsAt: `mock-${service.id}-${provider.id}-${index + 1}`,
+              label: slot,
+            })),
           })),
         })),
       };
     }
 
     const profile = mapPublicTenant(tenant);
+    const activeProviders = tenant.providers;
     const availabilityByService = tenant.services.map((service) => ({
       service: {
         id: service.id,
@@ -646,12 +666,34 @@ export async function getTenantBookingData(
           altText: image.altText ?? undefined,
         })),
       },
-      slots: generateAvailableSlotsForService(
-        { durationMin: service.durationMin },
-        tenant.availability,
-        tenant.appointments,
-        tenant.blockedTimeSlots,
-      ),
+      providerAvailabilities:
+        activeProviders.length > 0
+          ? activeProviders.map((provider) => ({
+              providerId: provider.id,
+              providerName: provider.name,
+              providerColor: provider.color ?? undefined,
+              slots: generateAvailableSlotsForService(
+                { durationMin: service.durationMin },
+                tenant.availability,
+                tenant.appointments.filter(
+                  (appointment) => appointment.providerId === provider.id,
+                ),
+                tenant.blockedTimeSlots,
+              ),
+            }))
+          : [
+              {
+                providerId: undefined,
+                providerName: "Agenda general",
+                providerColor: undefined,
+                slots: generateAvailableSlotsForService(
+                  { durationMin: service.durationMin },
+                  tenant.availability,
+                  tenant.appointments,
+                  tenant.blockedTimeSlots,
+                ),
+              },
+            ],
     }));
 
     return {
@@ -667,10 +709,15 @@ export async function getTenantBookingData(
       profile: fallbackPublicProfile,
       availabilityByService: fallbackPublicProfile.services.map((service) => ({
         service,
-        slots: fallbackPublicProfile.nextSlots.map((slot, index) => ({
-          startsAt: `mock-${service.id}-${index}`,
-          endsAt: `mock-${service.id}-${index + 1}`,
-          label: slot,
+        providerAvailabilities: fallbackProviders.map((provider) => ({
+          providerId: provider.id,
+          providerName: provider.name,
+          providerColor: provider.color,
+          slots: fallbackPublicProfile.nextSlots.map((slot, index) => ({
+            startsAt: `mock-${service.id}-${provider.id}-${index}`,
+            endsAt: `mock-${service.id}-${provider.id}-${index + 1}`,
+            label: slot,
+          })),
         })),
       })),
     };

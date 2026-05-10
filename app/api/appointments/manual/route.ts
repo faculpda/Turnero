@@ -72,10 +72,19 @@ export async function POST(request: Request) {
             appointments: {
               where: buildAppointmentActiveFilter(),
               select: {
+                providerId: true,
                 startsAt: true,
                 endsAt: true,
                 status: true,
                 paymentExpiresAt: true,
+              },
+            },
+            providers: {
+              where: {
+                isActive: true,
+              },
+              select: {
+                id: true,
               },
             },
           },
@@ -97,11 +106,26 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      payload.providerId &&
+      !service.tenant.providers.some((provider) => provider.id === payload.providerId)
+    ) {
+      return NextResponse.json(
+        { error: "El prestador seleccionado no pertenece a este tenant." },
+        { status: 400 },
+      );
+    }
+
     const endsAt = new Date(startsAt.getTime() + service.durationMin * 60 * 1000);
+    const providerAppointments = payload.providerId
+      ? service.tenant.appointments.filter(
+          (appointment) => appointment.providerId === payload.providerId,
+        )
+      : service.tenant.appointments;
     const availableSlots = generateAvailableSlotsForService(
       { durationMin: service.durationMin },
       service.tenant.availability,
-      service.tenant.appointments,
+      providerAppointments,
       service.tenant.blockedTimeSlots,
       500,
       21,

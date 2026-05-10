@@ -22,6 +22,7 @@ import { prisma } from "@/lib/prisma";
 const createAppointmentSchema = z.object({
   tenantSlug: z.string().min(1),
   serviceId: z.string().min(1),
+  providerId: z.string().min(1).optional(),
   startsAt: z.string().datetime(),
   redirectTo: z.string().min(1).optional(),
 });
@@ -116,6 +117,7 @@ export async function POST(request: Request) {
                     appointments: {
                       where: buildAppointmentActiveFilter(now),
                       select: {
+                        providerId: true,
                         startsAt: true,
                         endsAt: true,
                         status: true,
@@ -126,6 +128,14 @@ export async function POST(request: Request) {
                       select: {
                         startsAt: true,
                         endsAt: true,
+                      },
+                    },
+                    providers: {
+                      where: {
+                        isActive: true,
+                      },
+                      select: {
+                        id: true,
                       },
                     },
                   },
@@ -154,6 +164,16 @@ export async function POST(request: Request) {
               };
             }
 
+            if (
+              payload.providerId &&
+              !service.tenant.providers.some((provider) => provider.id === payload.providerId)
+            ) {
+              return {
+                error: "El prestador seleccionado no pertenece a este tenant.",
+                status: 400,
+              };
+            }
+
             const customerProfile = await tx.customerProfile.findUnique({
               where: {
                 userId_tenantId: {
@@ -171,10 +191,15 @@ export async function POST(request: Request) {
             }
 
             const endsAt = new Date(startsAt.getTime() + service.durationMin * 60 * 1000);
+            const providerAppointments = payload.providerId
+              ? service.tenant.appointments.filter(
+                  (appointment) => appointment.providerId === payload.providerId,
+                )
+              : service.tenant.appointments;
             const availableSlots = generateAvailableSlotsForService(
               { durationMin: service.durationMin },
               service.tenant.availability,
-              service.tenant.appointments,
+              providerAppointments,
               service.tenant.blockedTimeSlots,
               500,
               21,
@@ -199,6 +224,7 @@ export async function POST(request: Request) {
                 endsAt: {
                   gt: startsAt,
                 },
+                ...(payload.providerId ? { providerId: payload.providerId } : {}),
                 ...buildAppointmentActiveFilter(now),
               },
               select: {
@@ -219,6 +245,7 @@ export async function POST(request: Request) {
               data: {
                 tenantId: service.tenantId,
                 serviceId: service.id,
+                providerId: payload.providerId || null,
                 customerProfileId: customerProfile.id,
                 startsAt,
                 endsAt,
@@ -485,10 +512,19 @@ export async function PATCH(request: Request) {
               where: buildAppointmentActiveFilter(),
               select: {
                 id: true,
+                providerId: true,
                 startsAt: true,
                 endsAt: true,
                 status: true,
                 paymentExpiresAt: true,
+              },
+            },
+            providers: {
+              where: {
+                isActive: true,
+              },
+              select: {
+                id: true,
               },
             },
           },
@@ -522,15 +558,27 @@ export async function PATCH(request: Request) {
 
     let nextStartsAt = appointment.startsAt;
     let nextEndsAt = appointment.endsAt;
+    const nextProviderId =
+      payload.providerId !== undefined ? payload.providerId || null : appointment.providerId;
 
-    if (payload.startsAt) {
-      const startsAt = new Date(payload.startsAt);
+    if (
+      nextProviderId &&
+      !appointment.tenant.providers.some((provider) => provider.id === nextProviderId)
+    ) {
+      return NextResponse.json(
+        { error: "El prestador seleccionado no pertenece a este tenant." },
+        { status: 400 },
+      );
+    }
+
+    if (payload.startsAt !== undefined || payload.providerId !== undefined) {
+      const startsAt = payload.startsAt ? new Date(payload.startsAt) : appointment.startsAt;
 
       if (Number.isNaN(startsAt.getTime())) {
         return NextResponse.json({ error: "La nueva fecha no es valida." }, { status: 400 });
       }
 
-      if (startsAt <= new Date()) {
+      if (payload.startsAt && startsAt <= new Date()) {
         return NextResponse.json(
           { error: "No puedes reprogramar un turno a una fecha pasada." },
           { status: 400 },
@@ -538,9 +586,17 @@ export async function PATCH(request: Request) {
       }
 
       const endsAt = new Date(startsAt.getTime() + appointment.service.durationMin * 60 * 1000);
-      const otherAppointments = appointment.tenant.appointments.filter(
-        (tenantAppointment) => tenantAppointment.id !== appointment.id,
-      );
+      const otherAppointments = appointment.tenant.appointments.filter((tenantAppointment) => {
+        if (tenantAppointment.id === appointment.id) {
+          return false;
+        }
+
+        if (nextProviderId) {
+          return tenantAppointment.providerId === nextProviderId;
+        }
+
+        return true;
+      });
       const availableSlots = generateAvailableSlotsForService(
         { durationMin: appointment.service.durationMin },
         appointment.tenant.availability,
@@ -572,6 +628,7 @@ export async function PATCH(request: Request) {
           endsAt: {
             gt: startsAt,
           },
+          ...(nextProviderId ? { providerId: nextProviderId } : {}),
           ...buildAppointmentActiveFilter(),
         },
         select: {
@@ -598,7 +655,7 @@ export async function PATCH(request: Request) {
         startsAt: nextStartsAt,
         endsAt: nextEndsAt,
         notes: payload.notes !== undefined ? payload.notes.trim() || null : appointment.notes,
-        providerId: payload.providerId !== undefined ? payload.providerId : appointment.providerId,
+        providerId: nextProviderId,
         status: payload.status ?? appointment.status,
         paymentExpiresAt:
           payload.status === "CANCELLED" ? null : appointment.paymentExpiresAt,

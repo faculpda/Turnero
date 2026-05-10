@@ -208,7 +208,12 @@ export type BookingSlot = {
 
 export type ServiceAvailability = {
   service: ServiceSummary;
-  slots: BookingSlot[];
+  providerAvailabilities: Array<{
+    providerId?: string;
+    providerName: string;
+    providerColor?: string;
+    slots: BookingSlot[];
+  }>;
 };
 
 export type TenantDashboardData = {
