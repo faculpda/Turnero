@@ -1,5 +1,6 @@
 import { AccessDenied } from "@/components/auth/access-denied";
 import { AddServiceForm } from "@/components/tenant/add-service-form";
+import { CustomersPanel } from "@/components/tenant/customers-panel";
 import { PaymentSettingsForm } from "@/components/tenant/payment-settings-form";
 import { ProvidersPanel } from "@/components/tenant/providers-panel";
 import { ServiceEditorCard } from "@/components/tenant/service-editor-card";
@@ -45,6 +46,81 @@ export default async function TenantDashboardPage({
   const reservasActivas = appointments.filter(
     (appointment) => appointment.status === "PENDING" || appointment.status === "CONFIRMED",
   ).length;
+  const customersMap = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      email: string;
+      phone?: string;
+      totalAppointments: number;
+      activeAppointments: number;
+      pendingPayments: number;
+      lastServiceName?: string;
+      nextAppointment?: string;
+      history: Array<{
+        id: string;
+        serviceName: string;
+        startsAt: string;
+        status: string;
+        paymentStatus: string;
+      }>;
+    }
+  >();
+  const now = Date.now();
+
+  for (const appointment of appointments) {
+    const customerKey = appointment.customerEmail.toLowerCase();
+    const current =
+      customersMap.get(customerKey) ??
+      {
+        id: customerKey,
+        name: appointment.customerName,
+        email: appointment.customerEmail,
+        phone: appointment.customerPhone,
+        totalAppointments: 0,
+        activeAppointments: 0,
+        pendingPayments: 0,
+        lastServiceName: undefined,
+        nextAppointment: undefined,
+        history: [],
+      };
+
+    current.totalAppointments += 1;
+
+    if (appointment.status === "PENDING" || appointment.status === "CONFIRMED") {
+      current.activeAppointments += 1;
+    }
+
+    if (appointment.paymentStatus === "PENDING") {
+      current.pendingPayments += 1;
+    }
+
+    const appointmentTimestamp = new Date(appointment.startsAtIso).getTime();
+
+    if (appointmentTimestamp <= now) {
+      current.lastServiceName = appointment.serviceName;
+    } else if (!current.nextAppointment) {
+      current.nextAppointment = appointment.startsAt;
+    }
+
+    current.history.push({
+      id: appointment.id,
+      serviceName: appointment.serviceName,
+      startsAt: appointment.startsAt,
+      status: appointment.status,
+      paymentStatus: appointment.paymentStatus,
+    });
+
+    customersMap.set(customerKey, current);
+  }
+
+  const customers = Array.from(customersMap.values())
+    .map((customer) => ({
+      ...customer,
+      history: customer.history.slice(0, 6),
+    }))
+    .sort((a, b) => b.totalAppointments - a.totalAppointments);
 
   return (
     <TenantDashboardShell
@@ -60,6 +136,7 @@ export default async function TenantDashboardPage({
       agendaRulesCount={availabilityRules.filter((rule) => rule.isActive).length}
       appointments={appointments}
       blockedTimeSlots={blockedTimeSlots}
+      clientes={<CustomersPanel customers={customers} />}
       providers={providers}
       cobros={<PaymentSettingsForm tenant={profile} />}
       onlinePaymentServices={onlinePaymentServices}

@@ -9,6 +9,7 @@ import type { AppointmentSummary, TenantPublicProfile } from "@/lib/types";
 type DashboardSection =
   | "turnos"
   | "agenda"
+  | "clientes"
   | "prestadores"
   | "servicios"
   | "cobros";
@@ -44,6 +45,7 @@ type TenantDashboardShellProps = {
   activeProviders: number;
   agendaRulesCount: number;
   agenda: React.ReactNode;
+  clientes: React.ReactNode;
   prestadores: React.ReactNode;
   servicios: React.ReactNode;
   cobros: React.ReactNode;
@@ -52,6 +54,7 @@ type TenantDashboardShellProps = {
 const sectionTitles: Record<NavigationSection, string> = {
   turnos: "Turnos",
   agenda: "Agenda",
+  clientes: "Clientes",
   prestadores: "Prestadores",
   servicios: "Servicios",
   cobros: "Cobros",
@@ -61,6 +64,7 @@ const sectionTitles: Record<NavigationSection, string> = {
 const navigationItems: DashboardSection[] = [
   "turnos",
   "agenda",
+  "clientes",
   "prestadores",
   "servicios",
   "cobros",
@@ -100,6 +104,14 @@ function SidebarIcon({ section }: { section: NavigationSection }) {
           <circle cx="10" cy="7" r="3" />
           <path d="M20 19v-1a3 3 0 0 0-2-2.8" />
           <path d="M15 4.5a3 3 0 0 1 0 5.8" />
+        </svg>
+      );
+    case "clientes":
+      return (
+        <svg aria-hidden="true" {...commonProps}>
+          <path d="M6 19a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4" />
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 6.5h.01M19 6.5h.01" />
         </svg>
       );
     case "servicios":
@@ -142,6 +154,7 @@ export function TenantDashboardShell({
   activeProviders,
   agendaRulesCount,
   agenda,
+  clientes,
   prestadores,
   servicios,
   cobros,
@@ -173,6 +186,30 @@ export function TenantDashboardShell({
             tone: "amber",
           },
         ]
+      : activeSection === "clientes"
+        ? [
+            {
+              key: "clientes",
+              section: "clientes" as const,
+              label: "Clientes activos",
+              value: new Set(appointments.map((appointment) => appointment.customerEmail)).size,
+              tone: "violet",
+            },
+            {
+              key: "turnos",
+              section: "turnos" as const,
+              label: "Turnos activos",
+              value: reservasActivas,
+              tone: "blue",
+            },
+            {
+              key: "pendientes",
+              section: "cobros" as const,
+              label: "Pagos pendientes",
+              value: pagosPendientes,
+              tone: "amber",
+            },
+          ]
       : activeSection === "prestadores"
         ? [
             {
@@ -357,6 +394,7 @@ export function TenantDashboardShell({
             />
           ) : null}
           {activeSection === "agenda" ? agenda : null}
+          {activeSection === "clientes" ? clientes : null}
           {activeSection === "prestadores" ? prestadores : null}
           {activeSection === "servicios" ? servicios : null}
           {activeSection === "cobros" ? cobros : null}

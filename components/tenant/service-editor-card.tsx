@@ -147,7 +147,7 @@ export function ServiceEditorCard({ tenantSlug, service }: ServiceEditorCardProp
     >
       <div className="service-editor-summary">
         <div className="service-editor-summary-main">
-          <div className="header-row">
+          <div className="header-row service-editor-header-row">
             <div>
               <div className="service-chip-header">
                 <h3>{service.name}</h3>
@@ -160,7 +160,7 @@ export function ServiceEditorCard({ tenantSlug, service }: ServiceEditorCardProp
               </p>
             </div>
             <button
-              className="button secondary"
+              className="button secondary service-editor-toggle"
               onClick={() => setIsOpen((value) => !value)}
               type="button"
             >
