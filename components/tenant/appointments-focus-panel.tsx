@@ -195,6 +195,8 @@ export function AppointmentsFocusPanel({
   const [manualPaymentStatus, setManualPaymentStatus] = useState<
     "NOT_REQUIRED" | "PENDING" | "APPROVED"
   >("NOT_REQUIRED");
+  const [showGuide, setShowGuide] = useState(true);
+  const [showMobileControls, setShowMobileControls] = useState(false);
 
   const turnosOperativos = useMemo(
     () =>
@@ -455,23 +457,52 @@ export function AppointmentsFocusPanel({
         </button>
       </div>
 
-      <div className="dashboard-guided-steps">
-        <article className="dashboard-guided-step">
-          <span className="dashboard-detail-label">Paso 1</span>
-          <strong>Revisa la fecha</strong>
-          <p className="muted">Empieza por hoy o cambia entre dia y semana segun lo que necesites ver.</p>
-        </article>
-        <article className="dashboard-guided-step">
-          <span className="dashboard-detail-label">Paso 2</span>
-          <strong>Filtra solo si hace falta</strong>
-          <p className="muted">Busca por cliente, servicio, pago o prestador para acotar la agenda.</p>
-        </article>
-        <article className="dashboard-guided-step">
-          <span className="dashboard-detail-label">Paso 3</span>
-          <strong>Toca el turno para actuar</strong>
-          <p className="muted">Desde cada reserva puedes confirmar, completar, cancelar o reprogramar.</p>
-        </article>
-      </div>
+      {showGuide ? (
+        <div className="dashboard-guided-shell">
+          <div className="dashboard-guided-header">
+            <div className="dashboard-guided-header-copy">
+              <span className="badge pending">Guia opcional</span>
+              <p className="muted">
+                Estos pasos son solo una ayuda rapida. Puedes cerrarlos cuando ya no los necesites.
+              </p>
+            </div>
+            <button
+              className="button secondary dashboard-guide-dismiss"
+              onClick={() => setShowGuide(false)}
+              type="button"
+            >
+              Ocultar ayuda
+            </button>
+          </div>
+          <div className="dashboard-guided-steps">
+            <article className="dashboard-guided-step">
+              <span className="dashboard-detail-label">Paso 1</span>
+              <strong>Revisa la fecha</strong>
+              <p className="muted">Empieza por hoy o cambia entre dia y semana segun lo que necesites ver.</p>
+            </article>
+            <article className="dashboard-guided-step">
+              <span className="dashboard-detail-label">Paso 2</span>
+              <strong>Filtra solo si hace falta</strong>
+              <p className="muted">Busca por cliente, servicio, pago o prestador para acotar la agenda.</p>
+            </article>
+            <article className="dashboard-guided-step">
+              <span className="dashboard-detail-label">Paso 3</span>
+              <strong>Toca el turno para actuar</strong>
+              <p className="muted">Desde cada reserva puedes confirmar, completar, cancelar o reprogramar.</p>
+            </article>
+          </div>
+        </div>
+      ) : (
+        <div className="dashboard-guide-restore">
+          <button
+            className="button secondary dashboard-guide-restore-button"
+            onClick={() => setShowGuide(true)}
+            type="button"
+          >
+            Mostrar ayuda rapida
+          </button>
+        </div>
+      )}
 
       <div className="dashboard-kpi-grid dashboard-turnos-kpi-grid">
         <article className="metric dashboard-kpi-card dashboard-kpi-card-highlight dashboard-kpi-card-violet">
@@ -498,7 +529,7 @@ export function AppointmentsFocusPanel({
             <span className="muted">Vista principal de turnos y bloqueos del tenant.</span>
           </div>
 
-          <div className="dashboard-calendar-toolbar-actions">
+          <div className="dashboard-calendar-toolbar-actions dashboard-desktop-controls">
             <div className="dashboard-filter-group" role="tablist" aria-label="Vista calendario">
               {(["DAY", "WEEK"] as CalendarView[]).map((option) => (
                 <button
@@ -535,7 +566,113 @@ export function AppointmentsFocusPanel({
           </div>
         </div>
 
-        <div className="dashboard-calendar-filters">
+        <div className="dashboard-mobile-controls">
+          <button
+            className="button secondary dashboard-mobile-controls-toggle"
+            onClick={() => setShowMobileControls((current) => !current)}
+            type="button"
+          >
+            {showMobileControls ? "Ocultar filtros y navegacion" : "Ver filtros y navegacion"}
+          </button>
+          {showMobileControls ? (
+            <div className="dashboard-mobile-controls-panel dashboard-hierarchy-subpanel">
+              <div className="dashboard-calendar-toolbar-actions dashboard-mobile-controls-actions">
+                <div className="dashboard-filter-group" role="tablist" aria-label="Vista calendario">
+                  {(["DAY", "WEEK"] as CalendarView[]).map((option) => (
+                    <button
+                      key={option}
+                      className={`dashboard-filter-chip ${view === option ? "active" : ""}`}
+                      onClick={() => setView(option)}
+                      type="button"
+                    >
+                      {option === "DAY" ? "Dia" : "Semana"}
+                    </button>
+                  ))}
+                </div>
+                <div className="dashboard-week-nav">
+                  <button
+                    onClick={() =>
+                      setWeekStart((current) => addDays(current, view === "DAY" ? -1 : -7))
+                    }
+                    type="button"
+                  >
+                    Anterior
+                  </button>
+                  <button onClick={() => setWeekStart(startOfDay(referenceDate))} type="button">
+                    Hoy
+                  </button>
+                  <button
+                    onClick={() =>
+                      setWeekStart((current) => addDays(current, view === "DAY" ? 1 : 7))
+                    }
+                    type="button"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+
+              <div className="dashboard-calendar-filters dashboard-mobile-filter-grid">
+                <input
+                  className="dashboard-modal-input"
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Buscar por nombre, mail o telefono"
+                  value={searchQuery}
+                />
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) => setServiceFilter(event.target.value)}
+                  value={serviceFilter}
+                >
+                  <option value="ALL">Todos los servicios</option>
+                  {serviceOptions.map(([serviceId, serviceName]) => (
+                    <option key={serviceId} value={serviceId}>
+                      {serviceName}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) => setFilter(event.target.value as AppointmentFilter)}
+                  value={filter}
+                >
+                  {(["ALL", "CONFIRMED", "PENDING"] as AppointmentFilter[]).map((option) => (
+                    <option key={option} value={option}>
+                      {filterLabels[option]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) => setPaymentFilter(event.target.value as PaymentFilter)}
+                  value={paymentFilter}
+                >
+                  {(
+                    ["ALL", "NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED", "CANCELLED"] as PaymentFilter[]
+                  ).map((option) => (
+                    <option key={option} value={option}>
+                      {paymentFilterLabels[option]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="dashboard-modal-input"
+                  onChange={(event) => setProviderFilter(event.target.value)}
+                  value={providerFilter}
+                >
+                  <option value="ALL">Todos los prestadores</option>
+                  {providers.filter((provider) => provider.isActive).map((provider) => (
+                    <option key={provider.id} value={provider.id}>
+                      {provider.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="dashboard-calendar-filters dashboard-desktop-controls">
           <input
             className="dashboard-modal-input"
             onChange={(event) => setSearchQuery(event.target.value)}

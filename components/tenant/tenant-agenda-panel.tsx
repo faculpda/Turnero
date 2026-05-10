@@ -106,6 +106,7 @@ export function TenantAgendaPanel({
   const [reason, setReason] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [showGuide, setShowGuide] = useState(true);
   const [rules, setRules] = useState<AvailabilityRuleSummary[]>(
     availabilityRules.length > 0 ? availabilityRules.map(toLocalRule) : dayOptions.map((option) => ({ ...emptyRule(), dayOfWeek: option.value })),
   );
@@ -367,23 +368,52 @@ export function TenantAgendaPanel({
         </div>
       </div>
 
-      <div className="dashboard-guided-steps">
-        <article className="dashboard-guided-step">
-          <span className="dashboard-detail-label">Paso 1</span>
-          <strong>Define el horario general</strong>
-          <p className="muted">Carga una base comun para la semana y despues ajusta casos puntuales.</p>
-        </article>
-        <article className="dashboard-guided-step">
-          <span className="dashboard-detail-label">Paso 2</span>
-          <strong>Corrige dia por dia si hace falta</strong>
-          <p className="muted">Puedes agregar o quitar franjas individuales sin rehacer toda la agenda.</p>
-        </article>
-        <article className="dashboard-guided-step">
-          <span className="dashboard-detail-label">Paso 3</span>
-          <strong>Guarda y agrega bloqueos</strong>
-          <p className="muted">Al final revisa pausas, ausencias o feriados para no mostrar horarios incorrectos.</p>
-        </article>
-      </div>
+      {showGuide ? (
+        <div className="dashboard-guided-shell">
+          <div className="dashboard-guided-header">
+            <div className="dashboard-guided-header-copy">
+              <span className="badge pending">Guia opcional</span>
+              <p className="muted">
+                Estos pasos son solo una referencia rapida para organizar la agenda.
+              </p>
+            </div>
+            <button
+              className="button secondary dashboard-guide-dismiss"
+              onClick={() => setShowGuide(false)}
+              type="button"
+            >
+              Ocultar ayuda
+            </button>
+          </div>
+          <div className="dashboard-guided-steps">
+            <article className="dashboard-guided-step">
+              <span className="dashboard-detail-label">Paso 1</span>
+              <strong>Define el horario general</strong>
+              <p className="muted">Carga una base comun para la semana y despues ajusta casos puntuales.</p>
+            </article>
+            <article className="dashboard-guided-step">
+              <span className="dashboard-detail-label">Paso 2</span>
+              <strong>Corrige dia por dia si hace falta</strong>
+              <p className="muted">Puedes agregar o quitar franjas individuales sin rehacer toda la agenda.</p>
+            </article>
+            <article className="dashboard-guided-step">
+              <span className="dashboard-detail-label">Paso 3</span>
+              <strong>Guarda y agrega bloqueos</strong>
+              <p className="muted">Al final revisa pausas, ausencias o feriados para no mostrar horarios incorrectos.</p>
+            </article>
+          </div>
+        </div>
+      ) : (
+        <div className="dashboard-guide-restore">
+          <button
+            className="button secondary dashboard-guide-restore-button"
+            onClick={() => setShowGuide(true)}
+            type="button"
+          >
+            Mostrar ayuda rapida
+          </button>
+        </div>
+      )}
 
       <section className="dashboard-split-grid">
         <article className="panel dashboard-main-card dashboard-compact-card">

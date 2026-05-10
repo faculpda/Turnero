@@ -1020,6 +1020,27 @@ p {
   gap: 12px;
 }
 
+.dashboard-guided-shell {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-guided-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-guided-header-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-guided-header-copy .muted {
+  margin: 0;
+}
+
 .dashboard-guided-step {
   display: grid;
   gap: 8px;
@@ -1036,6 +1057,16 @@ p {
 
 .dashboard-guided-step p {
   margin: 0;
+}
+
+.dashboard-guide-dismiss,
+.dashboard-guide-restore-button {
+  white-space: nowrap;
+}
+
+.dashboard-guide-restore {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .dashboard-turnos-kpi-grid {
@@ -1069,6 +1100,16 @@ p {
   justify-content: flex-end;
   gap: 12px;
   align-items: center;
+}
+
+.dashboard-mobile-controls {
+  display: none;
+}
+
+.dashboard-mobile-controls-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
 }
 
 .dashboard-calendar-filters {
@@ -4326,6 +4367,17 @@ th:last-child {
     border-radius: 18px;
   }
 
+  .dashboard-guided-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-guide-dismiss,
+  .dashboard-guide-restore-button {
+    width: 100%;
+    justify-content: center;
+  }
+
   .dashboard-section-header {
     gap: 10px;
   }
@@ -4384,6 +4436,29 @@ th:last-child {
   }
 
   .dashboard-calendar-toolbar-actions {
+    gap: 10px;
+  }
+
+  .dashboard-desktop-controls {
+    display: none !important;
+  }
+
+  .dashboard-mobile-controls {
+    display: grid;
+    gap: 10px;
+  }
+
+  .dashboard-mobile-controls-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-mobile-controls-actions {
+    display: grid;
+    gap: 10px;
+  }
+
+  .dashboard-mobile-filter-grid {
     gap: 10px;
   }
 
