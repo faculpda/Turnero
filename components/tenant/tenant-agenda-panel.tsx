@@ -368,7 +368,7 @@ export function TenantAgendaPanel({
       </div>
 
       <section className="dashboard-split-grid">
-        <article className="panel dashboard-main-card dashboard-compact-card dashboard-agenda-overview-card">
+        <article className="panel dashboard-main-card dashboard-compact-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Horario laboral</h2>
@@ -376,17 +376,17 @@ export function TenantAgendaPanel({
             </div>
           </div>
           <div className="dashboard-agenda-metrics">
-            <div className="dashboard-agenda-metric dashboard-agenda-metric-violet">
+            <div className="dashboard-agenda-metric">
               <span className="dashboard-detail-label">Dias con agenda</span>
               <strong>{activeDaysCount}</strong>
               <p className="muted">Se muestran solo los dias con atencion activa.</p>
             </div>
-            <div className="dashboard-agenda-metric dashboard-agenda-metric-blue">
+            <div className="dashboard-agenda-metric">
               <span className="dashboard-detail-label">Franjas activas</span>
               <strong>{activeRules.length}</strong>
               <p className="muted">Cada franja define horas visibles para reservar.</p>
             </div>
-            <div className="dashboard-agenda-metric dashboard-agenda-metric-amber">
+            <div className="dashboard-agenda-metric">
               <span className="dashboard-detail-label">Prestadores disponibles</span>
               <strong>{activeProviders}</strong>
               <p className="muted">Profesionales hoy listos para tomar agenda.</p>
@@ -394,7 +394,7 @@ export function TenantAgendaPanel({
           </div>
         </article>
 
-        <article className="panel dashboard-side-card dashboard-compact-card dashboard-agenda-summary-card">
+        <article className="panel dashboard-side-card dashboard-compact-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Resumen de agenda</h2>
@@ -423,7 +423,7 @@ export function TenantAgendaPanel({
       </section>
 
       <section className="dashboard-split-grid">
-        <article className="panel dashboard-main-card dashboard-agenda-editor-card">
+        <article className="panel dashboard-main-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Modificar horario</h2>
@@ -451,7 +451,7 @@ export function TenantAgendaPanel({
 
             <div className="dashboard-schedule-general-list">
               {generalSchedule.map((generalRule) => (
-                <div className="dashboard-schedule-item dashboard-schedule-item-general" key={generalRule.clientId}>
+                <div className="dashboard-schedule-item" key={generalRule.clientId}>
                   <div className="dashboard-schedule-row dashboard-schedule-row-general">
                     <label className="dashboard-field">
                       <span className="dashboard-detail-label">Desde</span>
@@ -536,7 +536,7 @@ export function TenantAgendaPanel({
                       const ruleKey = getRuleKey(rule);
 
                       return (
-                        <div className="dashboard-schedule-item dashboard-schedule-item-day" key={ruleKey}>
+                        <div className="dashboard-schedule-item" key={ruleKey}>
                           <div className="dashboard-schedule-row dashboard-schedule-row-compact">
                             <label className="dashboard-field">
                               <span className="dashboard-detail-label">Desde</span>
@@ -631,7 +631,7 @@ export function TenantAgendaPanel({
           </div>
         </article>
 
-        <article className="panel dashboard-side-card dashboard-agenda-visibility-card">
+        <article className="panel dashboard-side-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Semana visible</h2>
@@ -661,7 +661,7 @@ export function TenantAgendaPanel({
       </section>
 
       <section className="dashboard-split-grid">
-        <article className="panel dashboard-main-card dashboard-agenda-block-form-card">
+        <article className="panel dashboard-main-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Agregar bloqueos de horario</h2>
@@ -711,7 +711,7 @@ export function TenantAgendaPanel({
           </div>
         </article>
 
-        <article className="panel dashboard-side-card dashboard-agenda-block-list-card">
+        <article className="panel dashboard-side-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Bloqueos actuales</h2>
