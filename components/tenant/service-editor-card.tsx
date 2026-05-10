@@ -140,39 +140,57 @@ export function ServiceEditorCard({ tenantSlug, service }: ServiceEditorCardProp
   }
 
   return (
-    <article className="panel service-editor-card dashboard-hierarchy-shell">
-      <div className="header-row">
-        <div>
-          <div className="service-chip-header">
-            <h3>{service.name}</h3>
-            <span className={`badge ${(service.isActive ?? true) ? "approved" : "cancelled"}`}>
-              {(service.isActive ?? true) ? "Activo" : "Inactivo"}
-            </span>
+    <article
+      className={`panel service-editor-card dashboard-hierarchy-shell ${
+        isOpen ? "service-editor-card-open" : ""
+      }`}
+    >
+      <div className="service-editor-summary">
+        <div className="service-editor-summary-main">
+          <div className="header-row">
+            <div>
+              <div className="service-chip-header">
+                <h3>{service.name}</h3>
+                <span className={`badge ${(service.isActive ?? true) ? "approved" : "cancelled"}`}>
+                  {(service.isActive ?? true) ? "Activo" : "Inactivo"}
+                </span>
+              </div>
+              <p className="muted">
+                {service.durationMin} min - {service.priceLabel}
+              </p>
+            </div>
+            <button
+              className="button secondary"
+              onClick={() => setIsOpen((value) => !value)}
+              type="button"
+            >
+              {isOpen ? "Cerrar" : "Editar servicio"}
+            </button>
           </div>
-          <p className="muted">
-            {service.durationMin} min - {service.priceLabel}
-          </p>
+
+          {service.description ? <p className="muted">{service.description}</p> : null}
         </div>
-        <button
-          className="button secondary"
-          onClick={() => setIsOpen((value) => !value)}
-          type="button"
-        >
-          {isOpen ? "Cerrar" : "Editar servicio"}
-        </button>
+
+        {service.images && service.images.length > 0 ? (
+          <div className="service-editor-hero-media">
+            <img
+              alt={service.images[0].altText ?? service.name}
+              className="service-image-thumb service-image-thumb-hero"
+              src={service.images[0].url}
+            />
+          </div>
+        ) : (
+          <div className="service-editor-hero-placeholder">
+            <span className="dashboard-detail-label">Servicio</span>
+            <strong>{service.name}</strong>
+          </div>
+        )}
       </div>
 
-      {service.description ? <p className="muted">{service.description}</p> : null}
-
       {service.images && service.images.length > 0 ? (
-        <div className="service-image-grid">
-          {service.images.map((image) => (
-            <img
-              alt={image.altText ?? service.name}
-              className="service-image-thumb"
-              key={image.id}
-              src={image.url}
-            />
+        <div className="service-image-grid service-image-grid-secondary">
+          {service.images.slice(1).map((image) => (
+            <img alt={image.altText ?? service.name} className="service-image-thumb" key={image.id} src={image.url} />
           ))}
         </div>
       ) : null}

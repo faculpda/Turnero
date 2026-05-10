@@ -2162,6 +2162,10 @@ th:last-child {
   width: 100%;
 }
 
+.service-editor-card-open {
+  grid-column: 1 / -1;
+}
+
 .service-editor-form {
   margin-top: 8px;
 }
@@ -2176,6 +2180,47 @@ th:last-child {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-top: 10px;
+}
+
+.service-image-grid-secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.service-editor-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.service-editor-summary-main {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.service-editor-hero-media,
+.service-editor-hero-placeholder {
+  display: grid;
+  align-content: stretch;
+  min-height: 220px;
+  border: 1px solid #e2e4e8;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fbfcfd, #f6f7f9);
+  overflow: hidden;
+}
+
+.service-editor-hero-placeholder {
+  gap: 8px;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.service-editor-hero-placeholder strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
 }
 
 .service-image-editor-grid {
@@ -2204,6 +2249,13 @@ th:last-child {
   height: 148px;
 }
 
+.service-image-thumb-hero {
+  height: 100%;
+  min-height: 220px;
+  border: 0;
+  border-radius: 0;
+}
+
 .service-inline-image {
   height: 120px;
   margin-bottom: 12px;
@@ -2221,6 +2273,11 @@ th:last-child {
 .service-admin {
   display: grid;
   gap: 14px;
+}
+
+.service-list-stack {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
 }
 
 .panel-pestanas {
@@ -3811,6 +3868,7 @@ th:last-child {
   .landing-editorial-grid,
   .landing-value-strip,
   .landing-outcomes-grid,
+  .service-editor-summary,
   .site-live-builder,
   .site-block-library,
   .site-block-columns {
@@ -3837,6 +3895,11 @@ th:last-child {
   .dashboard-inline-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .service-list-stack,
+  .service-image-grid-secondary {
+    grid-template-columns: 1fr;
   }
 
   .site-builder-page-topbar,
