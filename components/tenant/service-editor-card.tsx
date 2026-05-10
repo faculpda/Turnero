@@ -140,7 +140,7 @@ export function ServiceEditorCard({ tenantSlug, service }: ServiceEditorCardProp
   }
 
   return (
-    <article className="panel service-editor-card">
+    <article className="panel service-editor-card dashboard-hierarchy-shell">
       <div className="header-row">
         <div>
           <div className="service-chip-header">
@@ -178,7 +178,7 @@ export function ServiceEditorCard({ tenantSlug, service }: ServiceEditorCardProp
       ) : null}
 
       {isOpen ? (
-        <form className="service-form-grid service-editor-form" onSubmit={onSubmit}>
+        <form className="service-form-grid service-editor-form dashboard-hierarchy-subpanel" onSubmit={onSubmit}>
           <label className="field">
             <span>Titulo</span>
             <input onChange={(event) => setTitle(event.target.value)} required value={title} />
@@ -234,7 +234,10 @@ export function ServiceEditorCard({ tenantSlug, service }: ServiceEditorCardProp
             </p>
             <div className="service-image-editor-grid">
               {previewImages.map((image, index) => (
-                <div className="panel subtle-panel service-image-slot" key={`${service.id}-${index}`}>
+                <div
+                  className="panel subtle-panel service-image-slot dashboard-hierarchy-item"
+                  key={`${service.id}-${index}`}
+                >
                   <strong>Imagen {index + 1}</strong>
                   {image.previewUrl ? (
                     <img

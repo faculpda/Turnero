@@ -60,9 +60,9 @@ export function AddServiceForm({ tenantSlug }: AddServiceFormProps) {
       </button>
 
       {isOpen ? (
-        <form className="panel service-form" onSubmit={onSubmit}>
+        <form className="panel service-form dashboard-hierarchy-shell" onSubmit={onSubmit}>
           <div className="service-form-grid">
-            <div className="panel subtle-panel field-wide">
+            <div className="panel subtle-panel field-wide dashboard-hierarchy-item">
               <strong>Cobro online del servicio</strong>
               <p className="muted">
                 Si el tenant tiene Mercado Pago activo y este servicio tiene un valor mayor a

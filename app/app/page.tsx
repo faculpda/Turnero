@@ -78,7 +78,7 @@ export default async function TenantDashboardPage({
             </div>
             <AddServiceForm tenantSlug={tenantSlug} />
           </div>
-          <div className="service-list service-list-stack">
+          <div className="service-list service-list-stack dashboard-hierarchy-list">
             {profile.services.map((service) => (
               <ServiceEditorCard key={service.id} service={service} tenantSlug={tenantSlug} />
             ))}

@@ -56,7 +56,7 @@ export function PaymentSettingsForm({ tenant }: PaymentSettingsFormProps) {
 
   return (
     <section className="grid">
-      <article className="panel">
+      <article className="panel dashboard-hierarchy-shell">
         <div className="header-row">
           <div>
             <h2>Cobros con Mercado Pago</h2>
@@ -67,7 +67,7 @@ export function PaymentSettingsForm({ tenant }: PaymentSettingsFormProps) {
           </div>
         </div>
 
-        <form className="service-form-grid" onSubmit={onSubmit}>
+        <form className="service-form-grid dashboard-hierarchy-subpanel" onSubmit={onSubmit}>
           <label className="field field-wide">
             <span className="field-checkbox">
               <input
@@ -114,7 +114,7 @@ export function PaymentSettingsForm({ tenant }: PaymentSettingsFormProps) {
             />
           </label>
 
-          <div className="panel subtle-panel field-wide">
+          <div className="panel subtle-panel field-wide dashboard-hierarchy-item">
             <strong>Estado actual</strong>
             <p className="muted">
               Public Key: {tenant.paymentSettings?.mercadoPagoPublicKey ? "configurada" : "sin configurar"}

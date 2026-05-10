@@ -73,7 +73,7 @@ export function ProvidersPanel({ tenantSlug, providers }: ProvidersPanelProps) {
       </div>
 
       <section className="dashboard-split-grid">
-        <article className="panel dashboard-main-card">
+        <article className="panel dashboard-main-card dashboard-hierarchy-shell">
           <div className="dashboard-section-header">
             <div>
               <h2>Agregar prestador</h2>
@@ -83,7 +83,7 @@ export function ProvidersPanel({ tenantSlug, providers }: ProvidersPanelProps) {
             </div>
           </div>
 
-          <div className="dashboard-block-form">
+          <div className="dashboard-block-form dashboard-hierarchy-subpanel">
             <input
               className="dashboard-modal-input"
               onChange={(event) => setName(event.target.value)}
@@ -122,7 +122,7 @@ export function ProvidersPanel({ tenantSlug, providers }: ProvidersPanelProps) {
           </div>
         </article>
 
-        <article className="panel dashboard-side-card">
+        <article className="panel dashboard-side-card dashboard-hierarchy-shell dashboard-hierarchy-shell-soft">
           <div className="dashboard-section-header">
             <div>
               <h2>Prestadores activos</h2>
@@ -132,7 +132,7 @@ export function ProvidersPanel({ tenantSlug, providers }: ProvidersPanelProps) {
           <div className="dashboard-block-list">
             {providers.length > 0 ? (
               providers.map((provider) => (
-                <div className="dashboard-provider-item" key={provider.id}>
+                <div className="dashboard-provider-item dashboard-hierarchy-item" key={provider.id}>
                   <div className="dashboard-provider-identity">
                     <span
                       className="dashboard-provider-dot"
