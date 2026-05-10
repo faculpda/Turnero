@@ -37,12 +37,12 @@ export default async function HomePage() {
 
         <div className="landing-hero-grid">
           <div className="landing-hero-copy">
-            <span className="eyebrow">Software de turnos para negocios que quieren verse mejor</span>
-            <h1>Convierte tu agenda en una experiencia que transmite orden, confianza y valor.</h1>
+            <span className="eyebrow">Reservas online claras para negocios que quieren convertir mas</span>
+            <h1>Haz que pedir un turno sea tan claro que cualquier cliente pueda hacerlo sin ayuda.</h1>
             <p className="muted landing-lead">
-              Turnero combina una pagina de reservas mucho mas clara con un panel interno pensado
-              para trabajar rapido. Menos caos operativo. Mas imagen profesional. Mas turnos
-              concretados.
+              Turnero combina una pagina publica enfocada en reservar con un panel interno simple
+              de operar. Menos dudas para el cliente. Menos caos para el negocio. Mas turnos
+              confirmados.
             </p>
 
             <div className="actions landing-hero-actions">
@@ -55,9 +55,9 @@ export default async function HomePage() {
             </div>
 
             <div className="landing-proof-list">
-              <span>Reservas online 24/7</span>
-              <span>Marca propia por tenant</span>
-              <span>Agenda clara para operar</span>
+              <span>Reserva paso a paso</span>
+              <span>Horarios claros para elegir</span>
+              <span>Agenda facil de operar</span>
             </div>
           </div>
 
@@ -72,27 +72,27 @@ export default async function HomePage() {
 
                 <div className="product-stage-heading">
                   <div>
-                    <span className="showcase-label">Agenda central</span>
-                    <strong>Semana activa</strong>
+                    <span className="showcase-label">Reserva guiada</span>
+                    <strong>Elegir turno</strong>
                   </div>
-                  <div className="product-stage-badge">87% confirmados</div>
+                  <div className="product-stage-badge">3 pasos</div>
                 </div>
 
                 <div className="product-stage-metrics">
                   <div className="product-metric-card product-metric-card-blue">
-                    <span className="showcase-label">Reservas</span>
-                    <strong>124</strong>
-                    <small>+18 esta semana</small>
+                    <span className="showcase-label">Paso 1</span>
+                    <strong>Servicio</strong>
+                    <small>Elegi que necesitas</small>
                   </div>
                   <div className="product-metric-card product-metric-card-green">
-                    <span className="showcase-label">Ocupacion</span>
-                    <strong>76%</strong>
-                    <small>Agenda saludable</small>
+                    <span className="showcase-label">Paso 2</span>
+                    <strong>Horario</strong>
+                    <small>Ve solo opciones reales</small>
                   </div>
                   <div className="product-metric-card product-metric-card-amber">
-                    <span className="showcase-label">Cobros</span>
-                    <strong>9</strong>
-                    <small>Pendientes de revisar</small>
+                    <span className="showcase-label">Paso 3</span>
+                    <strong>Confirmacion</strong>
+                    <small>Revisa y reserva</small>
                   </div>
                 </div>
 
@@ -165,14 +165,14 @@ export default async function HomePage() {
 
               <div className="product-floating-card product-floating-booking">
                 <span className="showcase-label">Reserva publica</span>
-                <strong>Lista para convertir visitas en turnos</strong>
-                <p>Servicios, horarios y accion clara en una sola vista.</p>
+                <strong>Un cliente entiende enseguida que hacer</strong>
+                <p>Todo apunta a elegir, avanzar y confirmar el turno sin perderse.</p>
               </div>
 
               <div className="product-floating-card product-floating-kpi">
-                <span className="showcase-label">Hoy</span>
-                <strong>12 turnos activos</strong>
-                <p>Todo visible para atender sin perder contexto.</p>
+                <span className="showcase-label">Resultado</span>
+                <strong>Mas turnos concretados</strong>
+                <p>Menos friccion para el cliente y menos explicaciones manuales.</p>
               </div>
             </div>
           </aside>

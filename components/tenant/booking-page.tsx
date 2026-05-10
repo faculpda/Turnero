@@ -31,9 +31,9 @@ export function TenantBookingPage({
   if (!customerSession || customerSession.globalRole !== "CUSTOMER") {
     return (
       <AccessDenied
-        description="Para confirmar un turno primero necesitamos que ingreses con tu cuenta de cliente."
+        description="Primero ingresa con tu cuenta de cliente. Despues vas a poder elegir servicio, profesional y horario en un formulario guiado."
         loginHref={loginHref(tenant, useSlugRoutes)}
-        title="Reserva disponible para clientes autenticados"
+        title="Primero ingresa para pedir tu turno"
       />
     );
   }
@@ -46,10 +46,10 @@ export function TenantBookingPage({
       />
 
       <section className="hero">
-        <span className="eyebrow">Flujo de reserva</span>
-        <h1>Reservar en {tenant.name}</h1>
+        <span className="eyebrow">Reserva guiada</span>
+        <h1>Pide tu turno en {tenant.name}</h1>
         <p className="muted">
-          Elige el servicio, selecciona un horario disponible y confirma tu turno.
+          Te vamos guiando paso a paso para que reservar sea facil: primero eliges el servicio, despues el profesional, luego el horario y al final confirmas.
         </p>
         {tenant.paymentSettings?.mercadoPagoEnabled ? (
           <p className="muted">
@@ -57,6 +57,20 @@ export function TenantBookingPage({
             despues de reservar te vamos a redirigir al checkout para completar el pago.
           </p>
         ) : null}
+        <div className="booking-hero-steps">
+          <div className="booking-hero-step">
+            <span className="eyebrow">Paso 1</span>
+            <strong>Elige el servicio</strong>
+          </div>
+          <div className="booking-hero-step">
+            <span className="eyebrow">Paso 2</span>
+            <strong>Selecciona horario</strong>
+          </div>
+          <div className="booking-hero-step">
+            <span className="eyebrow">Paso 3</span>
+            <strong>Confirma con tranquilidad</strong>
+          </div>
+        </div>
         <div className="actions">
           <Link className="button secondary" href={profileHref(tenant, useSlugRoutes)}>
             Ver mis turnos
@@ -71,9 +85,27 @@ export function TenantBookingPage({
           tenantSlug={tenant.slug}
         />
 
-        <article className="panel">
-          <h2>Disponibilidad</h2>
-          <p className="muted">Resumen de slots abiertos para las proximas reservas.</p>
+        <article className="panel availability-side-panel">
+          <div className="availability-side-intro">
+            <h2>Ayuda para reservar</h2>
+            <p className="muted">Si es tu primera vez, esta vista te ayuda a entender lo que estas eligiendo antes de confirmar.</p>
+          </div>
+
+          <div className="booking-help-list">
+            <div className="booking-help-item">
+              <strong>Ve de a un paso por vez</strong>
+              <p className="muted">El formulario te muestra una sola decision importante a la vez.</p>
+            </div>
+            <div className="booking-help-item">
+              <strong>Revisa el resumen final</strong>
+              <p className="muted">Antes de reservar siempre veras servicio, profesional y horario seleccionado.</p>
+            </div>
+          </div>
+
+          <div className="availability-side-intro">
+            <h2>Horarios abiertos ahora</h2>
+            <p className="muted">Resumen simple de la disponibilidad actual para ayudarte a elegir mas rapido.</p>
+          </div>
           <div className="availability-list">
             {availabilityByService.map((entry) => (
               <div className="availability-card" key={entry.service.id}>

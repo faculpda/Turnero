@@ -30,6 +30,8 @@ export function TenantPublicHome({
   const onlinePaymentEnabled = tenant.paymentSettings?.mercadoPagoEnabled ?? false;
   const heroGridClass =
     tenant.heroLayout === "image-left" ? "tenant-hero-grid tenant-hero-grid-image-left" : "tenant-hero-grid";
+  const bookingHref = tenantHref(tenant, "/reservar", useSlugRoutes);
+  const profileLink = tenantHref(tenant, "/ingresar", useSlugRoutes);
 
   return (
     <main className="shell grid tenant-public" style={buildTenantStyle(tenant)}>
@@ -43,7 +45,7 @@ export function TenantPublicHome({
                 <div className="tenant-logo-placeholder">{tenant.name.charAt(0)}</div>
               )}
               <div>
-                <span className="eyebrow">Sitio del cliente</span>
+                <span className="eyebrow">Reserva online clara</span>
                 <strong>{tenant.siteTitle ?? tenant.name}</strong>
               </div>
             </div>
@@ -51,12 +53,30 @@ export function TenantPublicHome({
             <h1>{tenant.headline}</h1>
             <p className="muted hero-copy">{tenant.description}</p>
             <div className="actions">
-              <Link className="button primary tenant-primary-button" href={tenantHref(tenant, "/reservar", useSlugRoutes)}>
-                {tenant.ctaLabel ?? "Reservar turno"}
+              <Link className="button primary tenant-primary-button" href={bookingHref}>
+                {tenant.ctaLabel ?? "Quiero pedir mi turno"}
               </Link>
-              <Link className="button secondary" href={tenantHref(tenant, "/ingresar", useSlugRoutes)}>
+              <Link className="button secondary" href={profileLink}>
                 Ingresar a mi perfil
               </Link>
+            </div>
+
+            <div className="tenant-public-steps">
+              <article className="tenant-public-step-card">
+                <span className="tenant-step-number">Paso 1</span>
+                <strong>Elegi el servicio</strong>
+                <p className="muted">Mira opciones simples y toca la que mejor se adapte a lo que necesitas.</p>
+              </article>
+              <article className="tenant-public-step-card">
+                <span className="tenant-step-number">Paso 2</span>
+                <strong>Selecciona profesional y horario</strong>
+                <p className="muted">Te mostramos solo horarios realmente disponibles para evitar confusiones.</p>
+              </article>
+              <article className="tenant-public-step-card">
+                <span className="tenant-step-number">Paso 3</span>
+                <strong>Confirma tu turno</strong>
+                <p className="muted">Revisas un resumen claro y confirmas en pocos segundos.</p>
+              </article>
             </div>
           </div>
 
@@ -65,9 +85,9 @@ export function TenantPublicHome({
               <img alt={tenant.siteTitle ?? tenant.name} className="tenant-cover" src={tenant.heroImageUrl} />
             ) : (
               <div className="tenant-cover-placeholder">
-                <strong>{tenant.siteTitle ?? tenant.name}</strong>
+                <strong>Tu turno, paso a paso</strong>
                 <p className="muted">
-                  Este espacio puede personalizarse con imagen, logo, colores y textos propios.
+                  Este espacio se adapta para que pedir turno sea rapido, claro y facil de entender.
                 </p>
               </div>
             )}
@@ -79,8 +99,15 @@ export function TenantPublicHome({
 
       <section className="grid cols-2">
         <article className="panel">
-          <h2>Servicios disponibles</h2>
-          <p className="muted">Cada servicio puede tener su propia duracion y valor en pesos.</p>
+          <div className="panel-heading-row">
+            <div>
+              <h2>Elegi lo que necesitas</h2>
+              <p className="muted">Cada opcion te lleva despues al formulario guiado para pedir el turno.</p>
+            </div>
+            <Link className="button secondary" href={bookingHref}>
+              Empezar reserva
+            </Link>
+          </div>
           <div className="service-list">
             {tenant.services.map((service) => (
               <div className="service-chip" key={service.id}>
@@ -116,14 +143,27 @@ export function TenantPublicHome({
                 <div className="muted">
                   {service.durationMin} min - {service.priceLabel}
                 </div>
+                <Link className="button tertiary service-chip-cta" href={bookingHref}>
+                  Quiero este servicio
+                </Link>
               </div>
             ))}
           </div>
         </article>
 
-        <article className="panel">
-          <h2>Proximos horarios</h2>
-          <p className="muted">La reserva sigue siendo el eje central de toda la experiencia.</p>
+        <article className="panel tenant-public-booking-panel">
+          <h2>Horarios que puedes pedir hoy</h2>
+          <p className="muted">La reserva esta pensada para que avances sin dudas y sepas siempre que toca hacer.</p>
+          <div className="tenant-public-booking-checklist">
+            <div className="tenant-public-booking-item">
+              <strong>Formulario por pasos</strong>
+              <p className="muted">No necesitas completar todo de una vez. Vas eligiendo una cosa por vez.</p>
+            </div>
+            <div className="tenant-public-booking-item">
+              <strong>Resumen antes de confirmar</strong>
+              <p className="muted">Antes de reservar ves servicio, profesional y horario seleccionado.</p>
+            </div>
+          </div>
           <div className="slot-list">
             {tenant.nextSlots.map((slot) => (
               <div className="slot" key={slot}>
@@ -131,6 +171,9 @@ export function TenantPublicHome({
               </div>
             ))}
           </div>
+          <Link className="button primary tenant-primary-button" href={bookingHref}>
+            Ver horarios disponibles
+          </Link>
         </article>
       </section>
     </main>
