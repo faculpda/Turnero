@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { BookingSlot, ServiceAvailability } from "@/lib/types";
 
@@ -58,9 +58,28 @@ export function TenantBookingForm({
     [availabilityByService, serviceId],
   );
 
+  const hasMultipleProviders = (selectedAvailability?.providerAvailabilities.length ?? 0) > 1;
+
+  useEffect(() => {
+    if (!selectedAvailability) {
+      return;
+    }
+
+    if (selectedAvailability.providerAvailabilities.length === 1) {
+      const singleProviderId = selectedAvailability.providerAvailabilities[0]?.providerId ?? "";
+      if (providerId !== singleProviderId) {
+        setProviderId(singleProviderId);
+      }
+    }
+  }, [providerId, selectedAvailability]);
+
   const selectedProviderAvailability = useMemo(() => {
-    if (!selectedAvailability || !providerId) {
+    if (!selectedAvailability) {
       return undefined;
+    }
+
+    if (!providerId && selectedAvailability.providerAvailabilities.length === 1) {
+      return selectedAvailability.providerAvailabilities[0];
     }
 
     return selectedAvailability.providerAvailabilities.find(
@@ -77,14 +96,33 @@ export function TenantBookingForm({
   const selectedService = selectedAvailability?.service;
   const selectedProviderName = selectedProviderAvailability?.providerName;
   const selectedSlot = selectedDayGroup?.slots.find((slot) => slot.startsAt === startsAt);
-  const activeStep = !serviceId ? 1 : !providerId ? 2 : !selectedDay ? 3 : !startsAt ? 4 : 5;
 
-  function applyServiceSelection(nextServiceId: string) {
-    setServiceId(nextServiceId);
+  const progressSteps = hasMultipleProviders
+    ? ["Servicio", "Profesional", "Horario", "Confirmar"]
+    : ["Servicio", "Horario", "Confirmar"];
+
+  const activeStep = !serviceId
+    ? 1
+    : hasMultipleProviders
+      ? !providerId
+        ? 2
+        : !startsAt
+          ? 3
+          : 4
+      : !startsAt
+        ? 2
+        : 3;
+
+  function resetBookingTrail() {
     setProviderId("");
     setSelectedDay("");
     setStartsAt("");
     setError(null);
+  }
+
+  function applyServiceSelection(nextServiceId: string) {
+    setServiceId(nextServiceId);
+    resetBookingTrail();
   }
 
   function applyProviderSelection(nextProviderId: string) {
@@ -101,19 +139,15 @@ export function TenantBookingForm({
   }
 
   function goBackToService() {
-    setProviderId("");
-    setSelectedDay("");
-    setStartsAt("");
-    setError(null);
+    setServiceId("");
+    resetBookingTrail();
   }
 
   function goBackToProvider() {
+    if (hasMultipleProviders) {
+      setProviderId("");
+    }
     setSelectedDay("");
-    setStartsAt("");
-    setError(null);
-  }
-
-  function goBackToDay() {
     setStartsAt("");
     setError(null);
   }
@@ -165,17 +199,11 @@ export function TenantBookingForm({
       <div className="booking-wizard-header">
         <span className="eyebrow">Solicitud guiada</span>
         <h2>Solicitar un turno</h2>
-        <p className="muted">Vamos paso a paso para que reservar sea claro y muy facil de entender.</p>
+        <p className="muted">Te hacemos una pregunta por vez para que reservar sea claro y facil.</p>
       </div>
 
       <div className="booking-progress-grid" aria-label="Progreso de la reserva">
-        {[
-          "Servicio",
-          "Profesional",
-          "Dia",
-          "Horario",
-          "Confirmar",
-        ].map((label, index) => (
+        {progressSteps.map((label, index) => (
           <div
             className={`booking-progress-step ${activeStep === index + 1 ? "is-active" : activeStep > index + 1 ? "is-done" : ""}`}
             key={label}
@@ -186,42 +214,44 @@ export function TenantBookingForm({
         ))}
       </div>
 
-      <section className={`booking-question-card ${activeStep === 1 ? "is-current" : ""}`}>
-        <div className="booking-question-header">
-          <div>
-            <span className="eyebrow">Paso 1</span>
-            <h3>¿Que servicio necesitas?</h3>
-            <p className="muted">Elige una opcion para continuar.</p>
+      {!serviceId ? (
+        <section className="booking-question-card is-current">
+          <div className="booking-question-header">
+            <div>
+              <span className="eyebrow">Paso 1</span>
+              <h3>¿Qué servicio te interesa?</h3>
+              <p className="muted">Toca una opción para continuar.</p>
+            </div>
           </div>
-        </div>
 
-        <div className="booking-service-choice-list">
-          {availabilityByService.map((entry) => (
-            <button
-              className={`booking-large-option ${serviceId === entry.service.id ? "is-selected" : ""}`}
-              key={entry.service.id}
-              onClick={() => applyServiceSelection(entry.service.id)}
-              type="button"
-            >
-              <div className="booking-large-option-copy">
-                <strong>{entry.service.name}</strong>
-                {entry.service.description ? <span className="muted">{entry.service.description}</span> : null}
-                <span className="booking-large-option-meta">
-                  {entry.service.durationMin} min · {entry.service.priceLabel}
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
+          <div className="booking-service-choice-list">
+            {availabilityByService.map((entry) => (
+              <button
+                className="booking-large-option"
+                key={entry.service.id}
+                onClick={() => applyServiceSelection(entry.service.id)}
+                type="button"
+              >
+                <div className="booking-large-option-copy">
+                  <strong>{entry.service.name}</strong>
+                  {entry.service.description ? <span className="muted">{entry.service.description}</span> : null}
+                  <span className="booking-large-option-meta">
+                    {entry.service.durationMin} min · {entry.service.priceLabel}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      {serviceId ? (
-        <section className={`booking-question-card ${activeStep === 2 ? "is-current" : ""}`}>
+      {serviceId && hasMultipleProviders && !providerId ? (
+        <section className="booking-question-card is-current">
           <div className="booking-question-header">
             <div>
               <span className="eyebrow">Paso 2</span>
-              <h3>¿Con quien quieres atenderte?</h3>
-              <p className="muted">Primero te mostramos las opciones disponibles para el servicio elegido.</p>
+              <h3>¿Con qué profesional te gustaría tomarlo?</h3>
+              <p className="muted">Elige quién te va a atender.</p>
             </div>
             <button className="button tertiary" onClick={goBackToService} type="button">
               Volver
@@ -239,7 +269,7 @@ export function TenantBookingForm({
           <div className="booking-provider-choice-list">
             {(selectedAvailability?.providerAvailabilities ?? []).map((availability) => (
               <button
-                className={`booking-large-option booking-provider-option ${providerId === (availability.providerId ?? "") ? "is-selected" : ""}`}
+                className="booking-large-option booking-provider-option"
                 key={availability.providerId ?? availability.providerName}
                 onClick={() => applyProviderSelection(availability.providerId ?? "")}
                 type="button"
@@ -262,13 +292,13 @@ export function TenantBookingForm({
         </section>
       ) : null}
 
-      {providerId ? (
-        <section className={`booking-question-card ${activeStep === 3 ? "is-current" : ""}`}>
+      {serviceId && selectedProviderAvailability && !startsAt ? (
+        <section className="booking-question-card is-current">
           <div className="booking-question-header">
             <div>
-              <span className="eyebrow">Paso 3</span>
-              <h3>¿Que dia prefieres?</h3>
-              <p className="muted">Selecciona un dia con disponibilidad para ver sus horarios.</p>
+              <span className="eyebrow">Paso {hasMultipleProviders ? 3 : 2}</span>
+              <h3>Selecciona un horario</h3>
+              <p className="muted">Primero toca un día y después elige uno de sus horarios disponibles.</p>
             </div>
             <button className="button tertiary" onClick={goBackToProvider} type="button">
               Volver
@@ -276,9 +306,12 @@ export function TenantBookingForm({
           </div>
 
           <div className="booking-inline-summary">
-            <span className="booking-summary-label">Atencion elegida</span>
-            <strong>{selectedProviderName}</strong>
-            <span className="muted">{selectedService?.name}</span>
+            <span className="booking-summary-label">Reserva elegida</span>
+            <strong>{selectedService?.name}</strong>
+            <span className="muted">
+              {selectedProviderName ? `${selectedProviderName} · ` : ""}
+              {selectedService?.priceLabel}
+            </span>
           </div>
 
           <div className="booking-day-grid">
@@ -294,45 +327,32 @@ export function TenantBookingForm({
               </button>
             ))}
           </div>
-        </section>
-      ) : null}
 
-      {selectedDay ? (
-        <section className={`booking-question-card ${activeStep === 4 ? "is-current" : ""}`}>
-          <div className="booking-question-header">
-            <div>
-              <span className="eyebrow">Paso 4</span>
-              <h3>¿Que horario te queda mejor?</h3>
-              <p className="muted">Toca el horario que prefieras para seguir a la confirmacion.</p>
-            </div>
-            <button className="button tertiary" onClick={goBackToDay} type="button">
-              Volver
-            </button>
-          </div>
+          {selectedDayGroup ? (
+            <div className="booking-time-layout">
+              <div className="booking-time-day-panel">
+                <span className="booking-summary-label">Día elegido</span>
+                <strong>{selectedDayGroup.label}</strong>
+                <p className="muted">Ahora toca el horario que te quede mejor.</p>
+              </div>
 
-          <div className="booking-time-layout">
-            <div className="booking-time-day-panel">
-              <span className="booking-summary-label">Dia seleccionado</span>
-              <strong>{selectedDayGroup?.label}</strong>
-              <p className="muted">Estos son los horarios disponibles para esa fecha.</p>
+              <div className="booking-time-grid">
+                {selectedDayGroup.slots.map((slot) => (
+                  <button
+                    className={`booking-time-chip ${startsAt === slot.startsAt ? "is-selected" : ""}`}
+                    key={slot.startsAt}
+                    onClick={() => setStartsAt(slot.startsAt)}
+                    type="button"
+                  >
+                    {slot.label.split(" - ").at(-1) ?? slot.label}
+                  </button>
+                ))}
+              </div>
             </div>
-
-            <div className="booking-time-grid">
-              {selectedDayGroup?.slots.map((slot) => (
-                <button
-                  className={`booking-time-chip ${startsAt === slot.startsAt ? "is-selected" : ""}`}
-                  key={slot.startsAt}
-                  onClick={() => setStartsAt(slot.startsAt)}
-                  type="button"
-                >
-                  {slot.label.split(" - ").at(-1) ?? slot.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          ) : null}
 
           <div className="booking-tip-box">
-            <strong>Tip:</strong> confirma tu turno solo cuando estes seguro del horario elegido.
+            <strong>Tip:</strong> confirma tu turno solo cuando estés seguro del horario elegido.
           </div>
         </section>
       ) : null}
@@ -341,10 +361,13 @@ export function TenantBookingForm({
         <section className="booking-question-card booking-confirmation-panel is-current">
           <div className="booking-question-header">
             <div>
-              <span className="eyebrow">Paso 5</span>
+              <span className="eyebrow">Paso {hasMultipleProviders ? 4 : 3}</span>
               <h3>Revisa y confirma tu turno</h3>
-              <p className="muted">Este es el resumen final antes de reservar.</p>
+              <p className="muted">Este es el resumen final antes de continuar con la reserva o el pago.</p>
             </div>
+            <button className="button tertiary" onClick={() => setStartsAt("")} type="button">
+              Volver
+            </button>
           </div>
 
           <div className="booking-confirmation-grid">
@@ -352,12 +375,14 @@ export function TenantBookingForm({
               <span className="booking-summary-label">Servicio</span>
               <strong>{selectedService?.name}</strong>
             </div>
+            {selectedProviderName ? (
+              <div className="booking-confirmation-item">
+                <span className="booking-summary-label">Profesional</span>
+                <strong>{selectedProviderName}</strong>
+              </div>
+            ) : null}
             <div className="booking-confirmation-item">
-              <span className="booking-summary-label">Profesional</span>
-              <strong>{selectedProviderName}</strong>
-            </div>
-            <div className="booking-confirmation-item">
-              <span className="booking-summary-label">Dia</span>
+              <span className="booking-summary-label">Día</span>
               <strong>{selectedDayGroup?.label}</strong>
             </div>
             <div className="booking-confirmation-item">
@@ -372,15 +397,12 @@ export function TenantBookingForm({
             <button className="button primary booking-submit-button" disabled={isSubmitting} type="submit">
               {isSubmitting ? "Procesando..." : "Confirmar turno"}
             </button>
-            <button className="button tertiary" onClick={goBackToDay} type="button">
-              Volver
-            </button>
           </div>
         </section>
       ) : null}
 
       {!availabilityByService.length ? (
-        <p className="form-helper">Todavia no hay servicios disponibles para reservar.</p>
+        <p className="form-helper">Todavía no hay servicios disponibles para reservar.</p>
       ) : null}
     </form>
   );
