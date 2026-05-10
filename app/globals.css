@@ -4138,6 +4138,57 @@ th:last-child {
   margin-top: 22px;
 }
 
+.tenant-public-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.tenant-public-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tenant-public-brand-lockup p,
+.tenant-public-brand-lockup strong {
+  margin: 0;
+}
+
+.tenant-public-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+}
+
+.tenant-public-nav-link {
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.tenant-public-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.tenant-public-banner-copy,
+.tenant-public-banner-media {
+  display: grid;
+  gap: 18px;
+}
+
+.tenant-public-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
 .tenant-public-step-card {
   display: grid;
   gap: 8px;
@@ -4157,6 +4208,59 @@ th:last-child {
 
 .tenant-public-step-card p,
 .tenant-public-step-card strong {
+  margin: 0;
+}
+
+.tenant-public-info-card {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 8%, #dfe7f2);
+  border-radius: 22px;
+  background: #ffffff;
+}
+
+.tenant-public-info-card p,
+.tenant-public-info-card strong {
+  margin: 0;
+}
+
+.tenant-public-booking-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.tenant-public-booking-copy,
+.tenant-public-booking-preview {
+  display: grid;
+  gap: 18px;
+}
+
+.tenant-public-booking-preview {
+  align-content: center;
+}
+
+.tenant-public-preview-card {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: #ffffff;
+}
+
+.tenant-public-preview-card-primary {
+  background: linear-gradient(135deg, rgba(238, 244, 255, 0.96), #ffffff);
+}
+
+.tenant-public-preview-card-soft {
+  background: linear-gradient(135deg, rgba(248, 249, 252, 0.96), #ffffff);
+}
+
+.tenant-public-preview-card p,
+.tenant-public-preview-card strong {
   margin: 0;
 }
 
@@ -4199,7 +4303,10 @@ th:last-child {
   .booking-slot-grid,
   .booking-confirmation-grid,
   .booking-hero-steps,
-  .tenant-public-steps {
+  .tenant-public-steps,
+  .tenant-public-info-grid,
+  .tenant-public-booking-showcase,
+  .tenant-public-banner {
     grid-template-columns: 1fr;
   }
 
@@ -4217,10 +4324,16 @@ th:last-child {
     display: grid;
   }
 
+  .tenant-public-topbar,
+  .tenant-public-nav {
+    display: grid;
+  }
+
   .booking-slot-button,
   .service-chip-cta,
   .tenant-public-booking-panel .button,
-  .panel-heading-row .button {
+  .panel-heading-row .button,
+  .tenant-public-booking-showcase .button {
     width: 100%;
   }
 
@@ -4308,8 +4421,62 @@ th:last-child {
   margin: 0;
 }
 
+.tenant-public-services-layout {
+  align-items: start;
+}
+
 .service-chip-cta {
   justify-self: start;
+}
+
+.tenant-public-gallery-section {
+  display: grid;
+  gap: 18px;
+}
+
+.tenant-public-gallery-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.tenant-public-gallery-heading h2,
+.tenant-public-gallery-heading span {
+  margin: 0;
+}
+
+.tenant-public-gallery-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 18px;
+}
+
+.tenant-public-gallery-main,
+.tenant-public-gallery-tile {
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 8%, #dfe7f2);
+  background: #ffffff;
+}
+
+.tenant-public-gallery-main {
+  min-height: 360px;
+}
+
+.tenant-public-gallery-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.tenant-public-gallery-tile {
+  min-height: 170px;
+}
+
+.tenant-public-gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .site-preview-panel {
