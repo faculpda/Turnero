@@ -110,38 +110,6 @@ export function TenantPublicHome({
       </section>
 
       <section className="panel tenant-public-booking-showcase" id="solicitar-turno">
-        <div className="tenant-public-booking-copy">
-          <span className="eyebrow">Formulario para solicitar un turno</span>
-          <h2>Lo principal de esta pagina es que puedas solicitar tu turno.</h2>
-          <p className="muted">
-            Vas a avanzar paso a paso: eliges servicio, profesional, dia, horario y al final confirmas.
-          </p>
-
-          <div className="tenant-public-booking-checklist">
-            <div className="tenant-public-booking-item">
-              <strong>Paso 1</strong>
-              <p className="muted">Elige el servicio.</p>
-            </div>
-            <div className="tenant-public-booking-item">
-              <strong>Paso 2</strong>
-              <p className="muted">Selecciona dia y horario.</p>
-            </div>
-            <div className="tenant-public-booking-item">
-              <strong>Paso 3</strong>
-              <p className="muted">Confirma tu turno.</p>
-            </div>
-          </div>
-
-          <div className="actions tenant-public-booking-actions">
-            <Link className="button primary tenant-primary-button" href={bookingHref}>
-              Solicitar un turno
-            </Link>
-            <Link className="button secondary" href={profileLink}>
-              Ya tengo cuenta
-            </Link>
-          </div>
-        </div>
-
         <div className="tenant-public-booking-preview">
           <TenantBookingForm
             availabilityByService={availabilityByService}
