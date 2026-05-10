@@ -77,6 +77,12 @@ a {
   color: var(--text);
 }
 
+.dashboard-mobile-topbar,
+.dashboard-mobile-drawer-extras,
+.dashboard-mobile-backdrop {
+  display: none;
+}
+
 .dashboard-sidebar-brand {
   display: flex;
   align-items: center;
@@ -254,6 +260,26 @@ a {
   align-items: center;
   gap: 12px;
   padding-left: 12px;
+}
+
+.dashboard-mobile-menu-button {
+  display: inline-grid;
+  gap: 4px;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  border: 1px solid #e6ddd4;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(35, 26, 20, 0.05);
+}
+
+.dashboard-mobile-menu-button span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: #1a1411;
 }
 
 .dashboard-content {
@@ -3954,18 +3980,52 @@ th:last-child {
 }
 
 @media (max-width: 920px) {
+  .dashboard-mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px 0;
+  }
+
+  .dashboard-mobile-topbar-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
   .dashboard-app-shell {
     grid-template-columns: 1fr;
     min-height: auto;
   }
 
   .dashboard-sidebar {
-    grid-template-rows: auto auto;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    width: min(320px, 86vw);
+    height: 100dvh;
+    grid-template-rows: auto auto 1fr auto;
     gap: 12px;
-    padding: 16px;
-    border-right: 0;
-    border-bottom: 1px solid #e9e3f2;
-    box-shadow: none;
+    padding: 18px 14px;
+    border-right: 1px solid #e9e3f2;
+    border-bottom: 0;
+    box-shadow: 18px 0 50px rgba(35, 26, 20, 0.12);
+    transform: translateX(-104%);
+    transition: transform 180ms ease;
+    overflow-y: auto;
+  }
+
+  .dashboard-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .dashboard-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    border: 0;
+    background: rgba(21, 16, 13, 0.28);
   }
 
   .dashboard-sidebar-nav {
@@ -3973,14 +4033,14 @@ th:last-child {
   }
 
   .dashboard-sidebar-group {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     padding-bottom: 0;
   }
 
   .dashboard-sidebar-label {
-    display: none;
+    display: block;
   }
 
   .dashboard-sidebar-item {
@@ -3988,11 +4048,11 @@ th:last-child {
     min-width: 0;
     padding: 10px 12px;
     border: 1px solid #dde6f3;
-    border-radius: 18px;
+    border-radius: 16px;
     background: #ffffff;
-    justify-content: center;
+    justify-content: flex-start;
     white-space: normal;
-    text-align: center;
+    text-align: left;
   }
 
   .dashboard-sidebar-item.active {
@@ -4006,9 +4066,24 @@ th:last-child {
     display: none;
   }
 
-  .dashboard-topbar {
-    padding: 14px 16px;
+  .dashboard-mobile-drawer-extras {
+    display: grid;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #ece5dc;
+  }
+
+  .dashboard-mobile-user-card {
+    display: grid;
     gap: 12px;
+    padding: 14px;
+    border: 1px solid #e8e1d9;
+    border-radius: 18px;
+    background: #ffffff;
+  }
+
+  .dashboard-topbar {
+    display: none;
   }
 
   .dashboard-topbar-search {
@@ -4228,7 +4303,8 @@ th:last-child {
   }
 
   .dashboard-sidebar {
-    padding: 12px 10px 10px;
+    width: min(300px, 88vw);
+    padding: 16px 12px 12px;
   }
 
   .landing-hero {
@@ -4255,7 +4331,6 @@ th:last-child {
   }
 
   .dashboard-sidebar-group {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -4271,36 +4346,8 @@ th:last-child {
     border-radius: 9px;
   }
 
-  .dashboard-topbar-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .dashboard-topbar-actions > .button {
-    width: 100%;
-    justify-content: center;
-    min-height: 42px;
-    padding: 10px 12px;
-    font-size: 0.88rem;
-  }
-
-  .dashboard-topbar-user {
-    grid-column: 1 / -1;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    border: 1px solid #ebe5de;
-    border-radius: 18px;
-    background: #ffffff;
-  }
-
-  .dashboard-topbar-search {
-    min-height: 44px;
-    padding: 10px 12px;
-    border-radius: 16px;
-    font-size: 0.92rem;
+  .dashboard-mobile-topbar {
+    padding: 12px 12px 0;
   }
 
   .shell {

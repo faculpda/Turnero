@@ -160,6 +160,7 @@ export function TenantDashboardShell({
   cobros,
 }: TenantDashboardShellProps) {
   const [activeSection, setActiveSection] = useState<DashboardSection>("turnos");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const overviewChips =
     activeSection === "agenda"
@@ -284,7 +285,16 @@ export function TenantDashboardShell({
 
   return (
     <main className="dashboard-app-shell">
-      <aside className="dashboard-sidebar">
+      {isMobileMenuOpen ? (
+        <button
+          aria-label="Cerrar menu"
+          className="dashboard-mobile-backdrop"
+          onClick={() => setIsMobileMenuOpen(false)}
+          type="button"
+        />
+      ) : null}
+
+      <aside className={`dashboard-sidebar ${isMobileMenuOpen ? "is-open" : ""}`}>
         <div className="dashboard-sidebar-brand">
           {profile.logoUrl ? (
             <img
@@ -308,7 +318,10 @@ export function TenantDashboardShell({
               <button
                 key={section}
                 className={`dashboard-sidebar-item ${activeSection === section ? "active" : ""}`}
-                onClick={() => setActiveSection(section)}
+                onClick={() => {
+                  setActiveSection(section);
+                  setIsMobileMenuOpen(false);
+                }}
                 type="button"
               >
                 <span className="dashboard-sidebar-icon" aria-hidden="true">
@@ -319,6 +332,7 @@ export function TenantDashboardShell({
             ))}
             <Link
               className="dashboard-sidebar-item"
+              onClick={() => setIsMobileMenuOpen(false)}
               href={`/app/personalizar?tenant=${tenantSlug}`}
             >
               <span className="dashboard-sidebar-icon" aria-hidden="true">
@@ -334,9 +348,60 @@ export function TenantDashboardShell({
           <strong>{profile.name}</strong>
           <div className="dashboard-sidebar-subtitle">{profile.slug}</div>
         </div>
+
+        <div className="dashboard-mobile-drawer-extras">
+          <span className="dashboard-sidebar-label">Accesos</span>
+          <Link
+            className="dashboard-sidebar-item"
+            href={`/${profile.slug}`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <span className="dashboard-sidebar-icon" aria-hidden="true">
+              <SidebarIcon section="turnos" />
+            </span>
+            <span>Ver pagina publica</span>
+          </Link>
+          {session.globalRole === "SUPER_ADMIN" ? (
+            <Link
+              className="dashboard-sidebar-item"
+              href="/admin"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span className="dashboard-sidebar-icon" aria-hidden="true">
+                <SidebarIcon section="cobros" />
+              </span>
+              <span>Ir al super admin</span>
+            </Link>
+          ) : null}
+
+          <div className="dashboard-mobile-user-card">
+            <div>
+              <strong>{session.name}</strong>
+              <div className="muted">{session.email}</div>
+            </div>
+            <LogoutButton />
+          </div>
+        </div>
       </aside>
 
       <div className="dashboard-workspace">
+        <header className="dashboard-mobile-topbar">
+          <button
+            aria-label="Abrir menu"
+            className="dashboard-mobile-menu-button"
+            onClick={() => setIsMobileMenuOpen(true)}
+            type="button"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className="dashboard-mobile-topbar-copy">
+            <strong>{sectionTitles[activeSection]}</strong>
+            <div className="dashboard-sidebar-subtitle">{profile.name}</div>
+          </div>
+        </header>
+
         <header className="dashboard-topbar">
           <div className="dashboard-topbar-search">
             <span className="dashboard-topbar-search-icon" />
