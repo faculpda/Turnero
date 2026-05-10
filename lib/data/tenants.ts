@@ -539,6 +539,7 @@ export async function getTenantDashboardData(
         providers: fallbackProviders,
         appointments: fallbackAppointments,
         blockedTimeSlots: fallbackBlockedTimeSlots,
+        availabilityRules: [],
       };
     }
 
@@ -557,6 +558,7 @@ export async function getTenantDashboardData(
         providers: fallbackProviders,
         appointments: fallbackAppointments,
         blockedTimeSlots: fallbackBlockedTimeSlots,
+        availabilityRules: [],
       };
     }
 
@@ -579,6 +581,14 @@ export async function getTenantDashboardData(
         startsAtIso: blockedTimeSlot.startsAt.toISOString(),
         endsAtIso: blockedTimeSlot.endsAt.toISOString(),
       })),
+      availabilityRules: refreshedTenant.availability.map((rule) => ({
+        id: rule.id,
+        dayOfWeek: rule.dayOfWeek,
+        startTime: rule.startTime,
+        endTime: rule.endTime,
+        slotStepMin: rule.slotStepMin,
+        isActive: rule.isActive,
+      })),
     };
   } catch {
     return {
@@ -586,6 +596,7 @@ export async function getTenantDashboardData(
       providers: fallbackProviders,
       appointments: fallbackAppointments,
       blockedTimeSlots: fallbackBlockedTimeSlots,
+      availabilityRules: [],
     };
   }
 }

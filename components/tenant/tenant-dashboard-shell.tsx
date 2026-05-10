@@ -40,6 +40,9 @@ type TenantDashboardShellProps = {
   };
   reservasActivas: number;
   pagosPendientes: number;
+  onlinePaymentServices: number;
+  activeProviders: number;
+  agendaRulesCount: number;
   agenda: React.ReactNode;
   prestadores: React.ReactNode;
   servicios: React.ReactNode;
@@ -135,12 +138,112 @@ export function TenantDashboardShell({
   session,
   reservasActivas,
   pagosPendientes,
+  onlinePaymentServices,
+  activeProviders,
+  agendaRulesCount,
   agenda,
   prestadores,
   servicios,
   cobros,
 }: TenantDashboardShellProps) {
   const [activeSection, setActiveSection] = useState<DashboardSection>("turnos");
+
+  const overviewChips =
+    activeSection === "agenda"
+      ? [
+          {
+            key: "turnos",
+            section: "turnos" as const,
+            label: "Turnos activos",
+            value: reservasActivas,
+            tone: "violet",
+          },
+          {
+            key: "horarios",
+            section: "agenda" as const,
+            label: "Horarios activos",
+            value: agendaRulesCount,
+            tone: "blue",
+          },
+          {
+            key: "bloqueos",
+            section: "cobros" as const,
+            label: "Bloqueos activos",
+            value: blockedTimeSlots.length,
+            tone: "amber",
+          },
+        ]
+      : activeSection === "prestadores"
+        ? [
+            {
+              key: "prestadores",
+              section: "prestadores" as const,
+              label: "Prestadores activos",
+              value: activeProviders,
+              tone: "violet",
+            },
+            {
+              key: "turnos",
+              section: "turnos" as const,
+              label: "Turnos activos",
+              value: reservasActivas,
+              tone: "blue",
+            },
+            {
+              key: "bloqueos",
+              section: "agenda" as const,
+              label: "Bloqueos activos",
+              value: blockedTimeSlots.length,
+              tone: "amber",
+            },
+          ]
+        : activeSection === "cobros"
+          ? [
+              {
+                key: "pendientes",
+                section: "cobros" as const,
+                label: "Pagos pendientes",
+                value: pagosPendientes,
+                tone: "violet",
+              },
+              {
+                key: "online",
+                section: "servicios" as const,
+                label: "Servicios con cobro",
+                value: onlinePaymentServices,
+                tone: "blue",
+              },
+              {
+                key: "turnos",
+                section: "turnos" as const,
+                label: "Turnos activos",
+                value: reservasActivas,
+                tone: "amber",
+              },
+            ]
+          : [
+              {
+                key: "turnos",
+                section: "turnos" as const,
+                label: "Turnos activos",
+                value: reservasActivas,
+                tone: "violet",
+              },
+              {
+                key: "servicios",
+                section: "servicios" as const,
+                label: "Servicios visibles",
+                value: profile.services.length,
+                tone: "blue",
+              },
+              {
+                key: "pendientes",
+                section: "cobros" as const,
+                label: "Pagos pendientes",
+                value: pagosPendientes,
+                tone: "amber",
+              },
+            ];
 
   return (
     <main className="dashboard-app-shell">
@@ -229,27 +332,18 @@ export function TenantDashboardShell({
             </div>
 
             <div className="dashboard-overview-actions">
-              <div className="dashboard-overview-chip dashboard-overview-chip-violet">
-                <span className="dashboard-overview-chip-icon" aria-hidden="true">
-                  <SidebarIcon section="turnos" />
-                </span>
-                <span className="dashboard-overview-chip-label">Turnos activos</span>
-                <strong>{reservasActivas}</strong>
-              </div>
-              <div className="dashboard-overview-chip dashboard-overview-chip-blue">
-                <span className="dashboard-overview-chip-icon" aria-hidden="true">
-                  <SidebarIcon section="servicios" />
-                </span>
-                <span className="dashboard-overview-chip-label">Servicios visibles</span>
-                <strong>{profile.services.length}</strong>
-              </div>
-              <div className="dashboard-overview-chip dashboard-overview-chip-amber">
-                <span className="dashboard-overview-chip-icon" aria-hidden="true">
-                  <SidebarIcon section="cobros" />
-                </span>
-                <span className="dashboard-overview-chip-label">Pagos pendientes</span>
-                <strong>{pagosPendientes}</strong>
-              </div>
+              {overviewChips.map((chip) => (
+                <div
+                  className={`dashboard-overview-chip dashboard-overview-chip-${chip.tone}`}
+                  key={chip.key}
+                >
+                  <span className="dashboard-overview-chip-icon" aria-hidden="true">
+                    <SidebarIcon section={chip.section} />
+                  </span>
+                  <span className="dashboard-overview-chip-label">{chip.label}</span>
+                  <strong>{chip.value}</strong>
+                </div>
+              ))}
             </div>
           </section>
 

@@ -230,6 +230,14 @@ export type TenantDashboardData = {
     startsAtIso: string;
     endsAtIso: string;
   }>;
+  availabilityRules: Array<{
+    id: string;
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    slotStepMin: number;
+    isActive: boolean;
+  }>;
 };
 
 export type TenantBookingData = {

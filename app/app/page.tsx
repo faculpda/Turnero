@@ -31,7 +31,8 @@ export default async function TenantDashboardPage({
     );
   }
 
-  const { profile, providers, appointments, blockedTimeSlots } = await getTenantDashboardData(
+  const { profile, providers, appointments, blockedTimeSlots, availabilityRules } =
+    await getTenantDashboardData(
     tenantSlug,
   );
   const onlinePaymentEnabled = profile.paymentSettings?.mercadoPagoEnabled ?? false;
@@ -49,18 +50,19 @@ export default async function TenantDashboardPage({
     <TenantDashboardShell
       agenda={
         <TenantAgendaPanel
+          availabilityRules={availabilityRules}
           blockedTimeSlots={blockedTimeSlots}
-          onlinePaymentEnabled={onlinePaymentEnabled}
-          onlinePaymentServices={onlinePaymentServices}
-          pagosPendientes={pagosPendientes}
-          services={profile.services}
+          providers={providers}
           tenantSlug={tenantSlug}
         />
       }
+      activeProviders={providers.filter((provider) => provider.isActive).length}
+      agendaRulesCount={availabilityRules.filter((rule) => rule.isActive).length}
       appointments={appointments}
       blockedTimeSlots={blockedTimeSlots}
       providers={providers}
       cobros={<PaymentSettingsForm tenant={profile} />}
+      onlinePaymentServices={onlinePaymentServices}
       pagosPendientes={pagosPendientes}
       prestadores={<ProvidersPanel providers={providers} tenantSlug={tenantSlug} />}
       profile={profile}
