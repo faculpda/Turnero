@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type CustomerSummary = {
   id: string;
@@ -62,6 +62,13 @@ function appointmentStatusLabel(status: string) {
 export function CustomersPanel({ customers }: CustomersPanelProps) {
   const [query, setQuery] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState(customers[0]?.id ?? "");
+  const [showCustomerDetail, setShowCustomerDetail] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 640) {
+      setShowCustomerDetail(false);
+    }
+  }, []);
 
   const filteredCustomers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -114,15 +121,20 @@ export function CustomersPanel({ customers }: CustomersPanelProps) {
           <div className="dashboard-block-list">
             {filteredCustomers.length > 0 ? (
               filteredCustomers.map((customer) => (
-                <button
+                <div
                   className={`dashboard-customer-item dashboard-hierarchy-item ${
                     selectedCustomer?.id === customer.id ? "is-active" : ""
                   }`}
                   key={customer.id}
-                  onClick={() => setSelectedCustomerId(customer.id)}
-                  type="button"
                 >
-                  <div className="dashboard-customer-item-main">
+                  <button
+                    className="dashboard-customer-item-main"
+                    onClick={() => {
+                      setSelectedCustomerId(customer.id);
+                      setShowCustomerDetail(true);
+                    }}
+                    type="button"
+                  >
                     <div>
                       <strong>{customer.name}</strong>
                       <div className="muted">{customer.email}</div>
@@ -136,8 +148,24 @@ export function CustomersPanel({ customers }: CustomersPanelProps) {
                         </span>
                       ) : null}
                     </div>
+                  </button>
+                  <div className="dashboard-customer-item-actions">
+                    <button
+                      className="button secondary"
+                      onClick={() => {
+                        setSelectedCustomerId(customer.id);
+                        setShowCustomerDetail((current) =>
+                          selectedCustomer?.id === customer.id ? !current : true,
+                        );
+                      }}
+                      type="button"
+                    >
+                      {selectedCustomer?.id === customer.id && showCustomerDetail
+                        ? "Ocultar ficha"
+                        : "Ver ficha"}
+                    </button>
                   </div>
-                </button>
+                </div>
               ))
             ) : (
               <div className="dashboard-calendar-empty">
@@ -155,7 +183,7 @@ export function CustomersPanel({ customers }: CustomersPanelProps) {
             </div>
           </div>
 
-          {selectedCustomer ? (
+          {selectedCustomer && showCustomerDetail ? (
             <div className="dashboard-block-list">
               <div className="dashboard-hierarchy-subpanel dashboard-block-form">
                 <strong>{selectedCustomer.name}</strong>
@@ -205,6 +233,10 @@ export function CustomersPanel({ customers }: CustomersPanelProps) {
                   </div>
                 ))}
               </div>
+            </div>
+          ) : selectedCustomer ? (
+            <div className="dashboard-calendar-empty">
+              Toca en <strong>Ver ficha</strong> para abrir el detalle de este cliente.
             </div>
           ) : (
             <div className="dashboard-calendar-empty">

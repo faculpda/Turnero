@@ -2299,6 +2299,11 @@ th:last-child {
   order: 2;
 }
 
+.service-editor-card:not(.service-editor-card-open) .muted + .muted,
+.service-editor-card:not(.service-editor-card-open) .service-editor-summary-main > .muted:last-child {
+  display: none;
+}
+
 .service-editor-header-row {
   align-items: start;
 }
@@ -2410,15 +2415,11 @@ th:last-child {
 }
 
 .dashboard-customer-item {
+  display: grid;
+  gap: 12px;
   width: 100%;
-  border: 1px solid transparent;
-  background: transparent;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
 }
 
-.dashboard-customer-item.is-active .dashboard-hierarchy-item,
 .dashboard-customer-item.is-active {
   border-color: #d8dce3;
   background: #f6f7f9;
@@ -2426,9 +2427,15 @@ th:last-child {
 
 .dashboard-customer-item-main {
   display: flex;
+  width: 100%;
+  border: 0;
+  background: transparent;
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
 }
 
 .dashboard-customer-item-metrics,
@@ -2437,6 +2444,11 @@ th:last-child {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.dashboard-customer-item-actions {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .dashboard-customer-history-item {
@@ -4396,6 +4408,43 @@ th:last-child {
 
   .dashboard-kpi-card {
     padding: 14px;
+  }
+
+  .service-editor-card:not(.service-editor-card-open) {
+    padding: 14px;
+  }
+
+  .service-editor-card:not(.service-editor-card-open) .service-editor-summary {
+    gap: 10px;
+  }
+
+  .service-editor-card:not(.service-editor-card-open) .service-editor-hero-media,
+  .service-editor-card:not(.service-editor-card-open) .service-editor-hero-placeholder {
+    display: none;
+  }
+
+  .service-editor-card:not(.service-editor-card-open) .service-editor-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-customer-item {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .dashboard-customer-item-main {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dashboard-customer-item-metrics {
+    justify-content: flex-start;
+  }
+
+  .dashboard-customer-item-actions .button {
+    width: 100%;
+    justify-content: center;
   }
 
   .dashboard-turnos-kpi-grid {
