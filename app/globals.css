@@ -4341,7 +4341,7 @@ th:last-child {
 
 .tenant-public-booking-showcase {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: stretch;
 }
@@ -4353,7 +4353,11 @@ th:last-child {
 }
 
 .tenant-public-booking-preview {
-  align-content: center;
+  align-content: stretch;
+}
+
+.tenant-public-booking-preview > * {
+  width: 100%;
 }
 
 .tenant-public-form-placeholder {
