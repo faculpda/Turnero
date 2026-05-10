@@ -1014,6 +1014,30 @@ p {
   gap: 16px;
 }
 
+.dashboard-guided-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-guided-step {
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid #e7e1db;
+  border-radius: 22px;
+  background: #f8f8f9;
+}
+
+.dashboard-guided-step strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.dashboard-guided-step p {
+  margin: 0;
+}
+
 .dashboard-turnos-kpi-grid {
   margin-bottom: 6px;
 }
@@ -4290,6 +4314,16 @@ th:last-child {
     gap: 12px;
   }
 
+  .dashboard-guided-steps {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .dashboard-guided-step {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
   .dashboard-section-header {
     gap: 10px;
   }
@@ -4341,6 +4375,18 @@ th:last-child {
 
   .dashboard-calendar-week .muted {
     font-size: 0.9rem;
+  }
+
+  .dashboard-calendar-toolbar {
+    gap: 12px;
+  }
+
+  .dashboard-calendar-toolbar-actions {
+    gap: 10px;
+  }
+
+  .dashboard-week-nav {
+    gap: 8px;
   }
 
   .dashboard-calendar-day-label {

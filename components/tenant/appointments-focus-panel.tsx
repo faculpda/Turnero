@@ -440,8 +440,7 @@ export function AppointmentsFocusPanel({
         <div>
           <h2>Calendario de turnos</h2>
           <p className="muted">
-            Busca clientes, filtra por servicio o pago, alterna entre dia y semana y opera cada
-            turno desde la agenda.
+            Mira los turnos del dia, filtra solo si hace falta y toca cualquier reserva para ver mas detalles.
           </p>
         </div>
         <button
@@ -454,6 +453,24 @@ export function AppointmentsFocusPanel({
         >
           Agregar turno manual
         </button>
+      </div>
+
+      <div className="dashboard-guided-steps">
+        <article className="dashboard-guided-step">
+          <span className="dashboard-detail-label">Paso 1</span>
+          <strong>Revisa la fecha</strong>
+          <p className="muted">Empieza por hoy o cambia entre dia y semana segun lo que necesites ver.</p>
+        </article>
+        <article className="dashboard-guided-step">
+          <span className="dashboard-detail-label">Paso 2</span>
+          <strong>Filtra solo si hace falta</strong>
+          <p className="muted">Busca por cliente, servicio, pago o prestador para acotar la agenda.</p>
+        </article>
+        <article className="dashboard-guided-step">
+          <span className="dashboard-detail-label">Paso 3</span>
+          <strong>Toca el turno para actuar</strong>
+          <p className="muted">Desde cada reserva puedes confirmar, completar, cancelar o reprogramar.</p>
+        </article>
       </div>
 
       <div className="dashboard-kpi-grid dashboard-turnos-kpi-grid">

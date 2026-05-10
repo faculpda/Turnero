@@ -367,6 +367,24 @@ export function TenantAgendaPanel({
         </div>
       </div>
 
+      <div className="dashboard-guided-steps">
+        <article className="dashboard-guided-step">
+          <span className="dashboard-detail-label">Paso 1</span>
+          <strong>Define el horario general</strong>
+          <p className="muted">Carga una base comun para la semana y despues ajusta casos puntuales.</p>
+        </article>
+        <article className="dashboard-guided-step">
+          <span className="dashboard-detail-label">Paso 2</span>
+          <strong>Corrige dia por dia si hace falta</strong>
+          <p className="muted">Puedes agregar o quitar franjas individuales sin rehacer toda la agenda.</p>
+        </article>
+        <article className="dashboard-guided-step">
+          <span className="dashboard-detail-label">Paso 3</span>
+          <strong>Guarda y agrega bloqueos</strong>
+          <p className="muted">Al final revisa pausas, ausencias o feriados para no mostrar horarios incorrectos.</p>
+        </article>
+      </div>
+
       <section className="dashboard-split-grid">
         <article className="panel dashboard-main-card dashboard-compact-card">
           <div className="dashboard-section-header">
