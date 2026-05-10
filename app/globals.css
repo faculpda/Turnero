@@ -4224,13 +4224,6 @@ th:last-child {
   background: color-mix(in srgb, var(--tenant-secondary) 42%, white 58%);
 }
 
-.tenant-public-steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 22px;
-}
-
 .tenant-public-topbar {
   display: flex;
   flex-wrap: wrap;
@@ -4282,28 +4275,6 @@ th:last-child {
   gap: 18px;
 }
 
-.tenant-public-step-card {
-  display: grid;
-  gap: 8px;
-  padding: 16px 18px;
-  border: 1px solid color-mix(in srgb, var(--tenant-primary) 9%, #e1e6ee);
-  border-radius: 20px;
-  background: #ffffff;
-}
-
-.tenant-step-number {
-  color: var(--tenant-primary);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.tenant-public-step-card p,
-.tenant-public-step-card strong {
-  margin: 0;
-}
-
 .tenant-public-info-card {
   display: grid;
   gap: 10px;
@@ -4335,26 +4306,21 @@ th:last-child {
   align-content: center;
 }
 
-.tenant-public-preview-card {
+.tenant-public-form-placeholder {
   display: grid;
-  gap: 8px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
-  border-radius: 22px;
-  background: #ffffff;
+  place-items: center;
+  min-height: 320px;
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--tenant-primary) 10%, #dfe7f2);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%);
+  text-align: center;
 }
 
-.tenant-public-preview-card-primary {
-  background: linear-gradient(135deg, rgba(238, 244, 255, 0.96), #ffffff);
-}
-
-.tenant-public-preview-card-soft {
-  background: linear-gradient(135deg, rgba(248, 249, 252, 0.96), #ffffff);
-}
-
-.tenant-public-preview-card p,
-.tenant-public-preview-card strong {
-  margin: 0;
+.tenant-public-form-placeholder strong {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.1;
 }
 
 @media (min-width: 1025px) {
@@ -4395,7 +4361,6 @@ th:last-child {
   .booking-time-grid,
   .booking-confirmation-grid,
   .booking-hero-steps,
-  .tenant-public-steps,
   .tenant-public-info-grid,
   .tenant-public-booking-showcase,
   .tenant-public-banner,
@@ -4520,12 +4485,10 @@ th:last-child {
   margin: 0;
 }
 
-.tenant-public-services-layout {
-  align-items: start;
-}
-
-.service-chip-cta {
-  justify-self: start;
+.tenant-public-booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .tenant-public-gallery-section {

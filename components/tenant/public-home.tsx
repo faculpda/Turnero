@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { SiteBlocksRenderer } from "@/components/tenant/site-blocks-renderer";
 import type { TenantPublicProfile } from "@/lib/types";
 
 type TenantPublicHomeProps = {
@@ -27,7 +26,6 @@ export function TenantPublicHome({
   tenant,
   useSlugRoutes = true,
 }: TenantPublicHomeProps) {
-  const onlinePaymentEnabled = tenant.paymentSettings?.mercadoPagoEnabled ?? false;
   const bookingHref = tenantHref(tenant, "/reservar", useSlugRoutes);
   const profileLink = tenantHref(tenant, "/ingresar", useSlugRoutes);
   const galleryImages = tenant.services
@@ -55,11 +53,8 @@ export function TenantPublicHome({
           </div>
         </div>
         <div className="tenant-public-nav">
-          <Link className="tenant-public-nav-link" href="#solicitar-turno">
-            Solicitar turno
-          </Link>
-          <Link className="tenant-public-nav-link" href="#galeria">
-            Fotos
+          <Link className="tenant-public-nav-link" href="#contacto">
+            Contacto
           </Link>
           <Link className="tenant-public-nav-link" href={profileLink}>
             Mi cuenta
@@ -96,50 +91,47 @@ export function TenantPublicHome({
         </aside>
       </section>
 
-      <section className="tenant-public-info-grid">
+      <section className="tenant-public-info-grid" id="contacto">
         <article className="tenant-public-info-card">
-          <span className="tenant-step-number">Info 1</span>
-          <strong>Elige sin confundirte</strong>
-          <p className="muted">Mostramos solo opciones claras para que la reserva se entienda rapido.</p>
+          <strong>Reserva facil</strong>
+          <p className="muted">Un recorrido claro para pedir turno sin confundirte.</p>
         </article>
         <article className="tenant-public-info-card">
-          <span className="tenant-step-number">Info 2</span>
           <strong>Horarios reales</strong>
-          <p className="muted">Veras solo horarios disponibles para evitar idas y vueltas innecesarias.</p>
+          <p className="muted">Solo vas a ver horarios realmente disponibles.</p>
         </article>
         <article className="tenant-public-info-card">
-          <span className="tenant-step-number">Info 3</span>
           <strong>Confirmacion simple</strong>
-          <p className="muted">Antes de terminar revisas tu resumen y confirmas con tranquilidad.</p>
+          <p className="muted">Revisas tu seleccion y confirmas con tranquilidad.</p>
         </article>
       </section>
 
       <section className="panel tenant-public-booking-showcase" id="solicitar-turno">
         <div className="tenant-public-booking-copy">
           <span className="eyebrow">Formulario para solicitar un turno</span>
-          <h2>Lo mas importante del sitio es que puedas reservar sin pedir ayuda.</h2>
+          <h2>Lo principal de esta pagina es que puedas solicitar tu turno.</h2>
           <p className="muted">
-            La reserva se hace en pasos cortos: primero eliges el servicio, despues el profesional, luego el horario y al final confirmas.
+            Vas a avanzar paso a paso: eliges servicio, profesional, dia, horario y al final confirmas.
           </p>
 
           <div className="tenant-public-booking-checklist">
             <div className="tenant-public-booking-item">
-              <strong>Paso 1. Elige el servicio</strong>
-              <p className="muted">Cada servicio muestra duracion, valor y una accion clara para avanzar.</p>
+              <strong>Paso 1</strong>
+              <p className="muted">Elige el servicio.</p>
             </div>
             <div className="tenant-public-booking-item">
-              <strong>Paso 2. Selecciona horario</strong>
-              <p className="muted">Solo te mostramos opciones reales para no perder tiempo ni confundirte.</p>
+              <strong>Paso 2</strong>
+              <p className="muted">Selecciona dia y horario.</p>
             </div>
             <div className="tenant-public-booking-item">
-              <strong>Paso 3. Confirma el turno</strong>
-              <p className="muted">Revisas un resumen final y completas la reserva en pocos segundos.</p>
+              <strong>Paso 3</strong>
+              <p className="muted">Confirma tu turno.</p>
             </div>
           </div>
 
-          <div className="actions">
+          <div className="actions tenant-public-booking-actions">
             <Link className="button primary tenant-primary-button" href={bookingHref}>
-              Empezar a reservar
+              Solicitar un turno
             </Link>
             <Link className="button secondary" href={profileLink}>
               Ya tengo cuenta
@@ -148,86 +140,16 @@ export function TenantPublicHome({
         </div>
 
         <div className="tenant-public-booking-preview">
-          <div className="tenant-public-preview-card tenant-public-preview-card-primary">
-            <span className="tenant-step-number">Paso 1</span>
-            <strong>Servicio</strong>
-            <p className="muted">Limpieza dental, control o blanqueamiento.</p>
-          </div>
-          <div className="tenant-public-preview-card">
-            <span className="tenant-step-number">Paso 2</span>
-            <strong>Profesional y horario</strong>
-            <p className="muted">Solo opciones disponibles para reservar ahora.</p>
-          </div>
-          <div className="tenant-public-preview-card tenant-public-preview-card-soft">
-            <span className="tenant-step-number">Paso 3</span>
-            <strong>Confirmacion final</strong>
-            <p className="muted">Resumen claro antes de terminar.</p>
+          <div className="tenant-public-form-placeholder">
+            <strong>Formulario para solicitar un turno</strong>
           </div>
         </div>
-      </section>
-
-      <section className="grid cols-2 tenant-public-services-layout">
-        <article className="panel">
-          <div className="panel-heading-row">
-            <div>
-              <h2>Servicios para reservar</h2>
-              <p className="muted">Todos estan pensados como puerta de entrada directa a la reserva.</p>
-            </div>
-            <Link className="button secondary" href={bookingHref}>
-              Ver formulario
-            </Link>
-          </div>
-          <div className="service-list">
-            {tenant.services.map((service) => (
-              <div className="service-chip" key={service.id}>
-                <div className="service-chip-header">
-                  <strong>{service.name}</strong>
-                  <span
-                    className={`badge ${
-                      onlinePaymentEnabled && (service.priceCents ?? 0) > 0
-                        ? "approved"
-                        : "pending"
-                    }`}
-                  >
-                    {onlinePaymentEnabled && (service.priceCents ?? 0) > 0
-                      ? "Pago online"
-                      : "Reserva directa"}
-                  </span>
-                </div>
-                {service.description ? (
-                  <div className="muted service-description">{service.description}</div>
-                ) : null}
-                <div className="muted">
-                  {service.durationMin} min - {service.priceLabel}
-                </div>
-                <Link className="button tertiary service-chip-cta" href={bookingHref}>
-                  Reservar este servicio
-                </Link>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="panel tenant-public-booking-panel">
-          <h2>Horarios listos para pedir</h2>
-          <p className="muted">Una vista simple para que el cliente entienda que hay disponibilidad real.</p>
-          <div className="slot-list">
-            {tenant.nextSlots.map((slot) => (
-              <div className="slot" key={slot}>
-                {slot}
-              </div>
-            ))}
-          </div>
-          <Link className="button primary tenant-primary-button" href={bookingHref}>
-            Solicitar mi turno
-          </Link>
-        </article>
       </section>
 
       <section className="tenant-public-gallery-section" id="galeria">
         <div className="tenant-public-gallery-heading">
           <span className="eyebrow">Galeria</span>
-          <h2>Un poco mas de contexto visual antes de reservar</h2>
+          <h2>Galeria de fotos</h2>
         </div>
 
         <div className="tenant-public-gallery-grid">
@@ -255,8 +177,6 @@ export function TenantPublicHome({
           )}
         </div>
       </section>
-
-      <SiteBlocksRenderer blocks={tenant.siteBlocks} tenant={tenant} useSlugRoutes={useSlugRoutes} />
     </main>
   );
 }
