@@ -4627,6 +4627,19 @@ th:last-child {
   background: #ffffff;
 }
 
+.tenant-public-gallery-button {
+  position: relative;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.tenant-public-gallery-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(25, 45, 82, 0.1);
+  border-color: color-mix(in srgb, var(--tenant-primary) 18%, #dfe7f2);
+}
+
 .tenant-public-gallery-main {
   min-height: 360px;
 }
@@ -4646,6 +4659,56 @@ th:last-child {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.tenant-public-gallery-zoom {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(29, 39, 54, 0.84);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tenant-public-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(13, 19, 28, 0.74);
+  backdrop-filter: blur(6px);
+}
+
+.tenant-public-lightbox-card {
+  width: min(100%, 1040px);
+  display: grid;
+  gap: 16px;
+}
+
+.tenant-public-lightbox-close {
+  justify-self: end;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1d2736;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tenant-public-lightbox-image {
+  width: 100%;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  border-radius: 28px;
+  background: #ffffff;
 }
 
 .site-preview-panel {

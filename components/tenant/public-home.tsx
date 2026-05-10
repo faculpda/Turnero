@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { TenantBookingForm } from "@/components/tenant/booking-form";
+import { TenantPublicGalleryLightbox } from "@/components/tenant/public-gallery-lightbox";
 import type { ServiceAvailability, TenantPublicProfile } from "@/lib/types";
 
 type TenantPublicHomeProps = {
@@ -163,30 +164,13 @@ export function TenantPublicHome({
           <h2>Galeria de fotos</h2>
         </div>
 
-        <div className="tenant-public-gallery-grid">
-          {galleryImages.length > 0 ? (
-            <>
-              <div className="tenant-public-gallery-main">
-                <img
-                  alt={galleryImages[0]?.alt}
-                  className="tenant-public-gallery-image"
-                  src={galleryImages[0]?.url}
-                />
-              </div>
-              <div className="tenant-public-gallery-stack">
-                {galleryImages.slice(1).map((image) => (
-                  <div className="tenant-public-gallery-tile" key={image.id}>
-                    <img alt={image.alt} className="tenant-public-gallery-image" src={image.url} />
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="panel">
-              <p className="muted">Aqui puedes mostrar imagenes del negocio o de los servicios para generar mas confianza.</p>
-            </div>
-          )}
-        </div>
+        {galleryImages.length > 0 ? (
+          <TenantPublicGalleryLightbox images={galleryImages} />
+        ) : (
+          <div className="panel">
+            <p className="muted">Aqui puedes mostrar imagenes del negocio o de los servicios para generar mas confianza.</p>
+          </div>
+        )}
       </section>
     </main>
   );
