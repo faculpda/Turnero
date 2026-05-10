@@ -423,7 +423,7 @@ export function TenantAgendaPanel({
       </section>
 
       <section className="dashboard-split-grid">
-        <article className="panel dashboard-main-card">
+        <article className="panel dashboard-main-card dashboard-schedule-editor-card">
           <div className="dashboard-section-header">
             <div>
               <h2>Modificar horario</h2>
@@ -451,7 +451,7 @@ export function TenantAgendaPanel({
 
             <div className="dashboard-schedule-general-list">
               {generalSchedule.map((generalRule) => (
-                <div className="dashboard-schedule-item" key={generalRule.clientId}>
+                <div className="dashboard-schedule-item dashboard-schedule-item-general" key={generalRule.clientId}>
                   <div className="dashboard-schedule-row dashboard-schedule-row-general">
                     <label className="dashboard-field">
                       <span className="dashboard-detail-label">Desde</span>
@@ -536,7 +536,7 @@ export function TenantAgendaPanel({
                       const ruleKey = getRuleKey(rule);
 
                       return (
-                        <div className="dashboard-schedule-item" key={ruleKey}>
+                        <div className="dashboard-schedule-item dashboard-schedule-item-day" key={ruleKey}>
                           <div className="dashboard-schedule-row dashboard-schedule-row-compact">
                             <label className="dashboard-field">
                               <span className="dashboard-detail-label">Desde</span>
