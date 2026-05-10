@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
-import { Manrope, Montserrat, Sora } from "next/font/google";
+import { DM_Sans, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
+const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
 });
 
-const montserrat = Montserrat({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-accent",
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
-const sora = Sora({
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
@@ -32,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${manrope.variable} ${montserrat.variable} ${sora.variable}`}
+      className={`${dmSans.variable} ${ibmPlexMono.variable} ${fraunces.variable}`}
       lang="es"
     >
       <body>{children}</body>
