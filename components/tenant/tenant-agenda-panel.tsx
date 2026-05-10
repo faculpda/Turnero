@@ -22,6 +22,13 @@ type AvailabilityRuleSummary = {
   isActive: boolean;
 };
 
+type GeneralScheduleRule = {
+  clientId: string;
+  startTime: string;
+  endTime: string;
+  slotStepMin: number;
+};
+
 type TenantAgendaPanelProps = {
   tenantSlug: string;
   availabilityRules: AvailabilityRuleSummary[];
@@ -87,11 +94,14 @@ export function TenantAgendaPanel({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
-  const [generalSchedule, setGeneralSchedule] = useState({
-    startTime: "09:00",
-    endTime: "18:00",
-    slotStepMin: 30,
-  });
+  const [generalSchedule, setGeneralSchedule] = useState<GeneralScheduleRule[]>([
+    {
+      clientId: crypto.randomUUID(),
+      startTime: "09:00",
+      endTime: "18:00",
+      slotStepMin: 30,
+    },
+  ]);
   const [title, setTitle] = useState("Bloqueo interno");
   const [reason, setReason] = useState("");
   const [startsAt, setStartsAt] = useState("");
@@ -108,14 +118,34 @@ export function TenantAgendaPanel({
 
     setRules(nextRules);
 
-    const sourceRule = nextRules.find((rule) => rule.isActive) ?? nextRules[0];
-    if (sourceRule) {
-      setGeneralSchedule({
-        startTime: sourceRule.startTime,
-        endTime: sourceRule.endTime,
-        slotStepMin: sourceRule.slotStepMin,
-      });
-    }
+    const generalBase = Array.from(
+      new Map(
+        nextRules
+          .filter((rule) => rule.isActive)
+          .map((rule) => [
+            `${rule.startTime}-${rule.endTime}-${rule.slotStepMin}`,
+            {
+              clientId: crypto.randomUUID(),
+              startTime: rule.startTime,
+              endTime: rule.endTime,
+              slotStepMin: rule.slotStepMin,
+            },
+          ]),
+      ).values(),
+    );
+
+    setGeneralSchedule(
+      generalBase.length > 0
+        ? generalBase
+        : [
+            {
+              clientId: crypto.randomUUID(),
+              startTime: "09:00",
+              endTime: "18:00",
+              slotStepMin: 30,
+            },
+          ],
+    );
   }, [availabilityRules]);
 
   const activeRules = rules.filter((rule) => rule.isActive);
@@ -259,34 +289,70 @@ export function TenantAgendaPanel({
   }
 
   function addRuleForDay(dayOfWeek: number) {
+    const sourceRule = generalSchedule[0] ?? {
+      startTime: "09:00",
+      endTime: "18:00",
+      slotStepMin: 30,
+    };
+
     setRules((current) => [
       ...current,
       {
         clientId: crypto.randomUUID(),
         dayOfWeek,
-        startTime: generalSchedule.startTime,
-        endTime: generalSchedule.endTime,
-        slotStepMin: generalSchedule.slotStepMin,
+        startTime: sourceRule.startTime,
+        endTime: sourceRule.endTime,
+        slotStepMin: sourceRule.slotStepMin,
         isActive: true,
       },
     ]);
   }
 
+  function updateGeneralRule(ruleKey: string, patch: Partial<GeneralScheduleRule>) {
+    setGeneralSchedule((current) =>
+      current.map((rule) => (rule.clientId === ruleKey ? { ...rule, ...patch } : rule)),
+    );
+  }
+
+  function addGeneralRule() {
+    setGeneralSchedule((current) => [
+      ...current,
+      {
+        clientId: crypto.randomUUID(),
+        startTime: "09:00",
+        endTime: "18:00",
+        slotStepMin: 30,
+      },
+    ]);
+  }
+
+  function removeGeneralRule(ruleKey: string) {
+    setGeneralSchedule((current) =>
+      current.length === 1
+        ? current
+        : current.filter((rule) => rule.clientId !== ruleKey),
+    );
+  }
+
   function applyGeneralSchedule() {
     setRules(() =>
-      dayOptions.map((day) => {
-        const existingRule = rules.find((rule) => rule.dayOfWeek === day.value);
+      dayOptions.flatMap((day) =>
+        generalSchedule.map((generalRule, index) => {
+          const existingRule = rules
+            .filter((rule) => rule.dayOfWeek === day.value)
+            [index];
 
-        return {
-          id: existingRule?.id,
-          clientId: existingRule?.clientId ?? crypto.randomUUID(),
-          dayOfWeek: day.value,
-          startTime: generalSchedule.startTime,
-          endTime: generalSchedule.endTime,
-          slotStepMin: generalSchedule.slotStepMin,
-          isActive: true,
-        };
-      }),
+          return {
+            id: existingRule?.id,
+            clientId: existingRule?.clientId ?? crypto.randomUUID(),
+            dayOfWeek: day.value,
+            startTime: generalRule.startTime,
+            endTime: generalRule.endTime,
+            slotStepMin: generalRule.slotStepMin,
+            isActive: true,
+          };
+        }),
+      ),
     );
   }
 
@@ -373,55 +439,77 @@ export function TenantAgendaPanel({
                 <h2>Horario general</h2>
                 <p className="muted">Aplica una base comun a toda la semana y luego personaliza dias puntuales.</p>
               </div>
-              <button className="button secondary" onClick={applyGeneralSchedule} type="button">
-                Aplicar a toda la semana
-              </button>
+              <div className="dashboard-inline-actions">
+                <button className="button secondary" onClick={addGeneralRule} type="button">
+                  Agregar franja
+                </button>
+                <button className="button secondary" onClick={applyGeneralSchedule} type="button">
+                  Aplicar a toda la semana
+                </button>
+              </div>
             </div>
 
-            <div className="dashboard-schedule-row">
-              <label className="dashboard-field">
-                <span className="dashboard-detail-label">Desde</span>
-                <input
-                  className="dashboard-modal-input"
-                  onChange={(event) =>
-                    setGeneralSchedule((current) => ({ ...current, startTime: event.target.value }))
-                  }
-                  type="time"
-                  value={generalSchedule.startTime}
-                />
-              </label>
+            <div className="dashboard-schedule-general-list">
+              {generalSchedule.map((generalRule) => (
+                <div className="dashboard-schedule-item" key={generalRule.clientId}>
+                  <div className="dashboard-schedule-row dashboard-schedule-row-general">
+                    <label className="dashboard-field">
+                      <span className="dashboard-detail-label">Desde</span>
+                      <input
+                        className="dashboard-modal-input"
+                        onChange={(event) =>
+                          updateGeneralRule(generalRule.clientId, { startTime: event.target.value })
+                        }
+                        type="time"
+                        value={generalRule.startTime}
+                      />
+                    </label>
 
-              <label className="dashboard-field">
-                <span className="dashboard-detail-label">Hasta</span>
-                <input
-                  className="dashboard-modal-input"
-                  onChange={(event) =>
-                    setGeneralSchedule((current) => ({ ...current, endTime: event.target.value }))
-                  }
-                  type="time"
-                  value={generalSchedule.endTime}
-                />
-              </label>
+                    <label className="dashboard-field">
+                      <span className="dashboard-detail-label">Hasta</span>
+                      <input
+                        className="dashboard-modal-input"
+                        onChange={(event) =>
+                          updateGeneralRule(generalRule.clientId, { endTime: event.target.value })
+                        }
+                        type="time"
+                        value={generalRule.endTime}
+                      />
+                    </label>
 
-              <label className="dashboard-field">
-                <span className="dashboard-detail-label">Intervalo</span>
-                <select
-                  className="dashboard-modal-input"
-                  onChange={(event) =>
-                    setGeneralSchedule((current) => ({
-                      ...current,
-                      slotStepMin: Number(event.target.value),
-                    }))
-                  }
-                  value={generalSchedule.slotStepMin}
-                >
-                  {slotStepOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                    <label className="dashboard-field">
+                      <span className="dashboard-detail-label">Intervalo</span>
+                      <select
+                        className="dashboard-modal-input"
+                        onChange={(event) =>
+                          updateGeneralRule(generalRule.clientId, {
+                            slotStepMin: Number(event.target.value),
+                          })
+                        }
+                        value={generalRule.slotStepMin}
+                      >
+                        {slotStepOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="dashboard-schedule-actions">
+                    <div className="muted">Esta franja se copiara a todos los dias al aplicar el horario general.</div>
+                    <button
+                      className="button secondary"
+                      disabled={generalSchedule.length === 1}
+                      onClick={() => removeGeneralRule(generalRule.clientId)}
+                      type="button"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

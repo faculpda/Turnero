@@ -1394,6 +1394,17 @@ p {
   background: linear-gradient(180deg, #ffffff, #fbfbfc);
 }
 
+.dashboard-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard-schedule-general-list {
+  display: grid;
+  gap: 12px;
+}
+
 .dashboard-schedule-week-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1435,6 +1446,10 @@ p {
 }
 
 .dashboard-schedule-row-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-schedule-row-general {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -3715,6 +3730,7 @@ th:last-child {
   .dashboard-schedule-week-grid,
   .dashboard-schedule-row,
   .dashboard-schedule-row-compact,
+  .dashboard-schedule-row-general,
   .hero-grid,
   .dashboard-hero-notes,
   .dashboard-kpi-grid,
@@ -3756,7 +3772,8 @@ th:last-child {
   }
 
   .dashboard-schedule-day-header,
-  .dashboard-schedule-footer {
+  .dashboard-schedule-footer,
+  .dashboard-inline-actions {
     flex-direction: column;
     align-items: stretch;
   }
