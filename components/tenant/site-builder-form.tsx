@@ -32,6 +32,14 @@ type TemplatePreset = {
   siteBlocks: SiteBuilderBlock[];
 };
 
+type ThemeStylePreset = {
+  id: string;
+  name: string;
+  description: string;
+  primaryColor: string;
+  secondaryColor: string;
+};
+
 type BuilderSnapshot = {
   siteTitle: string;
   heroTitle: string;
@@ -45,6 +53,51 @@ type BuilderSnapshot = {
   secondaryColor: string;
   siteBlocks: SiteBuilderBlock[];
 };
+
+const themeOneStyles: ThemeStylePreset[] = [
+  {
+    id: "tema1_claro",
+    name: "Claro profesional",
+    description: "Limpio, sereno y muy versatil para casi cualquier negocio.",
+    primaryColor: "#205fc0",
+    secondaryColor: "#eef4ff",
+  },
+  {
+    id: "tema1_rosa",
+    name: "Rosa suave",
+    description: "Calido y delicado, ideal para una presencia mas femenina.",
+    primaryColor: "#b55f8d",
+    secondaryColor: "#fbf1f6",
+  },
+  {
+    id: "tema1_grafito",
+    name: "Grafito empresarial",
+    description: "Sobrio, elegante y corporativo, con contraste mas serio.",
+    primaryColor: "#475569",
+    secondaryColor: "#f2f5f8",
+  },
+  {
+    id: "tema1_verde",
+    name: "Verde calma",
+    description: "Suave y confiable, muy util para salud, bienestar o servicios cercanos.",
+    primaryColor: "#4a8c74",
+    secondaryColor: "#edf7f2",
+  },
+  {
+    id: "tema1_indigo",
+    name: "Indigo premium",
+    description: "Mas oscuro y refinado, para una imagen moderna y segura.",
+    primaryColor: "#4f46b5",
+    secondaryColor: "#f0efff",
+  },
+  {
+    id: "tema1_terracota",
+    name: "Terracota suave",
+    description: "Humano, cercano y con un tono mas calido sin verse agresivo.",
+    primaryColor: "#b46a58",
+    secondaryColor: "#fbf2ee",
+  },
+];
 
 const defaultVisibility: SiteBlockVisibility = {
   desktop: true,
@@ -517,6 +570,16 @@ function buildTemplatePresets(copy: {
   ];
 }
 
+function findThemeOneStyle(primaryColor: string, secondaryColor: string) {
+  return (
+    themeOneStyles.find(
+      (style) =>
+        style.primaryColor.toLowerCase() === primaryColor.toLowerCase() &&
+        style.secondaryColor.toLowerCase() === secondaryColor.toLowerCase(),
+    ) ?? null
+  );
+}
+
 export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
   const router = useRouter();
   const logoInputRef = useRef<HTMLInputElement | null>(null);
@@ -571,6 +634,10 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
         ctaLabel,
       }),
     [ctaLabel, heroDescription, heroTitle, siteTitle],
+  );
+  const activeThemeStyle = useMemo(
+    () => findThemeOneStyle(primaryColor, secondaryColor),
+    [primaryColor, secondaryColor],
   );
 
   function currentSnapshot(): BuilderSnapshot {
@@ -925,6 +992,19 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
     });
   }
 
+  function applyThemeStyle(styleId: string) {
+    const nextStyle = themeOneStyles.find((style) => style.id === styleId);
+
+    if (!nextStyle) {
+      return;
+    }
+
+    commitChange(() => {
+      setPrimaryColor(nextStyle.primaryColor);
+      setSecondaryColor(nextStyle.secondaryColor);
+    });
+  }
+
   function undoChange() {
     if (historyPast.length === 0) {
       return;
@@ -979,7 +1059,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
               <textarea onChange={(e) => setHeroTitle(e.target.value)} rows={4} value={heroTitle} />
             </label>
             <label className="field">
-              <span>Color principal del sitio</span>
+              <span>Color principal del sitio (avanzado)</span>
               <div className="color-picker-row">
                 <span className="color-swatch" style={{ backgroundColor: primaryColor }} />
                 <input onChange={(e) => setPrimaryColor(e.target.value)} type="color" value={primaryColor} />
@@ -1034,7 +1114,7 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
             Cambiar imagen
           </button>
           <label className="field">
-            <span>Color secundario</span>
+            <span>Color secundario (avanzado)</span>
             <div className="color-picker-row">
               <span className="color-swatch" style={{ backgroundColor: secondaryColor }} />
               <input onChange={(e) => setSecondaryColor(e.target.value)} type="color" value={secondaryColor} />
@@ -2268,6 +2348,39 @@ export function SiteBuilderForm({ tenant }: SiteBuilderFormProps) {
 
         {activeSidebarTab === "plantillas" ? (
           <section className="site-live-sidebar-section">
+            <h3>Tema principal</h3>
+            <article className="site-theme-card">
+              <div className="site-theme-card-head">
+                <div>
+                  <strong>Tema 1</strong>
+                  <p className="muted">
+                    Este es el tema base actual del sistema. Solo eliges el estilo que mejor represente a tu negocio.
+                  </p>
+                </div>
+                <span className="site-theme-badge">
+                  {activeThemeStyle ? activeThemeStyle.name : "Personalizado"}
+                </span>
+              </div>
+
+              <div className="site-theme-style-list">
+                {themeOneStyles.map((style) => (
+                  <button
+                    className={`site-theme-style-card ${activeThemeStyle?.id === style.id ? "is-active" : ""}`}
+                    key={style.id}
+                    onClick={() => applyThemeStyle(style.id)}
+                    type="button"
+                  >
+                    <div className="site-theme-style-swatches">
+                      <span className="site-template-swatch" style={{ backgroundColor: style.primaryColor }} />
+                      <span className="site-template-swatch" style={{ backgroundColor: style.secondaryColor }} />
+                    </div>
+                    <strong>{style.name}</strong>
+                    <span className="muted">{style.description}</span>
+                  </button>
+                ))}
+              </div>
+            </article>
+
             <h3>Plantillas iniciales</h3>
             <div className="site-template-list">
               {templatePresets.map((template) => (
