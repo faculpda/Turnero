@@ -11,6 +11,20 @@ type ThemeGalleryProps = {
   tenant: TenantPublicProfile;
 };
 
+type ThemeCard = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+const themeCards: ThemeCard[] = [
+  {
+    id: "tema1",
+    name: "Tema 1",
+    description: "El tema principal del sistema, pensado para una reserva simple, clara y profesional.",
+  },
+];
+
 function buildPreviewBlocks(styleId: string) {
   if (styleId === "tema1_rosa") {
     return ["Atencion cuidada", "Reserva simple", "Recordatorios claros"];
@@ -51,9 +65,8 @@ export function ThemeGallery({ tenant }: ThemeGalleryProps) {
 
   const selectedStyle =
     themeOneStyles.find((style) => style.id === selectedStyleId) ?? themeOneStyles[0];
-
-  const isSelectedStyleActive = selectedStyle.id === currentStyle.id;
   const previewBlocks = buildPreviewBlocks(selectedStyle.id);
+  const isSelectedStyleActive = selectedStyle.id === currentStyle.id;
 
   async function activateThemeStyle() {
     setError(null);
@@ -89,9 +102,7 @@ export function ThemeGallery({ tenant }: ThemeGalleryProps) {
     startTransition(async () => {
       const response = await fetch("/api/tenants/site-config", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -109,107 +120,109 @@ export function ThemeGallery({ tenant }: ThemeGalleryProps) {
   return (
     <section className="site-theme-gallery">
       <div className="site-theme-gallery-head">
-        <div>
-          <span className="eyebrow">Temas del sitio</span>
-          <h1>Elige como se vera tu pagina</h1>
-          <p className="muted">
-            Primero eliges el tema general. Despues, si quieres, lo personalizas en detalle.
-          </p>
-        </div>
+        <span className="eyebrow">Temas del sitio</span>
+        <h1>Elige un tema para tu pagina</h1>
+        <p className="muted">
+          Selecciona el tema, prueba un estilo de color y luego personalizalo si quieres ajustar el detalle fino.
+        </p>
       </div>
 
-      <div className="site-theme-grid">
-        <article className="site-theme-browser-card">
-            <div className="site-theme-browser-preview" style={{
-              ["--tenant-primary" as never]: selectedStyle.primaryColor,
-              ["--tenant-secondary" as never]: selectedStyle.secondaryColor,
-            } as CSSProperties}>
-            <div className="site-theme-preview-frame">
-              <div className="site-theme-preview-topbar">
-                <div className="site-theme-preview-logo" />
-                <div className="site-theme-preview-links">
-                  <span />
-                  <span />
-                </div>
-              </div>
-              <div className="site-theme-preview-hero">
-                <div className="site-theme-preview-banner" />
-              </div>
-              <div className="site-theme-preview-info-row">
-                {previewBlocks.map((item) => (
-                  <div className="site-theme-preview-info" key={item}>
-                    <span className="site-theme-preview-dot" />
-                    <strong>{item}</strong>
+      <div className="site-theme-cards-grid">
+        {themeCards.map((theme) => (
+          <article className="site-theme-card-item" key={theme.id}>
+            <div
+              className="site-theme-card-preview"
+              style={
+                {
+                  ["--tenant-primary" as never]: selectedStyle.primaryColor,
+                  ["--tenant-secondary" as never]: selectedStyle.secondaryColor,
+                } as CSSProperties
+              }
+            >
+              <div className="site-theme-card-preview-shell">
+                <div className="site-theme-card-preview-topbar">
+                  <div className="site-theme-card-preview-logo" />
+                  <div className="site-theme-card-preview-links">
+                    <span />
+                    <span />
                   </div>
-                ))}
-              </div>
-              <div className="site-theme-preview-form">
-                <div className="site-theme-preview-form-head">
+                </div>
+
+                <div className="site-theme-card-preview-banner" />
+
+                <div className="site-theme-card-preview-info-grid">
+                  {previewBlocks.map((item) => (
+                    <div className="site-theme-card-preview-info" key={item}>
+                      <span className="site-theme-card-preview-dot" />
+                      <strong>{item}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="site-theme-card-preview-form">
                   <span>Pedir turno</span>
                   <strong>Formulario principal</strong>
+                  <div className="site-theme-card-preview-step is-active">Servicio</div>
+                  <div className="site-theme-card-preview-step">Profesional</div>
+                  <div className="site-theme-card-preview-step">Horario</div>
+                  <div className="site-theme-card-preview-button">Reservar ahora</div>
                 </div>
-                <div className="site-theme-preview-form-step is-active">Servicio</div>
-                <div className="site-theme-preview-form-step">Profesional</div>
-                <div className="site-theme-preview-form-step">Horario</div>
-                <div className="site-theme-preview-form-action">Reservar ahora</div>
               </div>
             </div>
-          </div>
 
-          <div className="site-theme-browser-footer">
-            <div className="site-theme-browser-title-row">
-              <div>
-                <strong>Tema 1</strong>
-                <p className="muted">
-                  El tema principal del sistema, pensado para reservas claras y una experiencia simple.
-                </p>
+            <div className="site-theme-card-footer">
+              <div className="site-theme-card-title-row">
+                <div>
+                  <strong>{theme.name}</strong>
+                  <p className="muted">{theme.description}</p>
+                </div>
+                <span className="site-theme-card-badge">Activo</span>
               </div>
-              <span className="site-theme-status-badge">Activo</span>
-            </div>
 
-            <div className="site-theme-style-picker">
-              <span className="site-theme-style-label">Estilos</span>
-              <div className="site-theme-style-options">
-                {themeOneStyles.map((style) => (
-                  <button
-                    className={`site-theme-style-option ${selectedStyle.id === style.id ? "is-selected" : ""}`}
-                    key={style.id}
-                    onClick={() => setSelectedStyleId(style.id)}
-                    type="button"
-                  >
-                    <div className="site-theme-style-option-swatches">
-                      <span
-                        className="site-template-swatch"
-                        style={{ backgroundColor: style.primaryColor }}
-                      />
-                      <span
-                        className="site-template-swatch"
-                        style={{ backgroundColor: style.secondaryColor }}
-                      />
-                    </div>
-                    <strong>{style.name}</strong>
-                    <span className="muted">{style.description}</span>
+              <div className="site-theme-card-style-section">
+                <span className="site-theme-style-label">Estilos</span>
+                <div className="site-theme-style-options">
+                  {themeOneStyles.map((style) => (
+                    <button
+                      className={`site-theme-style-option ${selectedStyle.id === style.id ? "is-selected" : ""}`}
+                      key={style.id}
+                      onClick={() => setSelectedStyleId(style.id)}
+                      type="button"
+                    >
+                      <div className="site-theme-style-option-swatches">
+                        <span
+                          className="site-template-swatch"
+                          style={{ backgroundColor: style.primaryColor }}
+                        />
+                        <span
+                          className="site-template-swatch"
+                          style={{ backgroundColor: style.secondaryColor }}
+                        />
+                      </div>
+                      <strong>{style.name}</strong>
+                      <span className="muted">{style.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="site-theme-card-actions">
+                {isSelectedStyleActive ? (
+                  <span className="site-theme-inline-state">Estilo activo</span>
+                ) : (
+                  <button className="button primary" disabled={isPending} onClick={activateThemeStyle} type="button">
+                    {isPending ? "Activando..." : "Activar"}
                   </button>
-                ))}
+                )}
+                <Link className="button secondary" href={`/app/personalizar/editor?tenant=${tenant.slug}`}>
+                  Personalizar
+                </Link>
               </div>
-            </div>
 
-            <div className="site-theme-browser-actions">
-              {isSelectedStyleActive ? (
-                <span className="site-theme-inline-state">Estilo activo</span>
-              ) : (
-                <button className="button primary" disabled={isPending} onClick={activateThemeStyle} type="button">
-                  {isPending ? "Activando..." : "Activar estilo"}
-                </button>
-              )}
-              <Link className="button secondary" href={`/app/personalizar/editor?tenant=${tenant.slug}`}>
-                Personalizar
-              </Link>
+              {error ? <p className="form-error">{error}</p> : null}
             </div>
-
-            {error ? <p className="form-error">{error}</p> : null}
-          </div>
-        </article>
+          </article>
+        ))}
       </div>
     </section>
   );

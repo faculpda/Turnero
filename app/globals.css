@@ -3176,167 +3176,171 @@ th:last-child {
   margin: 0;
 }
 
-.site-theme-grid {
+.site-theme-cards-grid {
   display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
-.site-theme-browser-card {
+.site-theme-card-item {
   display: grid;
-  gap: 18px;
-  padding: 18px;
-  border: 1px solid #e2e8f0;
-  border-radius: 28px;
+  gap: 0;
+  border: 1px solid #dfe6ef;
+  border-radius: 0;
   background: #ffffff;
-  box-shadow: 0 18px 40px rgba(31, 41, 55, 0.06);
+  box-shadow: 0 16px 36px rgba(31, 41, 55, 0.06);
+  overflow: hidden;
 }
 
-.site-theme-browser-preview {
+.site-theme-card-preview {
   --tenant-primary: #205fc0;
   --tenant-secondary: #eef4ff;
-  padding: 18px;
-  border: 1px solid #dfe6ef;
-  border-radius: 24px;
+  padding: 14px;
   background: linear-gradient(180deg, #ffffff 0%, var(--tenant-secondary) 100%);
+  border-bottom: 1px solid #dfe6ef;
 }
 
-.site-theme-preview-frame {
+.site-theme-card-preview-shell {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 10px;
+  padding: 12px;
   border: 1px solid #dde6f0;
-  border-radius: 22px;
+  border-radius: 16px;
   background: #ffffff;
 }
 
-.site-theme-preview-topbar {
+.site-theme-card-preview-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.site-theme-preview-logo {
-  width: 112px;
-  height: 22px;
+.site-theme-card-preview-logo {
+  width: 72px;
+  height: 14px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--tenant-primary) 0%, color-mix(in srgb, var(--tenant-primary) 42%, white) 100%);
 }
 
-.site-theme-preview-links {
+.site-theme-card-preview-links {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
-.site-theme-preview-links span {
-  width: 42px;
-  height: 8px;
+.site-theme-card-preview-links span {
+  width: 22px;
+  height: 6px;
   border-radius: 999px;
   background: #e9eef4;
 }
 
-.site-theme-preview-banner {
-  min-height: 180px;
-  border-radius: 22px;
+.site-theme-card-preview-banner {
+  min-height: 120px;
+  border-radius: 14px;
   background: linear-gradient(140deg, color-mix(in srgb, var(--tenant-primary) 18%, white) 0%, color-mix(in srgb, var(--tenant-secondary) 74%, white) 100%);
   border: 1px solid color-mix(in srgb, var(--tenant-primary) 18%, #dfe6ef);
 }
 
-.site-theme-preview-info-row {
+.site-theme-card-preview-info-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
 }
 
-.site-theme-preview-info {
+.site-theme-card-preview-info {
   display: grid;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 18px;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: #fbfdff;
 }
 
-.site-theme-preview-info strong {
-  font-size: 0.86rem;
+.site-theme-card-preview-info strong {
+  font-size: 0.68rem;
   line-height: 1.35;
   color: #1d2736;
 }
 
-.site-theme-preview-dot {
-  width: 18px;
-  height: 18px;
+.site-theme-card-preview-dot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--tenant-primary);
   opacity: 0.92;
 }
 
-.site-theme-preview-form {
+.site-theme-card-preview-form {
   display: grid;
-  gap: 12px;
-  padding: 18px;
-  border-radius: 22px;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
   border: 1px solid #dfe6ef;
   background: #ffffff;
 }
 
-.site-theme-preview-form-head {
-  display: grid;
-  gap: 6px;
-}
-
-.site-theme-preview-form-head span,
-.site-theme-preview-form-head strong {
+.site-theme-card-preview-form span,
+.site-theme-card-preview-form strong {
   margin: 0;
 }
 
-.site-theme-preview-form-head span {
+.site-theme-card-preview-form span {
   color: #667085;
-  font-size: 0.85rem;
+  font-size: 0.62rem;
 }
 
-.site-theme-preview-form-step {
-  padding: 14px 16px;
-  border-radius: 18px;
+.site-theme-card-preview-form strong {
+  font-size: 0.76rem;
+  color: #1d2736;
+}
+
+.site-theme-card-preview-step {
+  padding: 8px 10px;
+  border-radius: 10px;
   border: 1px solid #dfe6ef;
   background: #f8fafc;
   color: #1f2937;
   font-weight: 600;
+  font-size: 0.7rem;
 }
 
-.site-theme-preview-form-step.is-active {
+.site-theme-card-preview-step.is-active {
   border-color: color-mix(in srgb, var(--tenant-primary) 30%, #dfe6ef);
   background: color-mix(in srgb, var(--tenant-secondary) 74%, white);
   color: var(--tenant-primary);
 }
 
-.site-theme-preview-form-action {
-  margin-top: 4px;
-  padding: 14px 16px;
-  border-radius: 18px;
+.site-theme-card-preview-button {
+  margin-top: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
   background: #211915;
   color: #fffaf5;
   text-align: center;
   font-weight: 700;
+  font-size: 0.72rem;
 }
 
-.site-theme-browser-footer {
+.site-theme-card-footer {
   display: grid;
-  gap: 18px;
+  gap: 14px;
+  padding: 16px;
+  background: #ffffff;
 }
 
-.site-theme-browser-title-row {
+.site-theme-card-title-row {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
 }
 
-.site-theme-browser-title-row strong,
-.site-theme-browser-title-row p {
+.site-theme-card-title-row strong,
+.site-theme-card-title-row p {
   margin: 0;
 }
 
-.site-theme-status-badge,
+.site-theme-card-badge,
 .site-theme-inline-state {
   padding: 8px 12px;
   border-radius: 999px;
@@ -3347,9 +3351,10 @@ th:last-child {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.site-theme-style-picker {
+.site-theme-card-style-section {
   display: grid;
   gap: 12px;
 }
@@ -3364,8 +3369,8 @@ th:last-child {
 
 .site-theme-style-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .site-theme-style-option {
@@ -3402,7 +3407,7 @@ th:last-child {
   gap: 8px;
 }
 
-.site-theme-browser-actions {
+.site-theme-card-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -5288,12 +5293,16 @@ th:last-child {
     flex-direction: column;
   }
 
-  .site-theme-preview-info-row,
+  .site-theme-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-theme-card-preview-info-grid,
   .site-theme-style-options {
     grid-template-columns: 1fr;
   }
 
-  .site-theme-browser-title-row {
+  .site-theme-card-title-row {
     flex-direction: column;
   }
 
